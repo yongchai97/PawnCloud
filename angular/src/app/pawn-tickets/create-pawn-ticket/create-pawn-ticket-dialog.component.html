@@ -1,0 +1,170 @@
+<form autocomplete="off" #pawnTicketForm="ngForm" novalidate (ngSubmit)="save()">
+    <abp-modal-header [title]="'CreateNewPawnTicket' | localize" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+    <div class="modal-body">
+        <abp-validation-summary [control]="pawnTicketForm"></abp-validation-summary>
+
+        <h6 class="mb-3 text-muted">{{ 'TicketDetails' | localize }}</h6>
+
+        <div class="row g-3 align-items-start">
+            <div class="col-md-6 mb-3">
+                <label for="TicketNo" class="form-label fw-bold">{{ 'TicketNo' | localize }} *</label>
+                <input pInputText class="w-100" id="TicketNo" name="ticketNo" [(ngModel)]="pawnTicket.ticketNo" required />
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="BranchId" class="form-label">{{ 'BranchId' | localize }}</label>
+                <p-inputNumber inputId="BranchId" name="branchId" styleClass="w-100" [(ngModel)]="pawnTicket.branchId"></p-inputNumber>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="Customer" class="form-label fw-bold">{{ 'Customer' | localize }} *</label>
+                <p-select
+                    #customerSelect
+                    inputId="Customer"
+                    name="customerId"
+                    styleClass="w-100"
+                    [options]="customers"
+                    optionLabel="displayName"
+                    optionValue="id"
+                    dataKey="id"
+                    [(ngModel)]="pawnTicket.customerId"
+                    [filter]="true"
+                    filterBy="displayName"
+                    placeholder="{{ 'SelectACustomer' | localize }}"
+                    appendTo="body"
+                    [baseZIndex]="2000"
+                    required>
+                </p-select>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="Status" class="form-label fw-bold">{{ 'Status' | localize }} *</label>
+                <p-select
+                    #statusSelect
+                    inputId="Status"
+                    name="status"
+                    styleClass="w-100"
+                    [options]="statuses"
+                    optionLabel="name"
+                    optionValue="value"
+                    [(ngModel)]="pawnTicket.status"
+                    placeholder="{{ 'SelectAStatus' | localize }}"
+                    appendTo="body"
+                    [baseZIndex]="2000"
+                    required>
+                </p-select>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label for="CreatedDate" class="form-label fw-bold">{{ 'CreatedDate' | localize }}</label>
+                <p-datepicker
+                    inputId="CreatedDate"
+                    name="createdDate"
+                    styleClass="w-100"
+                    [(ngModel)]="createdDate"
+                    dateFormat="yy-mm-dd"
+                    appendTo="body"
+                    [baseZIndex]="2000"
+                    [showIcon]="true"
+                    [showOnFocus]="true"
+                    (onClickOutside)="appRef.tick()"
+                    (onSelect)="onDateSelectRefresh()">
+                </p-datepicker>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label for="MaturityDate" class="form-label">{{ 'MaturityDate' | localize }}</label>
+                <p-datepicker
+                    inputId="MaturityDate"
+                    name="maturityDate"
+                    styleClass="w-100"
+                    [(ngModel)]="maturityDate"
+                    dateFormat="yy-mm-dd"
+                    appendTo="body"
+                    [baseZIndex]="2000"
+                    [showIcon]="true"
+                    [showOnFocus]="true"
+                    (onClickOutside)="appRef.tick()"
+                    (onSelect)="onDateSelectRefresh()">
+                </p-datepicker>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label for="ExpiryDate" class="form-label">{{ 'ExpiryDate' | localize }}</label>
+                <p-datepicker
+                    inputId="ExpiryDate"
+                    name="expiryDate"
+                    styleClass="w-100"
+                    [(ngModel)]="expiryDate"
+                    dateFormat="yy-mm-dd"
+                    appendTo="body"
+                    [baseZIndex]="2000"
+                    [showIcon]="true"
+                    [showOnFocus]="true"
+                    (onClickOutside)="appRef.tick()"
+                    (onSelect)="onDateSelectRefresh()">
+                </p-datepicker>
+            </div>
+
+            <div class="col-12 mb-3">
+                <label for="Remarks" class="form-label">{{ 'Remarks' | localize }}</label>
+                <textarea pTextarea class="w-100" id="Remarks" name="remarks" rows="2" [(ngModel)]="pawnTicket.remarks"></textarea>
+            </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="m-0 text-muted">{{ 'PawnItems' | localize }}</h6>
+            <p-button type="button" icon="pi pi-plus" label="{{ 'AddItem' | localize }}" styleClass="p-button-sm p-button-success" (onClick)="addPawnItem()"></p-button>
+        </div>
+
+        <p *ngIf="pawnItems.length === 0" class="text-muted fst-italic">{{ 'NoPawnItems' | localize }}</p>
+
+        <div *ngFor="let item of pawnItems; let i = index" class="border rounded p-3 mb-3 bg-light">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <strong>{{ 'Item' | localize }} #{{ i + 1 }}</strong>
+                <p-button type="button" icon="pi pi-times" styleClass="p-button-sm p-button-danger" (onClick)="removePawnItem(i)"></p-button>
+            </div>
+            <div class="row g-2 align-items-start">
+                <div class="col-md-6 mb-2">
+                    <label class="form-label">{{ 'Category' | localize }} *</label>
+                    <input pInputText class="w-100" [name]="'category_' + i" [(ngModel)]="item.category" required />
+                </div>
+                <div class="col-md-6 mb-2">
+                    <label class="form-label">{{ 'SerialNumber' | localize }}</label>
+                    <input pInputText class="w-100" [name]="'serial_' + i" [(ngModel)]="item.serialNumber" />
+                </div>
+                <div class="col-12 mb-2">
+                    <label class="form-label">{{ 'Description' | localize }} *</label>
+                    <textarea pTextarea class="w-100" rows="2" [name]="'desc_' + i" [(ngModel)]="item.description" required></textarea>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <label class="form-label">{{ 'Weight' | localize }}</label>
+                    <p-inputNumber [inputId]="'weight_' + i" [name]="'weight_' + i" styleClass="w-100" [(ngModel)]="item.weight" mode="decimal" [minFractionDigits]="2"></p-inputNumber>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <label class="form-label">{{ 'Purity' | localize }}</label>
+                    <p-inputNumber [inputId]="'purity_' + i" [name]="'purity_' + i" styleClass="w-100" [(ngModel)]="item.purity" mode="decimal" [minFractionDigits]="2"></p-inputNumber>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <label class="form-label">{{ 'Condition' | localize }}</label>
+                    <input pInputText class="w-100" [name]="'condition_' + i" [(ngModel)]="item.condition" />
+                </div>
+                <div class="col-md-4 mb-2">
+                    <label class="form-label">{{ 'EstimatedValue' | localize }}</label>
+                    <p-inputNumber [inputId]="'est_' + i" [name]="'est_' + i" styleClass="w-100" [(ngModel)]="item.estimatedValue" mode="decimal" [minFractionDigits]="2"></p-inputNumber>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <label class="form-label">{{ 'MarketValue' | localize }}</label>
+                    <p-inputNumber [inputId]="'mkt_' + i" [name]="'mkt_' + i" styleClass="w-100" [(ngModel)]="item.marketValue" mode="decimal" [minFractionDigits]="2"></p-inputNumber>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <label class="form-label">{{ 'LoanValue' | localize }}</label>
+                    <p-inputNumber [inputId]="'loan_' + i" [name]="'loan_' + i" styleClass="w-100" [(ngModel)]="item.loanValue" mode="decimal" [minFractionDigits]="2"></p-inputNumber>
+                </div>
+            </div>
+        </div>
+    </div>
+    <abp-modal-footer [saveDisabled]="saving || pawnTicketForm.invalid" [cancelDisabled]="saving" (onCancelClick)="bsModalRef.hide()" (onSaveClick)="save()"></abp-modal-footer>
+</form>

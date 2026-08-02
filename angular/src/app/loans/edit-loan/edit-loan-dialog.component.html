@@ -1,0 +1,114 @@
+<form autocomplete="off" #loanForm="ngForm" novalidate (ngSubmit)="save()">
+    <abp-modal-header [title]="'EditLoan' | localize" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+    <div class="modal-body">
+        <abp-validation-summary [control]="loanForm"></abp-validation-summary>
+
+        <h6 class="mb-3 text-muted">{{ 'LoanDetails' | localize }}</h6>
+
+        <div class="row g-3 align-items-start">
+            <div class="col-md-6 mb-3">
+                <label for="PawnTicket" class="form-label fw-bold">{{ 'PawnTicket' | localize }} *</label>
+                <p-select
+                    #pawnTicketSelect
+                    inputId="PawnTicket"
+                    name="pawnTicketId"
+                    styleClass="w-100"
+                    [options]="pawnTickets"
+                    optionLabel="displayName"
+                    optionValue="id"
+                    dataKey="id"
+                    [(ngModel)]="loan.pawnTicketId"
+                    [filter]="true"
+                    filterBy="displayName"
+                    placeholder="{{ 'SelectAPawnTicket' | localize }}"
+                    appendTo="body"
+                    [baseZIndex]="2000"
+                    required>
+                </p-select>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="Status" class="form-label fw-bold">{{ 'Status' | localize }} *</label>
+                <p-select
+                    #statusSelect
+                    inputId="Status"
+                    name="status"
+                    styleClass="w-100"
+                    [options]="statuses"
+                    optionLabel="name"
+                    optionValue="value"
+                    [(ngModel)]="loan.status"
+                    placeholder="{{ 'SelectAStatus' | localize }}"
+                    appendTo="body"
+                    [baseZIndex]="2000"
+                    required>
+                </p-select>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label for="Principal" class="form-label fw-bold">{{ 'Principal' | localize }} *</label>
+                <p-inputNumber inputId="Principal" name="principal" styleClass="w-100" [(ngModel)]="loan.principal" mode="decimal" [minFractionDigits]="2" required></p-inputNumber>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label for="InterestRate" class="form-label fw-bold">{{ 'InterestRate' | localize }} *</label>
+                <p-inputNumber inputId="InterestRate" name="interestRate" styleClass="w-100" [(ngModel)]="loan.interestRate" mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="4" required></p-inputNumber>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label for="InterestType" class="form-label">{{ 'InterestType' | localize }}</label>
+                <input pInputText class="w-100" id="InterestType" name="interestType" [(ngModel)]="loan.interestType" />
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label for="LoanPeriod" class="form-label fw-bold">{{ 'LoanPeriod' | localize }} *</label>
+                <p-inputNumber inputId="LoanPeriod" name="loanPeriod" styleClass="w-100" [(ngModel)]="loan.loanPeriod" required></p-inputNumber>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label for="InterestStartDate" class="form-label fw-bold">{{ 'InterestStartDate' | localize }}</label>
+                <p-datepicker
+                    inputId="InterestStartDate"
+                    name="interestStartDate"
+                    styleClass="w-100"
+                    [(ngModel)]="interestStartDate"
+                    dateFormat="yy-mm-dd"
+                    appendTo="body"
+                    [baseZIndex]="2000"
+                    [showIcon]="true"
+                    [showOnFocus]="true"
+                    (onClickOutside)="appRef.tick()"
+                    (onSelect)="onDateSelectRefresh()">
+                </p-datepicker>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label for="MaturityDate" class="form-label fw-bold">{{ 'MaturityDate' | localize }}</label>
+                <p-datepicker
+                    inputId="MaturityDate"
+                    name="maturityDate"
+                    styleClass="w-100"
+                    [(ngModel)]="maturityDate"
+                    dateFormat="yy-mm-dd"
+                    appendTo="body"
+                    [baseZIndex]="2000"
+                    [showIcon]="true"
+                    [showOnFocus]="true"
+                    (onClickOutside)="appRef.tick()"
+                    (onSelect)="onDateSelectRefresh()">
+                </p-datepicker>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="OutstandingPrincipal" class="form-label">{{ 'OutstandingPrincipal' | localize }}</label>
+                <p-inputNumber inputId="OutstandingPrincipal" name="outstandingPrincipal" styleClass="w-100" [(ngModel)]="loan.outstandingPrincipal" mode="decimal" [minFractionDigits]="2"></p-inputNumber>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="OutstandingInterest" class="form-label">{{ 'OutstandingInterest' | localize }}</label>
+                <p-inputNumber inputId="OutstandingInterest" name="outstandingInterest" styleClass="w-100" [(ngModel)]="loan.outstandingInterest" mode="decimal" [minFractionDigits]="2"></p-inputNumber>
+            </div>
+        </div>
+    </div>
+    <abp-modal-footer [saveDisabled]="saving || loanForm.invalid" [cancelDisabled]="saving" (onCancelClick)="bsModalRef.hide()" (onSaveClick)="save()"></abp-modal-footer>
+</form>

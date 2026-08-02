@@ -1583,6 +1583,205 @@ namespace PawnCloud.Migrations
                     b.ToTable("AbpUsers");
                 });
 
+            modelBuilder.Entity("PawnCloud.Customers.Customer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address1")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Address2")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("City")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("CreatorUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("CustomerNo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FullName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("LastModifierUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<decimal?>("MonthlyIncome")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("NRIC")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Nationality")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Occupation")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PassportNo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Postcode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("State")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("TenantId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Customers");
+                });
+
+            modelBuilder.Entity("PawnCloud.Customers.CustomerDocument", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("CreatorUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("Customer")
+                        .HasColumnType("int");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<byte[]>("DocumentContents")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("DocumentType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("LastModifierUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int?>("TenantId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Customer");
+
+                    b.ToTable("CustomerDocuments");
+                });
+
+            modelBuilder.Entity("PawnCloud.Loans.Loan", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("CreatorUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("InterestRate")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("InterestStartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("InterestType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("LastModifierUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("LoanPeriod")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("MaturityDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("OutstandingInterest")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("OutstandingPrincipal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("PawnTicketId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Principal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("TenantId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PawnTicketId");
+
+                    b.ToTable("Loans");
+                });
+
             modelBuilder.Entity("PawnCloud.MultiTenancy.Tenant", b =>
                 {
                     b.Property<int>("Id")
@@ -1645,6 +1844,138 @@ namespace PawnCloud.Migrations
                     b.HasIndex("TenancyName");
 
                     b.ToTable("AbpTenants");
+                });
+
+            modelBuilder.Entity("PawnCloud.PawnItems.PawnItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Category")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Condition")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("CreatorUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("EstimatedValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("LastModifierUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<decimal?>("LoanValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("MarketValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("PawnTicketId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("Purity")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("SerialNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("TenantId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("Weight")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PawnTicketId");
+
+                    b.ToTable("PawnItems");
+                });
+
+            modelBuilder.Entity("PawnCloud.PawnTickets.PawnTicket", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("BranchId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("CreatorUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("LastModifierUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("MaturityDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Remarks")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("TenantId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TicketNo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.ToTable("PawnTickets");
                 });
 
             modelBuilder.Entity("Abp.Application.Features.EditionFeatureSetting", b =>
@@ -1865,6 +2196,28 @@ namespace PawnCloud.Migrations
                     b.Navigation("LastModifierUser");
                 });
 
+            modelBuilder.Entity("PawnCloud.Customers.CustomerDocument", b =>
+                {
+                    b.HasOne("PawnCloud.Customers.Customer", "CustomerFk")
+                        .WithMany()
+                        .HasForeignKey("Customer")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CustomerFk");
+                });
+
+            modelBuilder.Entity("PawnCloud.Loans.Loan", b =>
+                {
+                    b.HasOne("PawnCloud.PawnTickets.PawnTicket", "PawnTicket")
+                        .WithMany()
+                        .HasForeignKey("PawnTicketId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PawnTicket");
+                });
+
             modelBuilder.Entity("PawnCloud.MultiTenancy.Tenant", b =>
                 {
                     b.HasOne("PawnCloud.Authorization.Users.User", "CreatorUser")
@@ -1890,6 +2243,28 @@ namespace PawnCloud.Migrations
                     b.Navigation("Edition");
 
                     b.Navigation("LastModifierUser");
+                });
+
+            modelBuilder.Entity("PawnCloud.PawnItems.PawnItem", b =>
+                {
+                    b.HasOne("PawnCloud.PawnTickets.PawnTicket", "PawnTicket")
+                        .WithMany()
+                        .HasForeignKey("PawnTicketId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PawnTicket");
+                });
+
+            modelBuilder.Entity("PawnCloud.PawnTickets.PawnTicket", b =>
+                {
+                    b.HasOne("PawnCloud.Customers.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
                 });
 
             modelBuilder.Entity("Abp.Application.Features.EditionFeatureSetting", b =>

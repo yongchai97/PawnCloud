@@ -16,6 +16,7 @@
     "type": "module",
     "dependencies": {
         "@angular/animations": "^19.2.1",
+        "@angular/cdk": "^19.0.0",
         "@angular/common": "^19.2.1",
         "@angular/compiler": "^19.2.1",
         "@angular/core": "^19.2.1",
@@ -36,6 +37,7 @@
         "moment-timezone": "0.5.47",
         "ngx-bootstrap": "^19.0.2",
         "ngx-pagination": "^6.0.3",
+        "primeicons": "^7.0.0",
         "primeng": "^19.0.9",
         "push.js": "1.0.12",
         "rtl-detect": "^1.1.2",
@@ -73,7 +75,7 @@
         "karma-jasmine": "~5.1.0",
         "karma-jasmine-html-reporter": "^2.1.0",
         "nswag": "^14.2.0",
-        "protractor": "~7.0.0",
+        "protractor": "^3.3.0",
         "ts-node": "^10.9.2",
         "typescript": "5.8.2",
         "webpack-bundle-analyzer": "^4.10.2"

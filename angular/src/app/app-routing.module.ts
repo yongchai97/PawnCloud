@@ -11,13 +11,19 @@ import { AppComponent } from './app.component';
                 component: AppComponent,
                 children: [
                     {
+                        path: '',
+                        redirectTo: 'home',
+                        pathMatch: 'full',
+                    },
+                    {
                         path: 'home',
                         loadChildren: () => import('./home/home.module').then((m) => m.HomeModule),
                         canActivate: [AppRouteGuard],
                     },
                     {
-                        path: 'about',
-                        loadChildren: () => import('./about/about.module').then((m) => m.AboutModule),
+                        path: 'customers',
+                        loadChildren: () => import('./customers/customers.module').then((m) => m.CustomersModule),
+                        data: { permission: 'Pages.Customers' },
                         canActivate: [AppRouteGuard],
                     },
                     {
@@ -36,6 +42,18 @@ import { AppComponent } from './app.component';
                         path: 'tenants',
                         loadChildren: () => import('./tenants/tenants.module').then((m) => m.TenantsModule),
                         data: { permission: 'Pages.Tenants' },
+                        canActivate: [AppRouteGuard],
+                    },
+                    {
+                        path: 'pawn-tickets',
+                        loadChildren: () => import('./pawn-tickets/pawn-tickets.module').then((m) => m.PawnTicketsModule),
+                        data: { permission: 'Pages.PawnTickets' },
+                        canActivate: [AppRouteGuard],
+                    },
+                    {
+                        path: 'loans',
+                        loadChildren: () => import('./loans/loans.module').then((m) => m.LoansModule),
+                        data: { permission: 'Pages.Loans' },
                         canActivate: [AppRouteGuard],
                     },
                     {

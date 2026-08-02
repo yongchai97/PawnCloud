@@ -1,0 +1,109 @@
+<form autocomplete="off" #customerForm="ngForm" novalidate (ngSubmit)="save()">
+    <abp-modal-header [title]="'EditCustomer' | localize" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+    <div class="modal-body">
+        <abp-validation-summary [control]="customerForm"></abp-validation-summary>
+
+        <h6 class="mb-3 text-muted">{{ 'CustomerDetails' | localize }}</h6>
+
+        <div class="row g-3">
+            <div class="col-md-6 form-group">
+                <label for="CustomerNo" class="fw-bold">{{ 'CustomerNo' | localize }}</label>
+                <input pInputText class="w-100" id="CustomerNo" name="customerNo" [(ngModel)]="customer.customerNo" required />
+            </div>
+
+            <div class="col-md-6 form-group">
+                <label for="FullName">{{ 'FullName' | localize }}</label>
+                <input pInputText class="w-100" id="FullName" name="fullName" [(ngModel)]="customer.fullName" required />
+            </div>
+
+            <div class="col-md-6 form-group">
+                <label for="Email">{{ 'Email' | localize }}</label>
+                <input pInputText class="w-100" id="Email" name="email" [(ngModel)]="customer.email" />
+            </div>
+
+            <div class="col-md-6 form-group">
+                <label for="PhoneNo">{{ 'PhoneNo' | localize }}</label>
+                <input pInputText class="w-100" id="PhoneNo" name="phoneNo" [(ngModel)]="customer.phoneNo" />
+            </div>
+
+            <div class="col-md-6 form-group">
+                <label for="Address1">{{ 'Address1' | localize }}</label>
+                <input pInputText class="w-100" id="Address1" name="address1" [(ngModel)]="customer.address1" />
+            </div>
+
+            <div class="col-md-6 form-group">
+                <label for="Address2">{{ 'Address2' | localize }}</label>
+                <input pInputText class="w-100" id="Address2" name="address2" [(ngModel)]="customer.address2" />
+            </div>
+
+            <div class="col-md-4 form-group">
+                <label for="Postcode">{{ 'Postcode' | localize }}</label>
+                <input pInputText class="w-100" id="Postcode" name="postcode" [(ngModel)]="customer.postcode" />
+            </div>
+
+            <div class="col-md-4 form-group">
+                <label for="City">{{ 'City' | localize }}</label>
+                <input pInputText class="w-100" id="City" name="city" [(ngModel)]="customer.city" />
+            </div>
+
+            <div class="col-md-4 form-group">
+                <label for="State">{{ 'State' | localize }}</label>
+                <input pInputText class="w-100" id="State" name="state" [(ngModel)]="customer.state" />
+            </div>
+
+            <div class="col-md-6 form-group">
+                <label for="Nationality">{{ 'Nationality' | localize }}</label>
+                <input pInputText class="w-100" id="Nationality" name="nationality" [(ngModel)]="customer.nationality" />
+            </div>
+
+            <div class="col-md-6 form-group">
+                <label for="Occupation">{{ 'Occupation' | localize }}</label>
+                <input pInputText class="w-100" id="Occupation" name="occupation" [(ngModel)]="customer.occupation" />
+            </div>
+
+            <div class="col-12 form-group">
+                <label for="MonthlyIncome">{{ 'MonthlyIncome' | localize }}</label>
+                <p-inputNumber inputId="MonthlyIncome" name="monthlyIncome" styleClass="w-100" [(ngModel)]="customer.monthlyIncome"></p-inputNumber>
+            </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <h6 class="mb-3 text-muted">{{ 'Documents' | localize }}</h6>
+
+        <div class="table-responsive mb-3" *ngIf="documents.length > 0">
+            <p-table [value]="documents" styleClass="p-datatable-sm">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th style="min-width: 140px">{{ 'FileName' | localize }}</th>
+                        <th style="min-width: 120px">{{ 'DocumentType' | localize }}</th>
+                        <th style="min-width: 80px">{{ 'Actions' | localize }}</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-doc>
+                    <tr>
+                        <td>{{ doc.fileName }}</td>
+                        <td>{{ doc.documentType }}</td>
+                        <td>
+                            <p-button icon="pi pi-trash" styleClass="p-button-sm p-button-danger" (onClick)="deleteDocument(doc)"></p-button>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+        <p *ngIf="documents.length === 0" class="text-muted fst-italic">{{ 'NoDocuments' | localize }}</p>
+
+        <div class="row g-3 mt-2">
+            <div class="col-md-6 form-group">
+                <label for="DocumentType">{{ 'DocumentType' | localize }}</label>
+                <input pInputText class="w-100" id="DocumentType" name="documentType" [(ngModel)]="documentType" placeholder="e.g. NRIC, Passport" />
+            </div>
+
+            <div class="col-md-6 form-group">
+                <label for="File" class="d-block">{{ 'File' | localize }}</label>
+                <input type="file" id="File" name="file" class="form-control" (change)="onFileSelected($event)" />
+            </div>
+        </div>
+    </div>
+    <abp-modal-footer [saveDisabled]="saving || uploading || customerForm.invalid" [cancelDisabled]="saving || uploading" (onCancelClick)="bsModalRef.hide()" (onSaveClick)="save()"></abp-modal-footer>
+</form>

@@ -75,3 +75,16 @@ table.table {
 .p-paginator .p-paginator-current {
     color: #6c757d !important;
 }
+
+/* PrimeNG dialogs - ensure input number stretches like a regular input */
+.p-inputnumber,
+.p-inputnumber-input {
+    width: 100%;
+}
+
+/* PrimeNG overlay panels - ensure they sit above ngx-bootstrap modal */
+.p-datepicker-panel,
+.p-select-overlay,
+.p-overlaypanel {
+    z-index: 2000 !important;
+}
