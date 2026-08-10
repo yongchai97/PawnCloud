@@ -75,7 +75,6 @@ public class CustomerAppService : ApplicationService, ICustomerAppService
 
     public async Task<ListResultDto<CustomerLookupDto>> GetCustomersForLookup()
     {
-        await PermissionChecker.AuthorizeAsync(PermissionNames.Pages_Customers);
         var customers = await _repository.GetAllListAsync();
         var lookup = customers
             .OrderBy(c => c.CustomerNo)

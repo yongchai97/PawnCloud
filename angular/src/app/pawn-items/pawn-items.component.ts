@@ -3,10 +3,10 @@ import { finalize } from 'rxjs/operators';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
-import { PawnTicketDto } from '@shared/service-proxies/service-proxies';
+import { PawnItemDto } from '@shared/service-proxies/service-proxies';
 import { LookupServiceProxy } from '@shared/service-proxies/lookup-service-proxy';
-import { CreatePawnTicketDialogComponent } from './create-pawn-ticket/create-pawn-ticket-dialog.component';
-import { EditPawnTicketDialogComponent } from './edit-pawn-ticket/edit-pawn-ticket-dialog.component';
+import { CreatePawnItemDialogComponent } from './create-pawn-item/create-pawn-item-dialog.component';
+import { EditPawnItemDialogComponent } from './edit-pawn-item/edit-pawn-item-dialog.component';
 import { Table, TableModule } from 'primeng/table';
 import { LazyLoadEvent, PrimeTemplate } from 'primeng/api';
 import { ActivatedRoute } from '@angular/router';
@@ -17,12 +17,12 @@ import { LocalizePipe } from '@shared/pipes/localize.pipe';
 import { ButtonModule } from 'primeng/button';
 
 @Component({
-    templateUrl: './pawn-tickets.component.html',
+    templateUrl: './pawn-items.component.html',
     animations: [appModuleAnimation()],
     standalone: true,
     imports: [FormsModule, TableModule, PrimeTemplate, NgIf, DatePipe, PaginatorModule, LocalizePipe, ButtonModule],
 })
-export class PawnTicketsComponent extends PagedListingComponentBase<PawnTicketDto> {
+export class PawnItemsComponent extends PagedListingComponentBase<PawnItemDto> {
     @ViewChild('dataTable', { static: true }) dataTable: Table;
     @ViewChild('paginator', { static: true }) paginator: Paginator;
 
@@ -42,7 +42,6 @@ export class PawnTicketsComponent extends PagedListingComponentBase<PawnTicketDt
     list(event?: LazyLoadEvent): void {
         if (this.primengTableHelper.shouldResetPaging(event)) {
             this.paginator.changePage(0);
-
             if (this.primengTableHelper.records && this.primengTableHelper.records.length > 0) {
                 return;
             }
@@ -51,7 +50,7 @@ export class PawnTicketsComponent extends PagedListingComponentBase<PawnTicketDt
         this.primengTableHelper.showLoadingIndicator();
 
         this._lookupService
-            .getPawnTickets(
+            .getPawnItems(
                 this.keyword,
                 this.primengTableHelper.getSorting(this.dataTable),
                 this.primengTableHelper.getSkipCount(this.paginator, event),
@@ -70,11 +69,11 @@ export class PawnTicketsComponent extends PagedListingComponentBase<PawnTicketDt
             });
     }
 
-    delete(ticket: PawnTicketDto): void {
-        abp.message.confirm(this.l('DeletePawnTicketWarningMessage', ticket.ticketNo), undefined, (result: boolean) => {
+    delete(item: PawnItemDto): void {
+        abp.message.confirm(this.l('DeletePawnItemWarningMessage', item.category), undefined, (result: boolean) => {
             if (result) {
                 this._lookupService
-                    .deletePawnTicket(ticket.id)
+                    .deletePawnItem(item.id)
                     .pipe(
                         finalize(() => {
                             abp.notify.success(this.l('SuccessfullyDeleted'));
@@ -86,23 +85,23 @@ export class PawnTicketsComponent extends PagedListingComponentBase<PawnTicketDt
         });
     }
 
-    createPawnTicket(): void {
-        this.showCreateOrEditPawnTicketDialog();
+    createPawnItem(): void {
+        this.showCreateOrEditPawnItemDialog();
     }
 
-    editPawnTicket(ticket: PawnTicketDto): void {
-        this.showCreateOrEditPawnTicketDialog(ticket.id);
+    editPawnItem(item: PawnItemDto): void {
+        this.showCreateOrEditPawnItemDialog(item.id);
     }
 
-    showCreateOrEditPawnTicketDialog(id?: number): void {
+    showCreateOrEditPawnItemDialog(id?: number): void {
         let dialog: BsModalRef;
         if (!id) {
-            dialog = this._modalService.show(CreatePawnTicketDialogComponent, {
-                class: 'modal-xl',
+            dialog = this._modalService.show(CreatePawnItemDialogComponent, {
+                class: 'modal-lg',
             });
         } else {
-            dialog = this._modalService.show(EditPawnTicketDialogComponent, {
-                class: 'modal-xl',
+            dialog = this._modalService.show(EditPawnItemDialogComponent, {
+                class: 'modal-lg',
                 initialState: {
                     id: id,
                 },

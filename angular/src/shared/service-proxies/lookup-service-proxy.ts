@@ -1,7 +1,37 @@
 import { Injectable, Inject, Optional } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { API_BASE_URL } from './service-proxies';
+
+/**
+ * ABP wraps every DynamicWebApi response in an AjaxResponse envelope:
+ *   { result: <payload>, success: true, error: null, __abp: true, ... }
+ *
+ * The AbpHttpInterceptor is supposed to unwrap this for generated NSwag
+ * proxies, but our hand-rolled http.get calls below bypass that path and
+ * receive the envelope as-is. unwrapAjaxResponse() handles both shapes
+ * (already-unwrapped, or still-wrapped) so callers always see the payload.
+ */
+export interface AjaxResponse<T> {
+    result: T;
+    targetUrl: string | null;
+    success: boolean;
+    error: any;
+    unAuthorizedRequest: boolean;
+    __abp: boolean;
+}
+
+function unwrapAjaxResponse<T>(source: Observable<any>): Observable<T> {
+    return source.pipe(
+        map((response) => {
+            if (response && typeof response === 'object' && '__abp' in response && 'result' in response) {
+                return (response as AjaxResponse<T>).result as T;
+            }
+            return response as T;
+        })
+    );
+}
 
 export class CustomerLookupDto {
     id: number = 0;
@@ -46,23 +76,107 @@ export class LookupServiceProxy {
         if (filter) {
             params = params.set('Filter', filter);
         }
-        return this.http.get<LookupListResultDto<CustomerLookupDto>>(
-            this.url('/Customer/GetCustomersForLookup'),
-            { params }
+        return unwrapAjaxResponse<LookupListResultDto<CustomerLookupDto>>(
+            this.http.get(this.url('/Customer/GetCustomersForLookup'), { params })
         );
     }
 
     getPawnTicketsForLookup(): Observable<LookupListResultDto<PawnTicketLookupDto>> {
-        return this.http.get<LookupListResultDto<PawnTicketLookupDto>>(
-            this.url('/PawnTicket/GetPawnTicketsForLookup')
+        return unwrapAjaxResponse<LookupListResultDto<PawnTicketLookupDto>>(
+            this.http.get(this.url('/PawnTicket/GetPawnTicketsForLookup'))
+        );
+    }
+
+    /**
+     * Hand-rolled listing endpoint for the Pawn Tickets page.
+     *
+     * The NSwag-generated PawnTicketServiceProxy.getAll() uses
+     * responseType: "blob" with Accept: "text/plain", which causes the
+     * AbpHttpInterceptor to skip envelope unwrapping (its Blob branch
+     * only fires when the Blob MIME type contains "application/json").
+     * The result is that processGetAll() receives the still-wrapped
+     * AjaxResponse and fromJS() produces an empty paged DTO. Going
+     * through HttpClient.get() directly keeps the response as a plain
+     * JSON object, so the interceptor unwraps it normally.
+     */
+    getPawnTickets(
+        filter: string | undefined,
+        sorting: string | undefined,
+        skipCount: number | undefined,
+        maxResultCount: number | undefined
+    ): Observable<any> {
+        let params = new HttpParams();
+        if (filter !== undefined && filter !== null) {
+            params = params.set('Filter', filter);
+        }
+        if (sorting !== undefined && sorting !== null) {
+            params = params.set('Sorting', sorting);
+        }
+        if (skipCount !== undefined && skipCount !== null) {
+            params = params.set('SkipCount', skipCount.toString());
+        }
+        if (maxResultCount !== undefined && maxResultCount !== null) {
+            params = params.set('MaxResultCount', maxResultCount.toString());
+        }
+        return unwrapAjaxResponse<any>(
+            this.http.get(this.url('/PawnTicket/GetAll'), { params })
+        );
+    }
+
+    deletePawnTicket(id: number): Observable<void> {
+        const params = new HttpParams().set('Id', id.toString());
+        return unwrapAjaxResponse<void>(
+            this.http.delete(this.url('/PawnTicket/Delete'), { params })
+        );
+    }
+
+    /**
+     * Hand-rolled listing endpoint for the Pawn Items page.
+     * Uses raw HttpClient.get so the ABP interceptor can unwrap the envelope
+     * normally (the generated proxy uses blob responses, which skip unwrapping).
+     */
+    getPawnItems(
+        filter: string | undefined,
+        sorting: string | undefined,
+        skipCount: number | undefined,
+        maxResultCount: number | undefined
+    ): Observable<any> {
+        let params = new HttpParams();
+        if (filter !== undefined && filter !== null) {
+            params = params.set('Filter', filter);
+        }
+        if (sorting !== undefined && sorting !== null) {
+            params = params.set('Sorting', sorting);
+        }
+        if (skipCount !== undefined && skipCount !== null) {
+            params = params.set('SkipCount', skipCount.toString());
+        }
+        if (maxResultCount !== undefined && maxResultCount !== null) {
+            params = params.set('MaxResultCount', maxResultCount.toString());
+        }
+        return unwrapAjaxResponse<any>(
+            this.http.get(this.url('/PawnItem/GetAll'), { params })
+        );
+    }
+
+    getPawnItemForEdit(id: number): Observable<any> {
+        const params = new HttpParams().set('Id', id.toString());
+        return unwrapAjaxResponse<any>(
+            this.http.get(this.url('/PawnItem/GetViaIdForEdit'), { params })
         );
     }
 
     getCustomerDocumentsByCustomerId(customerId: number): Observable<LookupListResultDto<CustomerDocumentSummaryDto>> {
         const params = new HttpParams().set('Id', customerId.toString());
-        return this.http.get<LookupListResultDto<CustomerDocumentSummaryDto>>(
-            this.url('/CustomerDocument/GetByCustomerId'),
-            { params }
+        return unwrapAjaxResponse<LookupListResultDto<CustomerDocumentSummaryDto>>(
+            this.http.get(this.url('/CustomerDocument/GetByCustomerId'), { params })
+        );
+    }
+
+    getPawnItemsByPawnTicketId(pawnTicketId: number): Observable<LookupListResultDto<any>> {
+        const params = new HttpParams().set('Id', pawnTicketId.toString());
+        return unwrapAjaxResponse<LookupListResultDto<any>>(
+            this.http.get(this.url('/PawnItem/GetByPawnTicketId'), { params })
         );
     }
 
@@ -96,13 +210,7 @@ export class LookupServiceProxy {
         );
     }
 
-    getPawnItemsByPawnTicketId(pawnTicketId: number): Observable<LookupListResultDto<any>> {
-        const params = new HttpParams().set('Id', pawnTicketId.toString());
-        return this.http.get<LookupListResultDto<any>>(
-            this.url('/PawnItem/GetByPawnTicketId'),
-            { params }
-        );
-    }
+
 
     deletePawnItem(id: number): Observable<void> {
         const params = new HttpParams().set('Id', id.toString());

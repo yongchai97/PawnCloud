@@ -1,5 +1,5 @@
-import { Component, Injector, ChangeDetectorRef, ApplicationRef, ViewChild, EventEmitter, output, OnInit } from '@angular/core';
-import { BsModalRef } from 'ngx-bootstrap/modal';
+import { Component, Injector, OnInit, ChangeDetectorRef, EventEmitter, output } from '@angular/core';
+import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { AppComponentBase } from '@shared/app-component-base';
 import { FormsModule } from '@angular/forms';
 import { AbpModalHeaderComponent } from '../../../shared/components/modal/abp-modal-header.component';
@@ -17,12 +17,6 @@ import {
     PawnItemDto,
 } from '@shared/service-proxies/service-proxies';
 import { LookupServiceProxy, CustomerLookupDto } from '@shared/service-proxies/lookup-service-proxy';
-import { InputTextModule } from 'primeng/inputtext';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { ButtonModule } from 'primeng/button';
-import { SelectModule, Select } from 'primeng/select';
-import { TextareaModule } from 'primeng/textarea';
-import { DatePickerModule } from 'primeng/datepicker';
 import { NgFor, NgIf } from '@angular/common';
 import moment from 'moment';
 
@@ -42,20 +36,11 @@ interface PawnItemRow {
         AbpValidationSummaryComponent,
         AbpModalFooterComponent,
         LocalizePipe,
-        InputTextModule,
-        InputNumberModule,
-        ButtonModule,
-        SelectModule,
-        TextareaModule,
-        DatePickerModule,
         NgFor,
         NgIf,
     ],
 })
 export class EditPawnTicketDialogComponent extends AppComponentBase implements OnInit {
-    @ViewChild('customerSelect') customerSelect: Select;
-    @ViewChild('statusSelect') statusSelect: Select;
-
     saving = false;
     pawnTicket = new CreateOrEditPawnTicketDto();
     customers: CustomerLookupDto[] = [];
@@ -63,10 +48,10 @@ export class EditPawnTicketDialogComponent extends AppComponentBase implements O
     pawnItems: PawnItemRow[] = [];
     id?: number;
 
-    // Local Date fields used to bind p-datepicker (DTO uses moment.Moment)
-    createdDate: Date | null = null;
-    maturityDate: Date | null = null;
-    expiryDate: Date | null = null;
+    // Local Date fields (yyyy-MM-dd) used for the native date input.
+    createdDate: string = '';
+    maturityDate: string = '';
+    expiryDate: string = '';
 
     onSave = output<EventEmitter<any>>();
 
@@ -76,51 +61,42 @@ export class EditPawnTicketDialogComponent extends AppComponentBase implements O
         private _pawnItemService: PawnItemServiceProxy,
         private _miscService: MiscFunctionServiceProxy,
         private _lookupService: LookupServiceProxy,
+        private _modalService: BsModalService,
         public bsModalRef: BsModalRef,
-        public cd: ChangeDetectorRef,
-        public appRef: ApplicationRef
+        private cd: ChangeDetectorRef
     ) {
         super(injector);
+    }
+
+    private toIsoDate(value: any): string {
+        if (!value) return '';
+        const d = moment(value);
+        if (!d.isValid()) return '';
+        return d.format('YYYY-MM-DD');
     }
 
     ngOnInit(): void {
         this._lookupService.getCustomersForLookup().subscribe((result) => {
             this.customers = result.items || [];
-            this.refreshSelect(this.customerSelect);
+            // Force change detection so the <select> rerenders its <option>
+            // children after the async fetch completes.
+            this.cd.detectChanges();
         });
         this._miscService.getStatuses().subscribe((result) => {
             this.statuses = result.items || [];
-            this.refreshSelect(this.statusSelect);
+            this.cd.detectChanges();
         });
 
         if (this.id) {
             this._pawnTicketService.getViaIdForEdit(this.id).subscribe((result: GetPawnTicketForEditOutput) => {
                 this.pawnTicket = result.pawnTicket;
-                this.createdDate = this.pawnTicket.createdDate ? (this.pawnTicket.createdDate as any).toDate() : null;
-                this.maturityDate = this.pawnTicket.maturityDate ? (this.pawnTicket.maturityDate as any).toDate() : null;
-                this.expiryDate = this.pawnTicket.expiryDate ? (this.pawnTicket.expiryDate as any).toDate() : null;
+                this.createdDate = this.toIsoDate(this.pawnTicket.createdDate);
+                this.maturityDate = this.toIsoDate(this.pawnTicket.maturityDate);
+                this.expiryDate = this.toIsoDate(this.pawnTicket.expiryDate);
                 this.loadItems();
-                this.appRef.tick();
-                this.refreshSelect(this.customerSelect);
-                this.refreshSelect(this.statusSelect);
+                this.cd.detectChanges();
             });
         }
-    }
-
-    private refreshSelect(select: Select): void {
-        if (!select) return;
-        (select as any).cd?.detectChanges?.();
-        this.appRef.tick();
-    }
-
-    /**
-     * PrimeNG's datepicker hides the overlay via setTimeout(150) AFTER
-     * onSelect fires. Calling detectChanges() synchronously in onSelect
-     * runs while overlayVisible is still true, so the panel stays.
-     * Wait past the 150ms timeout before triggering a tick.
-     */
-    onDateSelectRefresh(): void {
-        setTimeout(() => this.appRef.tick(), 200);
     }
 
     private loadItems(): void {
@@ -146,17 +122,58 @@ export class EditPawnTicketDialogComponent extends AppComponentBase implements O
                     data: itemDto,
                 };
             });
-            this.appRef.tick();
+            // In zoneless change detection, mutating the array isn't enough
+            // to refresh the *ngFor; the template needs an explicit tick.
+            this.cd.detectChanges();
         });
     }
 
     addPawnItem(): void {
-        const dto = new CreateOrEditPawnItemDto();
-        dto.pawnTicketId = this.id;
-        this.pawnItems.push({
-            isExisting: false,
-            markedForDeletion: false,
-            data: dto,
+        // Open popup with empty form; on hide, append the returned item to the list
+        // ONLY if the user actually clicked Save (the dialog sets saved=true).
+        // Lazy import to avoid circular dependency at module-evaluation time.
+        import('../shared/pawn-item-form-dialog.component').then((m) => {
+            const dto = new CreateOrEditPawnItemDto();
+            dto.pawnTicketId = this.id;
+            const dialog = this._modalService.show(m.PawnItemFormDialogComponent, {
+                class: 'modal-lg',
+                initialState: { item: dto, isEdit: false },
+            });
+            dialog.onHidden.subscribe(() => {
+                const saved = dialog.content && (dialog.content as any).saved;
+                const result = dialog.content && (dialog.content as any).item;
+                if (saved && result) {
+                    this.pawnItems.push({
+                        isExisting: false,
+                        markedForDeletion: false,
+                        data: result,
+                    });
+                    this.cd.detectChanges();
+                }
+            });
+        });
+    }
+
+    editPawnItem(index: number): void {
+        const row = this.pawnItems[index];
+        if (row.markedForDeletion) {
+            return;
+        }
+        // Open popup pre-populated with the item's data; only commit on Save.
+        import('../shared/pawn-item-form-dialog.component').then((m) => {
+            const clone = Object.assign(new CreateOrEditPawnItemDto(), row.data);
+            const dialog = this._modalService.show(m.PawnItemFormDialogComponent, {
+                class: 'modal-lg',
+                initialState: { item: clone, isEdit: true },
+            });
+            dialog.onHidden.subscribe(() => {
+                const saved = dialog.content && (dialog.content as any).saved;
+                const result = dialog.content && (dialog.content as any).item;
+                if (saved && result) {
+                    row.data = Object.assign(new CreateOrEditPawnItemDto(), result);
+                    this.cd.detectChanges();
+                }
+            });
         });
     }
 
@@ -167,13 +184,12 @@ export class EditPawnTicketDialogComponent extends AppComponentBase implements O
         } else {
             this.pawnItems.splice(index, 1);
         }
-        this.appRef.tick();
+        this.cd.detectChanges();
     }
 
     undoDelete(index: number): void {
-        const pawnItems = this.pawnItems;
-        pawnItems[index].markedForDeletion = false;
-        this.appRef.tick();
+        this.pawnItems[index].markedForDeletion = false;
+        this.cd.detectChanges();
     }
 
     save(): void {
@@ -187,7 +203,6 @@ export class EditPawnTicketDialogComponent extends AppComponentBase implements O
             () => this.processItems(),
             () => {
                 this.saving = false;
-                this.appRef.tick();
             }
         );
     }
@@ -207,7 +222,6 @@ export class EditPawnTicketDialogComponent extends AppComponentBase implements O
             if (remaining === 0) {
                 if (hadError) {
                     this.saving = false;
-                    this.appRef.tick();
                 } else {
                     this.finish();
                 }

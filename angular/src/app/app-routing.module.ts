@@ -51,6 +51,12 @@ import { AppComponent } from './app.component';
                         canActivate: [AppRouteGuard],
                     },
                     {
+                        path: 'pawn-items',
+                        loadChildren: () => import('./pawn-items/pawn-items.module').then((m) => m.PawnItemsModule),
+                        data: { permission: 'Pages.PawnItems' },
+                        canActivate: [AppRouteGuard],
+                    },
+                    {
                         path: 'loans',
                         loadChildren: () => import('./loans/loans.module').then((m) => m.LoansModule),
                         data: { permission: 'Pages.Loans' },
