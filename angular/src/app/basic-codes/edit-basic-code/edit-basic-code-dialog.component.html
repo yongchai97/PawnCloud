@@ -1,0 +1,42 @@
+<form autocomplete="off" #basicCodeForm="ngForm" novalidate (ngSubmit)="save()">
+    <abp-modal-header [title]="'EditBasicCode' | localize" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+    <div class="modal-body">
+        <abp-validation-summary [control]="basicCodeForm"></abp-validation-summary>
+
+        <div class="row g-3">
+            <div class="col-md-6 form-group">
+                <label for="CodeName" class="fw-bold">{{ 'CodeName' | localize }}</label>
+                <input pInputText class="w-100" id="CodeName" name="codeName" [(ngModel)]="basicCode.codeName" required />
+            </div>
+
+            <div class="col-md-6 form-group">
+                <label for="CodeDescription" class="fw-bold">{{ 'CodeDescription' | localize }}</label>
+                <input pInputText class="w-100" id="CodeDescription" name="codeDescription" [(ngModel)]="basicCode.codeDescription" required />
+            </div>
+
+            <div class="col-md-6 form-group">
+                <div class="form-check">
+                    <p-checkbox [(ngModel)]="basicCode.systemProvidedValue" name="systemProvidedValue" [binary]="true" inputId="SystemProvidedValue"></p-checkbox>
+                    <label class="form-check-label" for="SystemProvidedValue">
+                        {{ 'SystemProvided' | localize }}
+                    </label>
+                </div>
+            </div>
+
+            <div class="col-md-6 form-group">
+                <label for="MiscMasterConfig">{{ 'Category' | localize }}</label>
+                <p-dropdown
+                    inputId="MiscMasterConfig"
+                    name="miscMasterConfig"
+                    [(ngModel)]="basicCode.miscMasterConfig"
+                    [options]="miscMasterConfigOptions"
+                    optionLabel="displayName"
+                    optionValue="id"
+                    [showClear]="true"
+                    [placeholder]="'Select' | localize"
+                    styleClass="w-100"></p-dropdown>
+            </div>
+        </div>
+    </div>
+    <abp-modal-footer [saveDisabled]="saving || basicCodeForm.invalid" [cancelDisabled]="saving" (onCancelClick)="bsModalRef.hide()" (onSaveClick)="save()"></abp-modal-footer>
+</form>

@@ -1,0 +1,90 @@
+<div [@routerTransition]>
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-6">
+                    <h1>{{ 'BasicCodes' | localize }}</h1>
+                </div>
+                <div class="col-6 text-right">
+                    <p-button label="{{ 'Create' | localize }}" icon="pi pi-plus" styleClass="p-button-success" (onClick)="createBasicCode()"></p-button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="content px-2 pb-5">
+        <div class="container-fluid">
+            <div class="card mb-0 table-wrapper">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-md-6">&emsp;</div>
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <button type="button" class="btn bg-blue" (click)="list()">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    name="keyword"
+                                    [placeholder]="'SearchWithThreeDot' | localize"
+                                    [(ngModel)]="keyword"
+                                    (keyup.enter)="list()" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <div class="primeng-datatable-container table-striped table-bordered">
+                            <p-table
+                                #dataTable
+                                sortMode="multiple"
+                                (onLazyLoad)="list($event)"
+                                [value]="primengTableHelper.records"
+                                rows="{{ primengTableHelper.defaultRecordsCountPerPage }}"
+                                [paginator]="false"
+                                [lazy]="true"
+                                [tableStyle]="{ 'min-width': '50rem' }">
+                                <ng-template pTemplate="header">
+                                    <tr>
+                                        <th style="min-width: 150px" pSortableColumn="codeName">
+                                            {{ 'CodeName' | localize }}
+                                            <p-sortIcon field="codeName"></p-sortIcon>
+                                        </th>
+                                        <th style="min-width: 200px" pSortableColumn="codeDescription">
+                                            {{ 'CodeDescription' | localize }}
+                                            <p-sortIcon field="codeDescription"></p-sortIcon>
+                                        </th>
+                                        <th style="min-width: 120px" pSortableColumn="systemProvidedValue">
+                                            {{ 'SystemProvided' | localize }}
+                                            <p-sortIcon field="systemProvidedValue"></p-sortIcon>
+                                        </th>
+                                        <th style="min-width: 100px">{{ 'Actions' | localize }}</th>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="body" let-record="$implicit">
+                                    <tr>
+                                        <td>{{ record.codeName }}</td>
+                                        <td>{{ record.codeDescription }}</td>
+                                        <td>{{ record.systemProvidedValue ? 'Yes' : 'No' }}</td>
+                                        <td>
+                                            <button pButton type="button" class="p-button-sm p-button-info me-2" icon="pi pi-pencil" (click)="editBasicCode(record)"></button>
+                                            <button pButton type="button" class="p-button-sm p-button-danger" icon="pi pi-trash" (click)="delete(record)"></button>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                            </p-table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-5 m-auto">
+                <p-paginator #paginator [rows]="primengTableHelper.defaultRecordsCountPerPage" [totalRecords]="primengTableHelper.totalRecordsCount" (onPageChange)="paginator.changePage($event.page)"></p-paginator>
+            </div>
+        </div>
+    </section>
+</div>

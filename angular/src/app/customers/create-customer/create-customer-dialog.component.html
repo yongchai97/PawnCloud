@@ -27,18 +27,74 @@
             </div>
 
             <div class="col-md-6 form-group">
-                <label for="Address1">{{ 'Address1' | localize }}</label>
-                <input pInputText class="w-100" id="Address1" name="address1" [(ngModel)]="customer.address1" />
+                <label for="BirthDate">{{ 'BirthDate' | localize }}</label>
+                <input pInputText type="date" class="w-100" id="BirthDate" name="birthDate" [(ngModel)]="customer.birthDate" />
             </div>
 
-            <div class="col-md-6 form-group">
-                <label for="Address2">{{ 'Address2' | localize }}</label>
-                <input pInputText class="w-100" id="Address2" name="address2" [(ngModel)]="customer.address2" />
+            <div class="col-md-3 form-group">
+                <label for="Gender">{{ 'Gender' | localize }}</label>
+                <p-dropdown
+                    inputId="Gender"
+                    name="gender"
+                    [(ngModel)]="customer.gender"
+                    [options]="genderOptions"
+                    optionLabel="displayName"
+                    optionValue="id"
+                    [showClear]="true"
+                    [placeholder]="'Select' | localize"
+                    styleClass="w-100"></p-dropdown>
             </div>
 
-            <div class="col-md-4 form-group">
-                <label for="Postcode">{{ 'Postcode' | localize }}</label>
-                <input pInputText class="w-100" id="Postcode" name="postcode" [(ngModel)]="customer.postcode" />
+            <div class="col-md-3 form-group">
+                <label for="Race">{{ 'Race' | localize }}</label>
+                <p-dropdown
+                    inputId="Race"
+                    name="race"
+                    [(ngModel)]="customer.race"
+                    [options]="raceOptions"
+                    optionLabel="displayName"
+                    optionValue="id"
+                    [showClear]="true"
+                    [placeholder]="'Select' | localize"
+                    styleClass="w-100"></p-dropdown>
+            </div>
+
+            <div class="col-md-3 form-group">
+                <label for="Nationality">{{ 'Nationality' | localize }}</label>
+                <p-dropdown
+                    inputId="Nationality"
+                    name="nationality"
+                    [(ngModel)]="customer.nationality"
+                    [options]="nationalityOptions"
+                    optionLabel="displayName"
+                    optionValue="id"
+                    [showClear]="true"
+                    [placeholder]="'Select' | localize"
+                    styleClass="w-100"></p-dropdown>
+            </div>
+
+            <div class="col-md-3 form-group">
+                <label for="MaritalStatus">{{ 'MaritalStatus' | localize }}</label>
+                <p-dropdown
+                    inputId="MaritalStatus"
+                    name="maritalStatus"
+                    [(ngModel)]="customer.maritalStatus"
+                    [options]="maritalStatusOptions"
+                    optionLabel="displayName"
+                    optionValue="id"
+                    [showClear]="true"
+                    [placeholder]="'Select' | localize"
+                    styleClass="w-100"></p-dropdown>
+            </div>
+        </div>
+
+        <hr class="my-3" />
+        <h6 class="mb-3 text-muted">{{ 'ResidentialAddress' | localize }}</h6>
+
+        <div class="row g-3">
+            <div class="col-md-12 form-group">
+                <label for="Address">{{ 'Address' | localize }}</label>
+                <input pInputText class="w-100" id="Address" name="address" [(ngModel)]="customer.address" />
             </div>
 
             <div class="col-md-4 form-group">
@@ -51,37 +107,88 @@
                 <input pInputText class="w-100" id="State" name="state" [(ngModel)]="customer.state" />
             </div>
 
-            <div class="col-md-6 form-group">
-                <label for="Nationality">{{ 'Nationality' | localize }}</label>
-                <input pInputText class="w-100" id="Nationality" name="nationality" [(ngModel)]="customer.nationality" />
+            <div class="col-md-4 form-group">
+                <label for="Country">{{ 'Country' | localize }}</label>
+                <p-dropdown
+                    inputId="Country"
+                    name="country"
+                    [(ngModel)]="customer.country"
+                    [options]="countryOptions"
+                    optionLabel="displayName"
+                    optionValue="id"
+                    [showClear]="true"
+                    [placeholder]="'Select' | localize"
+                    styleClass="w-100"></p-dropdown>
+            </div>
+        </div>
+
+        <hr class="my-3" />
+        <h6 class="mb-3 text-muted">{{ 'MailingAddress' | localize }}</h6>
+
+        <div class="row g-3">
+            <div class="col-md-12 form-group">
+                <label for="MailingAddress">{{ 'Address' | localize }}</label>
+                <input pInputText class="w-100" id="MailingAddress" name="mailingAddress" [(ngModel)]="customer.mailingAddress" />
             </div>
 
+            <div class="col-md-4 form-group">
+                <label for="MailingCity">{{ 'City' | localize }}</label>
+                <input pInputText class="w-100" id="MailingCity" name="mailingCity" [(ngModel)]="customer.mailingCity" />
+            </div>
+
+            <div class="col-md-4 form-group">
+                <label for="MailingState">{{ 'State' | localize }}</label>
+                <input pInputText class="w-100" id="MailingState" name="mailingState" [(ngModel)]="customer.mailingState" />
+            </div>
+
+            <div class="col-md-4 form-group">
+                <label for="MailingCountry">{{ 'Country' | localize }}</label>
+                <p-dropdown
+                    inputId="MailingCountry"
+                    name="mailingCountry"
+                    [(ngModel)]="customer.mailingCountry"
+                    [options]="countryOptions"
+                    optionLabel="displayName"
+                    optionValue="id"
+                    [showClear]="true"
+                    [placeholder]="'Select' | localize"
+                    styleClass="w-100"></p-dropdown>
+            </div>
+        </div>
+
+        <hr class="my-3" />
+        <h6 class="mb-3 text-muted">{{ 'EmploymentInfo' | localize }}</h6>
+
+        <div class="row g-3">
             <div class="col-md-6 form-group">
                 <label for="Occupation">{{ 'Occupation' | localize }}</label>
                 <input pInputText class="w-100" id="Occupation" name="occupation" [(ngModel)]="customer.occupation" />
             </div>
 
-            <div class="col-12 form-group">
+            <div class="col-md-6 form-group">
+                <label for="Employer">{{ 'Employer' | localize }}</label>
+                <input pInputText class="w-100" id="Employer" name="employer" [(ngModel)]="customer.employer" />
+            </div>
+
+            <div class="col-md-6 form-group">
+                <label for="BusinessNature">{{ 'BusinessNature' | localize }}</label>
+                <p-dropdown
+                    inputId="BusinessNature"
+                    name="businessNature"
+                    [(ngModel)]="customer.businessNature"
+                    [options]="businessNatureOptions"
+                    optionLabel="displayName"
+                    optionValue="id"
+                    [showClear]="true"
+                    [placeholder]="'Select' | localize"
+                    styleClass="w-100"></p-dropdown>
+            </div>
+
+            <div class="col-md-6 form-group">
                 <label for="MonthlyIncome">{{ 'MonthlyIncome' | localize }}</label>
                 <p-inputNumber inputId="MonthlyIncome" name="monthlyIncome" styleClass="w-100" [(ngModel)]="customer.monthlyIncome"></p-inputNumber>
             </div>
         </div>
-
-        <hr class="my-4" />
-
-        <h6 class="mb-3 text-muted">{{ 'UploadDocument' | localize }} <small class="text-muted">({{ 'Optional' | localize }})</small></h6>
-
-        <div class="row g-3">
-            <div class="col-md-6 form-group">
-                <label for="DocumentType">{{ 'DocumentType' | localize }}</label>
-                <input pInputText class="w-100" id="DocumentType" name="documentType" [(ngModel)]="documentType" placeholder="e.g. NRIC, Passport" />
-            </div>
-
-            <div class="col-md-6 form-group">
-                <label for="File" class="d-block">{{ 'File' | localize }}</label>
-                <input type="file" id="File" name="file" class="form-control" (change)="onFileSelected($event)" />
-            </div>
-        </div>
     </div>
-    <abp-modal-footer [saveDisabled]="saving || uploading || customerForm.invalid" [cancelDisabled]="saving || uploading" (onCancelClick)="bsModalRef.hide()" (onSaveClick)="save()"></abp-modal-footer>
+    <abp-modal-footer [saveDisabled]="saving || customerForm.invalid" [cancelDisabled]="saving" (onCancelClick)="bsModalRef.hide()" (onSaveClick)="save()"></abp-modal-footer>
 </form>

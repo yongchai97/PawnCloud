@@ -38,6 +38,11 @@ public class PawnCloudAuthorizationProvider : AuthorizationProvider
         loans.CreateChildPermission(PermissionNames.Pages_Loans_Edit, L("EditLoan"));
         loans.CreateChildPermission(PermissionNames.Pages_Loans_Delete, L("DeleteLoan"));
 
+        var basicCodes = context.CreatePermission(PermissionNames.Pages_BasicCodes, L("BasicCodes"));
+        basicCodes.CreateChildPermission(PermissionNames.Pages_BasicCodes_Create, L("CreateBasicCode"));
+        basicCodes.CreateChildPermission(PermissionNames.Pages_BasicCodes_Edit, L("EditBasicCode"));
+        basicCodes.CreateChildPermission(PermissionNames.Pages_BasicCodes_Delete, L("DeleteBasicCode"));
+
         context.CreatePermission(PermissionNames.Pages_MiscFunctions, L("MiscFunctions"));
     }
 

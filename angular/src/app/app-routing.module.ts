@@ -63,6 +63,12 @@ import { AppComponent } from './app.component';
                         canActivate: [AppRouteGuard],
                     },
                     {
+                        path: 'basic-codes',
+                        loadChildren: () => import('./basic-codes/basic-codes.module').then((m) => m.BasicCodesModule),
+                        data: { permission: 'Pages.BasicCodes' },
+                        canActivate: [AppRouteGuard],
+                    },
+                    {
                         path: 'update-password',
                         loadChildren: () => import('./users/users.module').then((m) => m.UsersModule),
                         canActivate: [AppRouteGuard],

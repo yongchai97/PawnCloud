@@ -6,36 +6,41 @@ import { AbpModalHeaderComponent } from '../../../shared/components/modal/abp-mo
 import { AbpValidationSummaryComponent } from '../../../shared/components/validation/abp-validation.summary.component';
 import { AbpModalFooterComponent } from '../../../shared/components/modal/abp-modal-footer.component';
 import { LocalizePipe } from '@shared/pipes/localize.pipe';
-import { CustomerServiceProxy, CreateOrEditCustomerDto, GetCustomerForEditOutput, CustomerDocumentServiceProxy, CreateOrEditCustomerDocumentDto } from '@shared/service-proxies/service-proxies';
-import { LookupServiceProxy, CustomerDocumentSummaryDto } from '@shared/service-proxies/lookup-service-proxy';
+import { CustomerServiceProxy, CreateOrEditCustomerDto, GetCustomerForEditOutput, BasicCodeServiceProxy, BasicCodeLookupDto, MiscMasterConfigServiceProxy, MiscMasterConfigLookupDto } from '@shared/service-proxies/service-proxies';
+import { LookupServiceProxy } from '@shared/service-proxies/lookup-service-proxy';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
-import { NgIf } from '@angular/common';
+import { NgIf, NgFor } from '@angular/common';
+import { DropdownModule } from 'primeng/dropdown';
 
 @Component({
     templateUrl: './edit-customer-dialog.component.html',
     standalone: true,
-    imports: [FormsModule, AbpModalHeaderComponent, AbpValidationSummaryComponent, AbpModalFooterComponent, LocalizePipe, InputTextModule, InputNumberModule, ButtonModule, TableModule, NgIf],
+    imports: [FormsModule, AbpModalHeaderComponent, AbpValidationSummaryComponent, AbpModalFooterComponent, LocalizePipe, InputTextModule, InputNumberModule, ButtonModule, TableModule, NgIf, NgFor, DropdownModule],
 })
 export class EditCustomerDialogComponent extends AppComponentBase implements OnInit {
     saving = false;
     customer = new CreateOrEditCustomerDto();
-    documents: CustomerDocumentSummaryDto[] = [];
     id?: number;
 
-    documentType = '';
-    selectedFile: File | null = null;
-    uploading = false;
+    // BasicCode dropdowns
+    countryOptions: BasicCodeLookupDto[] = [];
+    raceOptions: BasicCodeLookupDto[] = [];
+    genderOptions: BasicCodeLookupDto[] = [];
+    nationalityOptions: BasicCodeLookupDto[] = [];
+    businessNatureOptions: BasicCodeLookupDto[] = [];
+    maritalStatusOptions: BasicCodeLookupDto[] = [];
 
     onSave = output<EventEmitter<any>>();
 
     constructor(
         injector: Injector,
         private _customerService: CustomerServiceProxy,
-        private _customerDocumentService: CustomerDocumentServiceProxy,
         private _lookupService: LookupServiceProxy,
+        private _basicCodeService: BasicCodeServiceProxy,
+        private _miscMasterConfigService: MiscMasterConfigServiceProxy,
         public bsModalRef: BsModalRef,
         private cd: ChangeDetectorRef
     ) {
@@ -43,55 +48,66 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
     }
 
     ngOnInit(): void {
+        this.loadBasicCodeDropdowns();
         if (this.id) {
             this._customerService.getViaIdForEdit(this.id).subscribe((result: GetCustomerForEditOutput) => {
                 this.customer = result.customer;
-                this.loadDocuments();
                 this.cd.detectChanges();
             });
         }
     }
 
-    loadDocuments(): void {
-        if (!this.id) return;
-        this._lookupService.getCustomerDocumentsByCustomerId(this.id).subscribe((result) => {
-            this.documents = result.items || [];
-            this.cd.detectChanges();
-        });
-    }
+    private loadBasicCodeDropdowns(): void {
+        this._miscMasterConfigService.getForLookup().subscribe((configs) => {
+            const configMap = new Map<string, number>();
+            configs.items?.forEach((config) => {
+                configMap.set(config.displayName.toLowerCase(), config.id);
+            });
 
-    onFileSelected(event: Event): void {
-        const input = event.target as HTMLInputElement;
-        if (input.files && input.files.length > 0) {
-            this.selectedFile = input.files[0];
-            if (!this.documentType && this.selectedFile) {
-                const ext = this.selectedFile.name.split('.').pop()?.toLowerCase();
-                this.documentType = ext ? ext.toUpperCase() : '';
-            }
-        } else {
-            this.selectedFile = null;
-        }
-    }
-
-    private fileToBase64(file: File): Promise<string> {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => {
-                const result = reader.result as string;
-                const idx = result.indexOf(',');
-                resolve(idx >= 0 ? result.substring(idx + 1) : result);
+            const categoryMap = {
+                'country': configMap.get('country'),
+                'race': configMap.get('race'),
+                'gender': configMap.get('gender'),
+                'nationality': configMap.get('nationality'),
+                'businessnature': configMap.get('businessnature') || configMap.get('business nature'),
+                'maritalstatus': configMap.get('maritalstatus') || configMap.get('marital status'),
             };
-            reader.onerror = () => reject(reader.error);
-            reader.readAsDataURL(file);
-        });
-    }
 
-    deleteDocument(doc: CustomerDocumentSummaryDto): void {
-        abp.message.confirm(this.l('DeleteDocumentConfirmation', doc.fileName), undefined, (result: boolean) => {
-            if (result && doc.id) {
-                this._customerDocumentService.delete(doc.id).subscribe(() => {
-                    abp.notify.success(this.l('SuccessfullyDeleted'));
-                    this.loadDocuments();
+            // Load BasicCodes for each category
+            if (categoryMap['country']) {
+                this._basicCodeService.getBasicCodesByCategory(categoryMap['country']).subscribe((result) => {
+                    this.countryOptions = result.items || [];
+                    this.cd.detectChanges();
+                });
+            }
+            if (categoryMap['race']) {
+                this._basicCodeService.getBasicCodesByCategory(categoryMap['race']).subscribe((result) => {
+                    this.raceOptions = result.items || [];
+                    this.cd.detectChanges();
+                });
+            }
+            if (categoryMap['gender']) {
+                this._basicCodeService.getBasicCodesByCategory(categoryMap['gender']).subscribe((result) => {
+                    this.genderOptions = result.items || [];
+                    this.cd.detectChanges();
+                });
+            }
+            if (categoryMap['nationality']) {
+                this._basicCodeService.getBasicCodesByCategory(categoryMap['nationality']).subscribe((result) => {
+                    this.nationalityOptions = result.items || [];
+                    this.cd.detectChanges();
+                });
+            }
+            if (categoryMap['businessnature']) {
+                this._basicCodeService.getBasicCodesByCategory(categoryMap['businessnature']).subscribe((result) => {
+                    this.businessNatureOptions = result.items || [];
+                    this.cd.detectChanges();
+                });
+            }
+            if (categoryMap['maritalstatus']) {
+                this._basicCodeService.getBasicCodesByCategory(categoryMap['maritalstatus']).subscribe((result) => {
+                    this.maritalStatusOptions = result.items || [];
+                    this.cd.detectChanges();
                 });
             }
         });
@@ -102,41 +118,14 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
         this.customer.id = this.id;
         this._customerService.createOrEdit(this.customer).subscribe(
             () => {
-                this.uploadDocumentIfNeeded();
+                this.notify.info(this.l('SavedSuccessfully'));
+                this.bsModalRef.hide();
+                this.onSave.emit(null);
             },
             () => {
                 this.saving = false;
                 this.cd.detectChanges();
             }
         );
-    }
-
-    private uploadDocumentIfNeeded(): void {
-        if (!this.selectedFile) {
-            this.finish();
-            return;
-        }
-        this.uploading = true;
-        this.fileToBase64(this.selectedFile).then((b64) => {
-            const dto = new CreateOrEditCustomerDocumentDto();
-            dto.customer = this.id!;
-            dto.documentType = this.documentType || '';
-            dto.fileName = this.selectedFile!.name;
-            dto.documentContents = b64;
-            this._lookupService.createCustomerDocument(dto).subscribe(
-                () => this.finish(),
-                () => {
-                    this.uploading = false;
-                    this.saving = false;
-                    this.cd.detectChanges();
-                }
-            );
-        });
-    }
-
-    private finish(): void {
-        this.notify.info(this.l('SavedSuccessfully'));
-        this.bsModalRef.hide();
-        this.onSave.emit(null);
     }
 }

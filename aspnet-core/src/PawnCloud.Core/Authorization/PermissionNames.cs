@@ -34,5 +34,10 @@ public static class PermissionNames
     public const string Pages_Loans_Edit = "Pages.Loans.Edit";
     public const string Pages_Loans_Delete = "Pages.Loans.Delete";
 
+    public const string Pages_BasicCodes = "Pages.BasicCodes";
+    public const string Pages_BasicCodes_Create = "Pages.BasicCodes.Create";
+    public const string Pages_BasicCodes_Edit = "Pages.BasicCodes.Edit";
+    public const string Pages_BasicCodes_Delete = "Pages.BasicCodes.Delete";
+
     public const string Pages_MiscFunctions = "Pages.MiscFunctions";
 }

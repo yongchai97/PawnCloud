@@ -14,10 +14,4 @@ public class CustomerDocument : FullAuditedEntity<int>, IMayHaveTenant
     [ForeignKey("Customer")]
     public virtual Customer CustomerFk { get; set; }
 
-    public virtual string DocumentType { get; set; }
-
-    public virtual string FileName { get; set; }
-
-    // store binary content
-    public virtual byte[] DocumentContents { get; set; }
 }

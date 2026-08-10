@@ -14,4 +14,8 @@
   <ItemGroup>
     <ProjectReference Include="..\PawnCloud.Core\PawnCloud.Core.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="GoldTypes\" />
+    <Folder Include="DailyGoldPrices\" />
+  </ItemGroup>
 </Project>
