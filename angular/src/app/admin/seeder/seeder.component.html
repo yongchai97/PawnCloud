@@ -1,0 +1,31 @@
+<div [@routerTransition]>
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">Seeder</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body text-center py-5">
+                            <p-button 
+                                label="Run Seeder Tool"
+                                icon="pi pi-play"
+                                [loading]="isSeedingRootDb"
+                                (click)="seedRootDb()"
+                                styleClass="p-button-warning p-button-lg">
+                            </p-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -12,7 +12,7 @@
 
 <ng-template #sidebarInner let-item="item">
     @if (isMenuItemVisible(item)) {
-        <li class="nav-item" [class.menu-open]="!item.isCollapsed" [class.has-treeview]="item.children">
+        <li class="nav-item" [class.menu-open]="!item.isCollapsed" [class.has-treeview]="item.children" [class.has-submenu-right]="item.children && !item.route">
             @if (item.route && item.route.indexOf('http') != 0) {
                 <a class="nav-link" [routerLink]="item.route" [class.active]="item.isActive">
                     <i class="nav-icon {{ item.icon }}"></i>
@@ -38,12 +38,15 @@
                     <i class="nav-icon {{ item.icon }}"></i>
                     <p>
                         {{ item.label }}
-                        <i class="right fas fa-angle-left"></i>
+                        <i class="right fas fa-angle-right"></i>
                     </p>
                 </a>
             }
             @if (item.children) {
-                <ul class="nav nav-treeview" [collapse]="item.isCollapsed" [isAnimated]="true">
+                <ul class="nav nav-treeview" 
+                    [collapse]="item.isCollapsed" 
+                    [isAnimated]="true" 
+                    [class.submenu-right]="!item.route">
                     @for (item of item.children; track item) {
                         <ng-container *ngTemplateOutlet="sidebarInner; context: { item: item }"></ng-container>
                     }

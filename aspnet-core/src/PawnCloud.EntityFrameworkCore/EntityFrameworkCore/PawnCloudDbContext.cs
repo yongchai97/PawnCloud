@@ -6,6 +6,8 @@ using PawnCloud.BasicCodes;
 using PawnCloud.Customers;
 using PawnCloud.DailyGoldPrices;
 using PawnCloud.GoldTypes;
+using PawnCloud.ItemListings;
+using PawnCloud.ItemStatuses;
 using PawnCloud.MiscMasterConfigs;
 using PawnCloud.MultiTenancy;
 
@@ -23,6 +25,8 @@ public class PawnCloudDbContext : AbpZeroDbContext<Tenant, Role, User, PawnCloud
     public virtual DbSet<DailyGoldPrice> DailyGoldPrices { get; set; }
     public virtual DbSet<MiscMasterConfig> MiscMasterConfigs { get; set; }
     public virtual DbSet<BasicCode> BasicCodes { get; set; }
+    public virtual DbSet<ItemStatus> ItemStatuses { get; set; }
+    public virtual DbSet<ItemListing> ItemListings { get; set; }
 
     public PawnCloudDbContext(DbContextOptions<PawnCloudDbContext> options)
         : base(options)

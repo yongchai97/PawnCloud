@@ -36,6 +36,12 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
             const primaryUrlSegmentGroup = this.router.parseUrl(currentUrl).root.children[PRIMARY_OUTLET];
             if (primaryUrlSegmentGroup) {
                 this.activateMenuItems('/' + primaryUrlSegmentGroup.toString());
+                // Auto-close all parent menus with children
+                this.menuItems.forEach(item => {
+                    if (item.children) {
+                        item.isCollapsed = true;
+                    }
+                });
             }
         });
     }
@@ -47,10 +53,14 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
             new MenuItem(this.l('PawnTickets'), '/app/pawn-tickets', 'fas fa-receipt', 'Pages.PawnTickets'),
             new MenuItem(this.l('PawnItems'), '/app/pawn-items', 'fas fa-boxes', 'Pages.PawnItems'),
             new MenuItem(this.l('Loans'), '/app/loans', 'fas fa-hand-holding-usd', 'Pages.Loans'),
-            new MenuItem(this.l('BasicCodes'), '/app/basic-codes', 'fas fa-list', 'Pages.BasicCodes'),
-            new MenuItem(this.l('Roles'), '/app/roles', 'fas fa-theater-masks', 'Pages.Roles'),
-            new MenuItem(this.l('Tenants'), '/app/tenants', 'fas fa-building', 'Pages.Tenants'),
-            new MenuItem(this.l('Users'), '/app/users', 'fas fa-users', 'Pages.Users'),
+            new MenuItem(this.l('Admin'), '', 'fas fa-cog', null, [
+                new MenuItem(this.l('BasicCodes'), '/app/basic-codes', 'fas fa-list', 'Pages.BasicCodes'),
+                new MenuItem(this.l('Roles'), '/app/roles', 'fas fa-theater-masks', 'Pages.Roles'),
+                new MenuItem(this.l('Tenants'), '/app/tenants', 'fas fa-building', 'Pages.Tenants'),
+                new MenuItem(this.l('Users'), '/app/users', 'fas fa-users', 'Pages.Users'),
+                new MenuItem(this.l('GoldTypes'), '/app/admin/gold-types', 'fas fa-ring', 'Pages.GoldTypes'),
+                new MenuItem(this.l('Seeder'), '/app/admin/seeder', 'fas fa-database', null),
+            ]),
         ];
     }
 

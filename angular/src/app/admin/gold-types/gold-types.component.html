@@ -1,0 +1,79 @@
+<div [@routerTransition]>
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">{{ 'GoldTypes' | localize }}</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">{{ 'GoldTypesList' | localize }}</h3>
+                            <div class="card-tools">
+                                <div class="input-group input-group-sm">
+                                    <input
+                                        type="text"
+                                        class="form-control float-right"
+                                        placeholder="{{ 'Search' | localize }}"
+                                        [(ngModel)]="keyword"
+                                        (keyup.enter)="refresh()" />
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" (click)="refresh()">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-body table-responsive p-0">
+                            <p-table
+                                #dataTable
+                                [value]="primengTableHelper.records"
+                                [paginator]="false"
+                                [rows]="primengTableHelper.defaultRecordsCountPerPage"
+                                [loading]="primengTableHelper.isLoading"
+                                styleClass="p-datatable-sm">
+                                <ng-template pTemplate="header">
+                                    <tr>
+                                        <th style="min-width: 120px">{{ 'Purity' | localize }}</th>
+                                        <th style="min-width: 200px">{{ 'Description' | localize }}</th>
+                                        <th style="min-width: 100px">{{ 'Active' | localize }}</th>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="body" let-record="rowData">
+                                    <tr>
+                                        <td>{{ record.purity }}</td>
+                                        <td>{{ record.description }}</td>
+                                        <td>
+                                            <span *ngIf="record.active" class="badge badge-success">{{ 'Active' | localize }}</span>
+                                            <span *ngIf="!record.active" class="badge badge-danger">{{ 'Inactive' | localize }}</span>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                            </p-table>
+                        </div>
+
+                        <div class="card-footer">
+                            <p-paginator
+                                #paginator
+                                [rows]="primengTableHelper.defaultRecordsCountPerPage"
+                                [totalRecords]="primengTableHelper.totalRecordsCount"
+                                [rowsPerPageOptions]="primengTableHelper.predefinedRecordsCountPerPage"
+                                (onPageChange)="list($event)"
+                                styleClass="p-paginator-sm">
+                            </p-paginator>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -119,3 +119,79 @@ input[type="date"].date-picker:focus::-webkit-calendar-picker-indicator {
 .p-overlaypanel {
     z-index: 2000 !important;
 }
+
+/* Sidebar submenu positioned as right panel with multi-column layout */
+.nav-item.has-submenu-right {
+    position: relative;
+}
+
+.nav-item.has-submenu-right > .nav-treeview.submenu-right {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    position: fixed;
+    left: 250px;
+    top: 50px;
+    max-height: calc(100vh - 60px);
+    width: auto;
+    min-width: 220px;
+    background-color: #ffffff;
+    border: 2px solid #1976d2;
+    border-left: 4px solid #1976d2;
+    border-radius: 4px;
+    padding: 15px 0;
+    list-style: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 1050;
+    align-content: flex-start;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(25, 118, 210, 0.1);
+}
+
+.nav-item.has-submenu-right > .nav-treeview.submenu-right.ng-collapse {
+    display: none !important;
+}
+
+.nav-item.has-submenu-right > .nav-treeview.submenu-right li.nav-item {
+    margin: 0;
+    padding: 0;
+    border: none;
+    flex: 0 0 calc((100vh - 120px) / 5);
+    width: 220px;
+    max-width: 220px;
+}
+
+.nav-item.has-submenu-right > .nav-treeview.submenu-right li.nav-item > a.nav-link {
+    padding: 12px 20px;
+    border-radius: 0;
+    color: #333;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 100%;
+    line-height: 1;
+    border-bottom: 1px solid #e9ecef;
+    transition: background-color 0.2s ease;
+}
+
+.nav-item.has-submenu-right > .nav-treeview.submenu-right li.nav-item > a.nav-link:hover {
+    background-color: #e9ecef;
+    color: #1976d2;
+}
+
+.nav-item.has-submenu-right > .nav-treeview.submenu-right li.nav-item > a.nav-link.active {
+    background-color: #e3f2fd;
+    color: #1976d2;
+    border-left: 3px solid #1976d2;
+    padding-left: 17px;
+}
+
+.nav-item.has-submenu-right > .nav-treeview.submenu-right li.nav-item > a.nav-link i.nav-icon {
+    margin-right: 10px;
+    width: 20px;
+    flex-shrink: 0;
+}

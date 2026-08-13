@@ -69,6 +69,22 @@ import { AppComponent } from './app.component';
                         canActivate: [AppRouteGuard],
                     },
                     {
+                        path: 'admin',
+                        children: [
+                            {
+                                path: 'gold-types',
+                                loadChildren: () => import('./admin/gold-types/gold-types.module').then((m) => m.GoldTypesModule),
+                                data: { permission: 'Pages.GoldTypes' },
+                                canActivate: [AppRouteGuard],
+                            },
+                            {
+                                path: 'seeder',
+                                loadChildren: () => import('./admin/seeder/seeder.module').then((m) => m.SeederModule),
+                                canActivate: [AppRouteGuard],
+                            },
+                        ],
+                    },
+                    {
                         path: 'update-password',
                         loadChildren: () => import('./users/users.module').then((m) => m.UsersModule),
                         canActivate: [AppRouteGuard],
