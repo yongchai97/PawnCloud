@@ -1,5 +1,5 @@
 {
-    "remoteServiceBaseUrl": "https://pmscloudapp.com",
+    "remoteServiceBaseUrl": "https://api.pmscloudapp.com",
     "appBaseUrl": "https://pmscloudapp.com",
     "localeMappings": [
         {

@@ -1,24 +1,63 @@
-version: '3'
-
 services:
-
-  abp_host:
-    image: abp/host
-    environment:
-      ASPNETCORE_ENVIRONMENT: "Staging"
-      ConnectionStrings__Default: "Server=10.0.75.1; Database=PawnCloudDb; User=PawnCloudUser; Password=YourStrongPassword;TrustServerCertificate=True;"
-      App__ServerRootAddress: "http://localhost:44311/"
-      App__ClientRootAddress: "http://localhost:4200/"
-      App__CorsOrigins: "http://localhost:4200"
-      TZ: "America/Toronto"
-      Kestrel__Endpoints__Http__Url: "http://+:80"
+  nginx:
+    image: nginx:alpine
+    container_name: pmscloud-nginx
+    restart: unless-stopped
     ports:
-      - "44311:80"
+      - "80:80"
+      - "443:443"
     volumes:
-      - "./Host-Logs:/app/App_Data/Logs"
-    restart: always
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
+    depends_on:
+      - pmscloud_web
+      - pmscloud_ng
 
-  abp_ng:
-    image: abp/ng
-    ports:
-      - "4200:80"
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: pmscloud-mssql
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Chai_2607"
+      MSSQL_PID: "Developer"
+    volumes:
+      - pmscloud-mssql-data:/var/opt/mssql
+
+  pmscloud_web:
+    image: mcr.microsoft.com/dotnet/aspnet:9.0
+    working_dir: /app
+    command: ["dotnet", "/app/PawnCloud.Web.Host.dll"]
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      Kestrel__Endpoints__Http__Url: http://0.0.0.0:8080
+      ConnectionStrings__Default: Server=mssql,1433;Database=PawnCloud;User Id=sa;Password=Chai_2607;TrustServerCertificate=True;
+      App__ServerRootAddress: https://api.pmscloudapp.com/
+      App__ClientRootAddress: https://pmscloudapp.com/
+      App__CorsOrigins: https://pmscloudapp.com,https://www.pmscloudapp.com
+      TZ: Asia/Kuala_Lumpur
+    volumes:
+      - ./Host-Logs:/app/App_Data/Logs
+      - ./release/webhost:/app
+    depends_on:
+      - mssql
+    restart: unless-stopped
+
+  pmscloud_ng:
+    image: nginx:alpine
+    volumes:
+      - ./release/angular:/usr/share/nginx/html:ro
+      - ./release/angular/fast-nginx-default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - pmscloud_web
+    restart: unless-stopped
+
+volumes:
+  pmscloud-mssql-data:
+    external: true
+
+networks:
+  default:
+    name: pmscloud-network

@@ -1,34 +1,26 @@
 #!/bin/bash
-echo " Welcome to docker build"
-echo ""
-echo ""
+set -euo pipefail
 
-ABP_HOST="abp/host"
-ABP_NG="abp/ng"
+ASP_NET_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+REPO_ROOT="$(cd "$ASP_NET_ROOT/.." && pwd)"
+RELEASE_ROOT="$ASP_NET_ROOT/release"
+MIGRATOR_RELEASE="$RELEASE_ROOT/migrator"
+WEB_HOST_RELEASE="$RELEASE_ROOT/webhost"
+ANGULAR_RELEASE="$RELEASE_ROOT/angular"
 
-cd ..
-echo " Building docker image $ABP_HOST..."
-docker build -t $ABP_HOST .
-echo " Done. -- Building docker image $ABP_HOST..."
-echo ""
-echo ""
+dotnet publish "$ASP_NET_ROOT/src/PawnCloud.Migrator/PawnCloud.Migrator.csproj" -c Release -o "$MIGRATOR_RELEASE"
+dotnet publish "$ASP_NET_ROOT/src/PawnCloud.Web.Host/PawnCloud.Web.Host.csproj" -c Release -o "$WEB_HOST_RELEASE"
 
-# echo " Pushing docker image $ABP_HOST..."
-# docker push $ABP_HOST
-# echo " Done. -- Pushing docker image $ABP_HOST..."
-# echo ""
-# echo ""
+cd "$REPO_ROOT/angular"
+yarn install
+yarn run ng build --configuration production
 
-cd ..
-cd angular/
-echo " Building docker image $ABP_NG..."
-docker build -t $ABP_NG -f Dockerfile .
-echo " Done. -- Building docker image $ABP_NG..."
-echo ""
-echo ""
+mkdir -p "$ANGULAR_RELEASE"
+cp -R "$REPO_ROOT/angular/dist/browser/." "$ANGULAR_RELEASE/"
+cp "$REPO_ROOT/angular/Dockerfile" "$ANGULAR_RELEASE/"
+cp "$REPO_ROOT/angular/fast-nginx-default.conf" "$ANGULAR_RELEASE/"
 
-# echo " Pushing docker image $ABP_NG..."
-# docker push $ABP_NG
-# echo " Done. -- Pushing docker image $ABP_NG..."
-# echo ""
-# echo ""
+echo "Deployment folders are ready:"
+echo "$MIGRATOR_RELEASE"
+echo "$WEB_HOST_RELEASE"
+echo "$ANGULAR_RELEASE"
