@@ -83,9 +83,9 @@ namespace PawnCloud.CustomSeeders
             await AddGoldTypeIfNotExist("965", "965", (decimal)96.5);
             await AddGoldTypeIfNotExist("999", "999", (decimal)99.9);
             await AddGoldTypeIfNotExist("G", "STAINLESS STEEL", 0);
-            await AddGoldTypeIfNotExist("H", "YELLOW GOLD", 0);
-            await AddGoldTypeIfNotExist("I", "WHITE GOLD", 0);
-            await AddGoldTypeIfNotExist("J", "EVEROSE GOLD", 0);
+            await AddGoldTypeIfNotExist("H", "YELLOW GOLD", (decimal)75.0);
+            await AddGoldTypeIfNotExist("I", "WHITE GOLD", 750);
+            await AddGoldTypeIfNotExist("J", "EVEROSE GOLD", 750);
             await AddGoldTypeIfNotExist("K", "PLATINUM", 0);
             await AddGoldTypeIfNotExist("L", "DIAMOND", 0);
             await AddGoldTypeIfNotExist("M", "SS DIAMOND", 0);

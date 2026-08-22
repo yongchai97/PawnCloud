@@ -25,17 +25,17 @@ public class Customer : FullAuditedEntity<int>, IMayHaveTenant
     public virtual string? City { get; set; }
 
     public virtual string? State { get; set; }
-    public virtual int? Country { get; set; } //getting data from basic code country
+    public virtual int? Country { get; set; } //getting data from country table
     public virtual string? mailingAddress { get; set; }
     public virtual string? mailingCity { get; set; }
 
     public virtual string? mailingState { get; set; }
-    public virtual int? mailingCountry { get; set; } //getting data from basic code country
-    public virtual int? Race { get; set; }//getting data from basic code nationality
-    public virtual int? Gender { get; set; }//getting data from basic code nationality
+    public virtual int? mailingCountry { get; set; } //getting data from country table
+    public virtual int? Race { get; set; }//getting data from basic code race
+    public virtual int? Gender { get; set; }//getting data from basic code gender
     public bool member { get; set; }
 
-    public virtual int? Nationality { get; set; }//getting data from basic code nationality
+    public virtual int? Nationality { get; set; }//getting data from country table
     public DateTime birthDate { get; set; }
     public decimal age { get; set; } //automatic calculated based on birthdate until current date
     public virtual string? oldIC { get; set; }
