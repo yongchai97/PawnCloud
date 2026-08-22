@@ -59,6 +59,7 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
                 new MenuItem(this.l('Tenants'), '/app/tenants', 'fas fa-building', 'Pages.Tenants'),
                 new MenuItem(this.l('Users'), '/app/users', 'fas fa-users', 'Pages.Users'),
                 new MenuItem(this.l('GoldTypes'), '/app/admin/gold-types', 'fas fa-ring', 'Pages.GoldTypes'),
+                new MenuItem('Gold Price Entry', '/app/admin/gold-price-entry', 'fas fa-coins'),
                 new MenuItem(this.l('Seeder'), '/app/admin/seeder', 'fas fa-database', null),
             ]),
         ];
@@ -110,10 +111,7 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
     }
 
     activateMenuItem(item: MenuItem): void {
-        item.isActive = true;
-        if (item.children) {
-            item.isCollapsed = false;
-        }
+        item.isActive = !!item.route;
         this.activatedMenuItems.push(item);
         if (item.parentId) {
             this.activateMenuItem(this.menuItemsMap[item.parentId]);

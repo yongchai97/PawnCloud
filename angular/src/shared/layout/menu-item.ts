@@ -21,5 +21,7 @@ export class MenuItem {
         this.icon = icon;
         this.permissionName = permissionName;
         this.children = children;
+        this.isActive = false;
+        this.isCollapsed = true;
     }
 }

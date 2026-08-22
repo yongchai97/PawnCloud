@@ -22,6 +22,7 @@ import { LookupServiceProxy } from './lookup-service-proxy';
         ApiServiceProxies.BasicCodeServiceProxy,
         ApiServiceProxies.MiscMasterConfigServiceProxy,
         ApiServiceProxies.GoldTypeServiceProxy,
+        ApiServiceProxies.DailyGoldPriceServiceProxy,
         ApiServiceProxies.CustomSeederServiceProxy,
         LookupServiceProxy,
         { provide: HTTP_INTERCEPTORS, useClass: AbpHttpInterceptor, multi: true },

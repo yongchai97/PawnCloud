@@ -78,6 +78,11 @@ import { AppComponent } from './app.component';
                                 canActivate: [AppRouteGuard],
                             },
                             {
+                                path: 'gold-price-entry',
+                                loadChildren: () => import('./admin/gold-price-entry/gold-price-entry.module').then((m) => m.GoldPriceEntryModule),
+                                canActivate: [AppRouteGuard],
+                            },
+                            {
                                 path: 'seeder',
                                 loadChildren: () => import('./admin/seeder/seeder.module').then((m) => m.SeederModule),
                                 canActivate: [AppRouteGuard],
