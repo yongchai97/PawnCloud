@@ -55,11 +55,6 @@ export class LookupListResultDto<T> {
     items: T[] = [];
 }
 
-export interface CreatePawnTicketWithItemsDto {
-    ticket: any;
-    items: any[];
-}
-
 @Injectable()
 export class LookupServiceProxy {
     constructor(
@@ -130,53 +125,10 @@ export class LookupServiceProxy {
         );
     }
 
-    /**
-     * Hand-rolled listing endpoint for the Pawn Items page.
-     * Uses raw HttpClient.get so the ABP interceptor can unwrap the envelope
-     * normally (the generated proxy uses blob responses, which skip unwrapping).
-     */
-    getPawnItems(
-        filter: string | undefined,
-        sorting: string | undefined,
-        skipCount: number | undefined,
-        maxResultCount: number | undefined
-    ): Observable<any> {
-        let params = new HttpParams();
-        if (filter !== undefined && filter !== null) {
-            params = params.set('Filter', filter);
-        }
-        if (sorting !== undefined && sorting !== null) {
-            params = params.set('Sorting', sorting);
-        }
-        if (skipCount !== undefined && skipCount !== null) {
-            params = params.set('SkipCount', skipCount.toString());
-        }
-        if (maxResultCount !== undefined && maxResultCount !== null) {
-            params = params.set('MaxResultCount', maxResultCount.toString());
-        }
-        return unwrapAjaxResponse<any>(
-            this.http.get(this.url('/PawnItem/GetAll'), { params })
-        );
-    }
-
-    getPawnItemForEdit(id: number): Observable<any> {
-        const params = new HttpParams().set('Id', id.toString());
-        return unwrapAjaxResponse<any>(
-            this.http.get(this.url('/PawnItem/GetViaIdForEdit'), { params })
-        );
-    }
-
     getCustomerDocumentsByCustomerId(customerId: number): Observable<LookupListResultDto<CustomerDocumentSummaryDto>> {
         const params = new HttpParams().set('Id', customerId.toString());
         return unwrapAjaxResponse<LookupListResultDto<CustomerDocumentSummaryDto>>(
             this.http.get(this.url('/CustomerDocument/GetByCustomerId'), { params })
-        );
-    }
-
-    getPawnItemsByPawnTicketId(pawnTicketId: number): Observable<LookupListResultDto<any>> {
-        const params = new HttpParams().set('Id', pawnTicketId.toString());
-        return unwrapAjaxResponse<LookupListResultDto<any>>(
-            this.http.get(this.url('/PawnItem/GetByPawnTicketId'), { params })
         );
     }
 
@@ -195,28 +147,8 @@ export class LookupServiceProxy {
         return this.http.post<number>(this.url('/PawnTicket/CreateOrEdit'), input);
     }
 
-    createPawnItem(input: any): Observable<number> {
-        return this.http.post<number>(this.url('/PawnItem/CreateOrEdit'), input);
-    }
-
     createLoan(input: any): Observable<number> {
         return this.http.post<number>(this.url('/Loan/CreateOrEdit'), input);
     }
 
-    createPawnTicketWithItems(input: CreatePawnTicketWithItemsDto): Observable<number> {
-        return this.http.post<number>(
-            this.url('/PawnTicket/CreateWithItems'),
-            input
-        );
-    }
-
-
-
-    deletePawnItem(id: number): Observable<void> {
-        const params = new HttpParams().set('Id', id.toString());
-        return this.http.delete<void>(
-            this.url('/PawnItem/Delete'),
-            { params }
-        );
-    }
 }

@@ -53,21 +53,25 @@
                                             {{ 'TicketNo' | localize }}
                                             <p-sortIcon field="ticketNo"></p-sortIcon>
                                         </th>
-                                        <th style="min-width: 160px" pSortableColumn="customerId">
+                                        <th style="min-width: 160px" pSortableColumn="customer">
                                             {{ 'Customer' | localize }}
-                                            <p-sortIcon field="customerId"></p-sortIcon>
+                                            <p-sortIcon field="customer"></p-sortIcon>
                                         </th>
-                                        <th style="min-width: 120px" pSortableColumn="status">
-                                            {{ 'Status' | localize }}
-                                            <p-sortIcon field="status"></p-sortIcon>
+                                        <th style="min-width: 140px" pSortableColumn="itemStatus">
+                                            {{ 'ItemStatus' | localize }}
+                                            <p-sortIcon field="itemStatus"></p-sortIcon>
                                         </th>
-                                        <th style="min-width: 140px" pSortableColumn="createdDate">
-                                            {{ 'CreatedDate' | localize }}
-                                            <p-sortIcon field="createdDate"></p-sortIcon>
+                                        <th style="min-width: 140px" pSortableColumn="goldType">
+                                            {{ 'GoldType' | localize }}
+                                            <p-sortIcon field="goldType"></p-sortIcon>
                                         </th>
-                                        <th style="min-width: 140px" pSortableColumn="maturityDate">
-                                            {{ 'MaturityDate' | localize }}
-                                            <p-sortIcon field="maturityDate"></p-sortIcon>
+                                        <th style="min-width: 140px" pSortableColumn="value">
+                                            {{ 'Value' | localize }}
+                                            <p-sortIcon field="value"></p-sortIcon>
+                                        </th>
+                                        <th style="min-width: 180px" pSortableColumn="includedItemWeight">
+                                            {{ 'IncludedItemWeight' | localize }}
+                                            <p-sortIcon field="includedItemWeight"></p-sortIcon>
                                         </th>
                                         <th style="min-width: 120px">
                                             {{ 'Actions' | localize }}
@@ -78,10 +82,11 @@
                                 <ng-template pTemplate="body" let-record="$implicit">
                                     <tr>
                                         <td>{{ record.ticketNo }}</td>
-                                        <td>{{ record.customerId }}</td>
-                                        <td>{{ record.status }}</td>
-                                        <td>{{ record.createdDate | date }}</td>
-                                        <td>{{ record.maturityDate | date }}</td>
+                                        <td>{{ record.customer }}</td>
+                                        <td>{{ record.itemStatus }}</td>
+                                        <td>{{ record.goldType }}</td>
+                                        <td>{{ record.value }}</td>
+                                        <td>{{ record.includedItemWeight }}</td>
                                         <td>
                                             <p-button icon="pi pi-pencil" styleClass="p-button-sm p-button-info" (onClick)="editPawnTicket(record)"></p-button>
                                             <p-button icon="pi pi-trash" styleClass="p-button-sm p-button-danger ms-2" (onClick)="delete(record)"></p-button>

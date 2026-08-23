@@ -21,21 +21,10 @@ namespace PawnCloud.GoldTypes
         {
             _repository = repository;
         }
-        public async Task<PagedResultDto<GoldTypeDto>> GetAll(PagedCustomerResultRequestDto input)
+        public async Task<List<GoldType>> GetAll()
         {
-            await PermissionChecker.AuthorizeAsync(PermissionNames.Pages_Customers);
-
-            var query = _repository.GetAll()
-                .WhereIf(!string.IsNullOrWhiteSpace(input.Filter),
-                    c => c.purity.Contains(input.Filter) || c.description.Contains(input.Filter));
-
-            var totalCount = await query.CountAsync();
-
-            var entities = await query.OrderByDescending(c => c.CreationTime).PageBy(input).ToListAsync();
-
-            var dtos = ObjectMapper.Map<List<GoldTypeDto>>(entities);
-
-            return new PagedResultDto<GoldTypeDto>(totalCount, dtos);
+            var goldTypes = await _repository.GetAllListAsync();
+            return goldTypes;
         }
     }
 }

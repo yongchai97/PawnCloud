@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { AppRouteGuard } from '@shared/auth/auth-route-guard';
 import { AppComponent } from './app.component';
+import { CountriesComponent } from './admin/countries/countries.component';
 
 @NgModule({
     imports: [
@@ -51,12 +52,6 @@ import { AppComponent } from './app.component';
                         canActivate: [AppRouteGuard],
                     },
                     {
-                        path: 'pawn-items',
-                        loadChildren: () => import('./pawn-items/pawn-items.module').then((m) => m.PawnItemsModule),
-                        data: { permission: 'Pages.PawnItems' },
-                        canActivate: [AppRouteGuard],
-                    },
-                    {
                         path: 'loans',
                         loadChildren: () => import('./loans/loans.module').then((m) => m.LoansModule),
                         data: { permission: 'Pages.Loans' },
@@ -75,6 +70,11 @@ import { AppComponent } from './app.component';
                                 path: 'gold-types',
                                 loadChildren: () => import('./admin/gold-types/gold-types.module').then((m) => m.GoldTypesModule),
                                 data: { permission: 'Pages.GoldTypes' },
+                                canActivate: [AppRouteGuard],
+                            },
+                            {
+                                path: 'countries',
+                                component: CountriesComponent,
                                 canActivate: [AppRouteGuard],
                             },
                             {

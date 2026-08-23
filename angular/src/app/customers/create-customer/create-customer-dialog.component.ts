@@ -6,7 +6,7 @@ import { AbpModalHeaderComponent } from '../../../shared/components/modal/abp-mo
 import { AbpValidationSummaryComponent } from '../../../shared/components/validation/abp-validation.summary.component';
 import { AbpModalFooterComponent } from '../../../shared/components/modal/abp-modal-footer.component';
 import { LocalizePipe } from '@shared/pipes/localize.pipe';
-import { CreateOrEditCustomerDto, BasicCodeServiceProxy, BasicCodeLookupDto, MiscMasterConfigServiceProxy, MiscMasterConfigLookupDto } from '@shared/service-proxies/service-proxies';
+import { CreateOrEditCustomerDto, BasicCodeServiceProxy, BasicCodeLookupDto, Country, CountryServiceProxy, MiscMasterConfigServiceProxy, MiscMasterConfigLookupDto } from '@shared/service-proxies/service-proxies';
 import { LookupServiceProxy } from '@shared/service-proxies/lookup-service-proxy';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -24,10 +24,10 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
     customer = new CreateOrEditCustomerDto();
 
     // BasicCode dropdowns
-    countryOptions: BasicCodeLookupDto[] = [];
+    countryOptions: { label: string; value: number }[] = [];
     raceOptions: BasicCodeLookupDto[] = [];
     genderOptions: BasicCodeLookupDto[] = [];
-    nationalityOptions: BasicCodeLookupDto[] = [];
+    nationalityOptions: { label: string; value: number }[] = [];
     businessNatureOptions: BasicCodeLookupDto[] = [];
     maritalStatusOptions: BasicCodeLookupDto[] = [];
 
@@ -37,6 +37,7 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
         injector: Injector,
         private _lookupService: LookupServiceProxy,
         private _basicCodeService: BasicCodeServiceProxy,
+        private _countryService: CountryServiceProxy,
         private _miscMasterConfigService: MiscMasterConfigServiceProxy,
         public bsModalRef: BsModalRef,
         private cd: ChangeDetectorRef
@@ -45,7 +46,19 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
     }
 
     ngOnInit(): void {
+        this.loadCountries();
         this.loadBasicCodeDropdowns();
+    }
+
+    private loadCountries(): void {
+        this._countryService.getAllViaYear(new Date().getFullYear()).subscribe((countries: Country[]) => {
+            this.countryOptions = (countries || []).map((country) => ({
+                label: `${country.countryCodeThreeAlphabet} - ${country.countryName}`,
+                value: country.id,
+            }));
+            this.nationalityOptions = this.countryOptions;
+            this.cd.detectChanges();
+        });
     }
 
     private loadBasicCodeDropdowns(): void {
@@ -65,12 +78,6 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
             };
 
             // Load BasicCodes for each category
-            if (categoryMap['country']) {
-                this._basicCodeService.getBasicCodesByCategory(categoryMap['country']).subscribe((result) => {
-                    this.countryOptions = result.items || [];
-                    this.cd.detectChanges();
-                });
-            }
             if (categoryMap['race']) {
                 this._basicCodeService.getBasicCodesByCategory(categoryMap['race']).subscribe((result) => {
                     this.raceOptions = result.items || [];
@@ -80,12 +87,6 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
             if (categoryMap['gender']) {
                 this._basicCodeService.getBasicCodesByCategory(categoryMap['gender']).subscribe((result) => {
                     this.genderOptions = result.items || [];
-                    this.cd.detectChanges();
-                });
-            }
-            if (categoryMap['nationality']) {
-                this._basicCodeService.getBasicCodesByCategory(categoryMap['nationality']).subscribe((result) => {
-                    this.nationalityOptions = result.items || [];
                     this.cd.detectChanges();
                 });
             }

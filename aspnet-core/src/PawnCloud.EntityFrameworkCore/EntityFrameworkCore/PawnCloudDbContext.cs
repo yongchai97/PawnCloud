@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using PawnCloud.Authorization.Roles;
 using PawnCloud.Authorization.Users;
 using PawnCloud.BasicCodes;
+using PawnCloud.Countries;
 using PawnCloud.Customers;
 using PawnCloud.DailyGoldPrices;
 using PawnCloud.GoldTypes;
@@ -19,7 +20,6 @@ public class PawnCloudDbContext : AbpZeroDbContext<Tenant, Role, User, PawnCloud
     public virtual DbSet<Customer> Customers { get; set; }
     public virtual DbSet<CustomerDocument> CustomerDocuments { get; set; }
     public virtual DbSet<PawnCloud.PawnTickets.PawnTicket> PawnTickets { get; set; }
-    public virtual DbSet<PawnCloud.PawnItems.PawnItem> PawnItems { get; set; }
     public virtual DbSet<PawnCloud.Loans.Loan> Loans { get; set; }
     public virtual DbSet<GoldType> GoldTypes { get; set; }
     public virtual DbSet<DailyGoldPrice> DailyGoldPrices { get; set; }
@@ -27,6 +27,7 @@ public class PawnCloudDbContext : AbpZeroDbContext<Tenant, Role, User, PawnCloud
     public virtual DbSet<BasicCode> BasicCodes { get; set; }
     public virtual DbSet<ItemStatus> ItemStatuses { get; set; }
     public virtual DbSet<ItemListing> ItemListings { get; set; }
+    public virtual DbSet<Country> Countries { get; set; }
 
     public PawnCloudDbContext(DbContextOptions<PawnCloudDbContext> options)
         : base(options)

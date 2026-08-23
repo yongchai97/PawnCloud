@@ -9,7 +9,7 @@ import { CreatePawnTicketDialogComponent } from './create-pawn-ticket/create-paw
 import { EditPawnTicketDialogComponent } from './edit-pawn-ticket/edit-pawn-ticket-dialog.component';
 import { Table, TableModule } from 'primeng/table';
 import { LazyLoadEvent, PrimeTemplate } from 'primeng/api';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
 import { Paginator, PaginatorModule } from 'primeng/paginator';
 import { FormsModule } from '@angular/forms';
 import { DatePipe, NgIf } from '@angular/common';
@@ -33,10 +33,16 @@ export class PawnTicketsComponent extends PagedListingComponentBase<PawnTicketDt
         private _lookupService: LookupServiceProxy,
         private _modalService: BsModalService,
         private _activatedRoute: ActivatedRoute,
+        private _router: Router,
         cd: ChangeDetectorRef
     ) {
         super(injector, cd);
         this.keyword = this._activatedRoute.snapshot.queryParams['keyword'] || '';
+        this._router.events.subscribe((event) => {
+            if (event instanceof NavigationStart) {
+                this._modalService.hide();
+            }
+        });
     }
 
     list(event?: LazyLoadEvent): void {
@@ -95,6 +101,10 @@ export class PawnTicketsComponent extends PagedListingComponentBase<PawnTicketDt
     }
 
     showCreateOrEditPawnTicketDialog(id?: number): void {
+        if (this._modalService.getModalsCount() > 0) {
+            return;
+        }
+
         let dialog: BsModalRef;
         if (!id) {
             dialog = this._modalService.show(CreatePawnTicketDialogComponent, {
@@ -112,5 +122,6 @@ export class PawnTicketsComponent extends PagedListingComponentBase<PawnTicketDt
         dialog.content.onSave.subscribe(() => {
             this.refresh();
         });
+
     }
 }

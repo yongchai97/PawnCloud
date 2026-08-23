@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PawnCloud.EntityFrameworkCore;
 
@@ -11,9 +12,11 @@ using PawnCloud.EntityFrameworkCore;
 namespace PawnCloud.Migrations
 {
     [DbContext(typeof(PawnCloudDbContext))]
-    partial class PawnCloudDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260823125151_added country")]
+    partial class addedcountry
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2232,6 +2235,75 @@ namespace PawnCloud.Migrations
                     b.ToTable("AbpTenants");
                 });
 
+            modelBuilder.Entity("PawnCloud.PawnItems.PawnItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Category")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Condition")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("CreatorUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("EstimatedValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("LastModifierUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<decimal?>("LoanValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("MarketValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("PawnTicketId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("Purity")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("SerialNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("TenantId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("Weight")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PawnTicketId");
+
+                    b.ToTable("PawnItems");
+                });
+
             modelBuilder.Entity("PawnCloud.PawnTickets.PawnTicket", b =>
                 {
                     b.Property<int>("Id")
@@ -2240,13 +2312,19 @@ namespace PawnCloud.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("BranchId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("CreationTime")
                         .HasColumnType("datetime2");
 
                     b.Property<long?>("CreatorUserId")
                         .HasColumnType("bigint");
 
-                    b.Property<int?>("Customer")
+                    b.Property<int>("CustomerId")
                         .HasColumnType("int");
 
                     b.Property<long?>("DeleterUserId")
@@ -2255,17 +2333,11 @@ namespace PawnCloud.Migrations
                     b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("GoldType")
-                        .HasColumnType("int");
+                    b.Property<DateTime?>("ExpiryDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
-
-                    b.Property<int?>("ItemListing")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ItemStatus")
-                        .HasColumnType("int");
 
                     b.Property<DateTime?>("LastModificationTime")
                         .HasColumnType("datetime2");
@@ -2273,42 +2345,24 @@ namespace PawnCloud.Migrations
                     b.Property<long?>("LastModifierUserId")
                         .HasColumnType("bigint");
 
+                    b.Property<DateTime?>("MaturityDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Remarks")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int?>("TenantId")
                         .HasColumnType("int");
 
                     b.Property<string>("TicketNo")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("brand")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("includedItemWeight")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int?>("includedItems")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("length")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("value")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("weight")
-                        .HasColumnType("decimal(18,2)");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("Customer");
-
-                    b.HasIndex("GoldType");
-
-                    b.HasIndex("ItemListing");
-
-                    b.HasIndex("ItemStatus");
+                    b.HasIndex("CustomerId");
 
                     b.ToTable("PawnTickets");
                 });
@@ -2600,31 +2654,26 @@ namespace PawnCloud.Migrations
                     b.Navigation("LastModifierUser");
                 });
 
+            modelBuilder.Entity("PawnCloud.PawnItems.PawnItem", b =>
+                {
+                    b.HasOne("PawnCloud.PawnTickets.PawnTicket", "PawnTicket")
+                        .WithMany()
+                        .HasForeignKey("PawnTicketId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PawnTicket");
+                });
+
             modelBuilder.Entity("PawnCloud.PawnTickets.PawnTicket", b =>
                 {
-                    b.HasOne("PawnCloud.Customers.Customer", "CustomerFk")
+                    b.HasOne("PawnCloud.Customers.Customer", "Customer")
                         .WithMany()
-                        .HasForeignKey("Customer");
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasOne("PawnCloud.GoldTypes.GoldType", "GoldTypeFk")
-                        .WithMany()
-                        .HasForeignKey("GoldType");
-
-                    b.HasOne("PawnCloud.ItemListings.ItemListing", "ItemListingFk")
-                        .WithMany()
-                        .HasForeignKey("ItemListing");
-
-                    b.HasOne("PawnCloud.ItemStatuses.ItemStatus", "ItemStatusFk")
-                        .WithMany()
-                        .HasForeignKey("ItemStatus");
-
-                    b.Navigation("CustomerFk");
-
-                    b.Navigation("GoldTypeFk");
-
-                    b.Navigation("ItemListingFk");
-
-                    b.Navigation("ItemStatusFk");
+                    b.Navigation("Customer");
                 });
 
             modelBuilder.Entity("Abp.Application.Features.EditionFeatureSetting", b =>

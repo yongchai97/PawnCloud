@@ -25,21 +25,10 @@ namespace PawnCloud.ItemStatuses
         {
             _repository = repository;
         }
-        public async Task<PagedResultDto<ItemStatusDto>> GetAll(PagedCustomerResultRequestDto input)
+        public async Task<List<ItemStatus>> GetAll()
         {
-            await PermissionChecker.AuthorizeAsync(PermissionNames.Pages_Customers);
-
-            var query = _repository.GetAll()
-                .WhereIf(!string.IsNullOrWhiteSpace(input.Filter),
-                    c => c.code.Contains(input.Filter) || c.description.Contains(input.Filter));  // Changed from c.purity to c.code
-
-            var totalCount = await query.CountAsync();
-
-            var entities = await query.OrderByDescending(c => c.CreationTime).PageBy(input).ToListAsync();
-
-            var dtos = ObjectMapper.Map<List<ItemStatusDto>>(entities);
-
-            return new PagedResultDto<ItemStatusDto>(totalCount, dtos);
+            var itemStatuses = await _repository.GetAllListAsync();
+            return itemStatuses;
         }
     }
 }

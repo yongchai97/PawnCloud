@@ -1,12 +1,12 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { PawnItemsComponent } from './pawn-items.component';
+import { CountriesComponent } from './countries.component';
 
 const routes: Routes = [
     {
         path: '',
-        component: PawnItemsComponent,
-        pathMatch: 'full',
+        component: CountriesComponent,
+        data: { title: 'Countries' },
     },
 ];
 
@@ -14,4 +14,4 @@ const routes: Routes = [
     imports: [RouterModule.forChild(routes)],
     exports: [RouterModule],
 })
-export class PawnItemsRoutingModule {}
+export class CountriesRoutingModule {}

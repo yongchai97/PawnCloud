@@ -120,6 +120,15 @@ input[type="date"].date-picker:focus::-webkit-calendar-picker-indicator {
     z-index: 2000 !important;
 }
 
+/* Keep ngx-bootstrap modal content above its backdrop and the application shell. */
+.modal-backdrop {
+    z-index: 1040 !important;
+}
+
+.modal {
+    z-index: 1050 !important;
+}
+
 /* Sidebar submenu positioned as right panel with multi-column layout */
 .nav-item.has-submenu-right {
     position: relative;

@@ -9,17 +9,16 @@ public class PawnTicketDto : EntityDto<int>
 
     public string TicketNo { get; set; }
 
-    public int? BranchId { get; set; }
 
-    public int CustomerId { get; set; }
-
-    public string Status { get; set; }
-
-    public DateTime CreatedDate { get; set; }
-
-    public DateTime? MaturityDate { get; set; }
-
-    public DateTime? ExpiryDate { get; set; }
-
-    public string Remarks { get; set; }
+    public int? Customer { get; set; }
+    public virtual int? ItemListing { get; set; }
+    public virtual int? ItemStatus { get; set; }
+    public string description { get; set; }
+    public virtual int? GoldType { get; set; }
+    public decimal weight { get; set; }
+    public decimal length { get; set; }
+    public string brand { get; set; }
+    public virtual int? includedItems { get; set; } //getting data from basic code included items
+    public decimal value { get; set; }
+    public decimal includedItemWeight { get; set; }
 }

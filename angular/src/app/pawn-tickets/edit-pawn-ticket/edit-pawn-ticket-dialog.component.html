@@ -2,122 +2,19 @@
     <abp-modal-header [title]="'EditPawnTicket' | localize" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
     <div class="modal-body">
         <abp-validation-summary [control]="pawnTicketForm"></abp-validation-summary>
-
-        <h6 class="mb-3 text-muted">{{ 'TicketDetails' | localize }}</h6>
-
-        <div class="row g-3 align-items-start">
-            <div class="col-md-6 form-group">
-                <label for="TicketNo" class="fw-bold">{{ 'TicketNo' | localize }} *</label>
-                <input class="form-control" id="TicketNo" name="ticketNo" [(ngModel)]="pawnTicket.ticketNo" required />
-            </div>
-
-            <div class="col-md-6 form-group">
-                <label for="BranchId">{{ 'BranchId' | localize }}</label>
-                <input type="number" class="form-control" id="BranchId" name="branchId" [(ngModel)]="pawnTicket.branchId" />
-            </div>
-
-            <div class="col-md-6 form-group">
-                <label for="Customer" class="fw-bold">{{ 'Customer' | localize }} *</label>
-                <select
-                    class="form-control"
-                    id="Customer"
-                    name="customerId"
-                    [(ngModel)]="pawnTicket.customerId"
-                    required>
-                    <option *ngFor="let c of customers" [ngValue]="c.id">{{ c.displayName }}</option>
-                </select>
-            </div>
-
-            <div class="col-md-6 form-group">
-                <label for="Status" class="fw-bold">{{ 'Status' | localize }} *</label>
-                <select
-                    class="form-control"
-                    id="Status"
-                    name="status"
-                    [(ngModel)]="pawnTicket.status"
-                    required>
-                    <option *ngFor="let s of statuses" [ngValue]="s.value">{{ s.name }}</option>
-                </select>
-            </div>
-
-            <div class="col-md-4 form-group">
-                <label for="CreatedDate" class="fw-bold">{{ 'CreatedDate' | localize }}</label>
-                <input type="date" class="form-control date-picker" id="CreatedDate" name="createdDate" [(ngModel)]="createdDate" />
-            </div>
-
-            <div class="col-md-4 form-group">
-                <label for="MaturityDate">{{ 'MaturityDate' | localize }}</label>
-                <input type="date" class="form-control date-picker" id="MaturityDate" name="maturityDate" [(ngModel)]="maturityDate" />
-            </div>
-
-            <div class="col-md-4 form-group">
-                <label for="ExpiryDate">{{ 'ExpiryDate' | localize }}</label>
-                <input type="date" class="form-control date-picker" id="ExpiryDate" name="expiryDate" [(ngModel)]="expiryDate" />
-            </div>
-
-            <div class="col-12 form-group">
-                <label for="Remarks">{{ 'Remarks' | localize }}</label>
-                <textarea class="form-control" id="Remarks" name="remarks" rows="2" [(ngModel)]="pawnTicket.remarks"></textarea>
-            </div>
-        </div>
-
-        <hr class="my-4" />
-
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h6 class="m-0 text-muted">{{ 'PawnItems' | localize }}</h6>
-            <button type="button" class="btn btn-sm btn-success" (click)="addPawnItem()">
-                <i class="fa fa-plus"></i> {{ 'AddItem' | localize }}
-            </button>
-        </div>
-
-        <p *ngIf="pawnItems.length === 0" class="text-muted fst-italic">{{ 'NoPawnItems' | localize }}</p>
-
-        <div *ngIf="pawnItems.length > 0" class="table-responsive mb-2">
-            <table class="table table-sm table-striped table-bordered align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th style="width: 110px">{{ 'Category' | localize }}</th>
-                        <th>{{ 'Description' | localize }}</th>
-                        <th style="width: 100px">{{ 'SerialNumber' | localize }}</th>
-                        <th style="width: 80px" class="text-end">{{ 'Weight' | localize }}</th>
-                        <th style="width: 70px" class="text-end">{{ 'Purity' | localize }}</th>
-                        <th style="width: 90px">{{ 'Condition' | localize }}</th>
-                        <th style="width: 100px" class="text-end">{{ 'EstimatedValue' | localize }}</th>
-                        <th style="width: 100px" class="text-end">{{ 'MarketValue' | localize }}</th>
-                        <th style="width: 100px" class="text-end">{{ 'LoanValue' | localize }}</th>
-                        <th style="width: 130px" class="text-center">{{ 'Actions' | localize }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let row of pawnItems; let i = index" [class.table-danger]="row.markedForDeletion">
-                        <td>{{ row.data.category }}</td>
-                        <td>{{ row.data.description }}</td>
-                        <td>{{ row.data.serialNumber }}</td>
-                        <td class="text-end">{{ row.data.weight }}</td>
-                        <td class="text-end">{{ row.data.purity }}</td>
-                        <td>{{ row.data.condition }}</td>
-                        <td class="text-end">{{ row.data.estimatedValue }}</td>
-                        <td class="text-end">{{ row.data.marketValue }}</td>
-                        <td class="text-end">{{ row.data.loanValue }}</td>
-                        <td class="text-center">
-                            <ng-container *ngIf="!row.markedForDeletion">
-                                <button type="button" class="btn btn-sm btn-outline-primary me-1" (click)="editPawnItem(i)" title="{{ 'Edit' | localize }}">
-                                    <i class="fa fa-pencil"></i>
-                                </button>
-                                <button type="button" class="btn btn-sm btn-outline-danger" (click)="removePawnItem(i)" title="{{ 'Delete' | localize }}">
-                                    <i class="fa fa-trash"></i>
-                                </button>
-                            </ng-container>
-                            <ng-container *ngIf="row.markedForDeletion">
-                                <button type="button" class="btn btn-sm btn-outline-secondary me-1" (click)="undoDelete(i)" title="{{ 'Undo' | localize }}">
-                                    <i class="fa fa-undo"></i>
-                                </button>
-                                <span class="badge bg-danger">{{ 'MarkedForDeletion' | localize }}</span>
-                            </ng-container>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="row g-3">
+            <div class="col-md-6 form-group"><label for="TicketNo">{{ 'TicketNo' | localize }} *</label><input class="form-control" id="TicketNo" name="ticketNo" [(ngModel)]="pawnTicket.ticketNo" required /></div>
+            <div class="col-md-6 form-group"><label for="Customer">{{ 'Customer' | localize }} *</label><select class="form-control" id="Customer" name="customer" [(ngModel)]="pawnTicket.customer" required><option [ngValue]="undefined">{{ 'Select' | localize }}</option><option *ngFor="let customer of customers" [ngValue]="customer.id">{{ customer.displayName }}</option></select></div>
+            <div class="col-md-6 form-group"><label for="ItemListing">{{ 'ItemListing' | localize }} *</label><select class="form-control" id="ItemListing" name="itemListing" [(ngModel)]="pawnTicket.itemListing" required><option [ngValue]="undefined">{{ 'Select' | localize }}</option><option *ngFor="let item of itemListings" [ngValue]="item.id">{{ item.code }} - {{ item.description }}</option></select></div>
+            <div class="col-md-6 form-group"><label for="ItemStatus">{{ 'ItemStatus' | localize }} *</label><select class="form-control" id="ItemStatus" name="itemStatus" [(ngModel)]="pawnTicket.itemStatus" required><option [ngValue]="undefined">{{ 'Select' | localize }}</option><option *ngFor="let status of itemStatuses" [ngValue]="status.id">{{ status.code }} - {{ status.description }}</option></select></div>
+            <div class="col-md-6 form-group"><label for="GoldType">{{ 'GoldType' | localize }} *</label><select class="form-control" id="GoldType" name="goldType" [(ngModel)]="pawnTicket.goldType" required><option [ngValue]="undefined">{{ 'Select' | localize }}</option><option *ngFor="let goldType of goldTypes" [ngValue]="goldType.id">{{ goldType.purity }} - {{ goldType.description }}</option></select></div>
+            <div class="col-md-6 form-group"><label for="IncludedItems">{{ 'IncludedItems' | localize }}</label><select class="form-control" id="IncludedItems" name="includedItems" [(ngModel)]="pawnTicket.includedItems"><option [ngValue]="undefined">{{ 'Select' | localize }}</option><option *ngFor="let item of includedItems" [ngValue]="item.id">{{ item.displayName }}</option></select></div>
+            <div class="col-md-6 form-group"><label for="Weight">{{ 'Weight' | localize }}</label><input type="number" class="form-control" id="Weight" name="weight" [(ngModel)]="pawnTicket.weight" /></div>
+            <div class="col-md-6 form-group"><label for="Length">{{ 'Length' | localize }}</label><input type="number" class="form-control" id="Length" name="length" [(ngModel)]="pawnTicket.length" /></div>
+            <div class="col-md-6 form-group"><label for="Brand">{{ 'Brand' | localize }}</label><input class="form-control" id="Brand" name="brand" [(ngModel)]="pawnTicket.brand" /></div>
+            <div class="col-md-6 form-group"><label for="Value">{{ 'Value' | localize }}</label><input type="number" class="form-control" id="Value" name="value" [(ngModel)]="pawnTicket.value" /></div>
+            <div class="col-md-6 form-group"><label for="IncludedItemWeight">{{ 'IncludedItemWeight' | localize }}</label><input type="number" class="form-control" id="IncludedItemWeight" name="includedItemWeight" [(ngModel)]="pawnTicket.includedItemWeight" /></div>
+            <div class="col-12 form-group"><label for="Description">{{ 'Description' | localize }}</label><textarea class="form-control" id="Description" name="description" rows="3" [(ngModel)]="pawnTicket.description"></textarea></div>
         </div>
     </div>
     <abp-modal-footer [saveDisabled]="saving || pawnTicketForm.invalid" [cancelDisabled]="saving" (onCancelClick)="bsModalRef.hide()" (onSaveClick)="save()"></abp-modal-footer>

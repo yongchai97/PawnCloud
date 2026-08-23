@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, Injector, ViewChild } from '@angular/core
 import { finalize } from 'rxjs/operators';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
-import { GoldTypeServiceProxy, GoldTypeDto, GoldTypeDtoPagedResultDto } from '@shared/service-proxies/service-proxies';
+import { GoldTypeServiceProxy, GoldType } from '@shared/service-proxies/service-proxies';
 import { Table, TableModule } from 'primeng/table';
 import { LazyLoadEvent, PrimeTemplate } from 'primeng/api';
 import { Paginator, PaginatorModule } from 'primeng/paginator';
@@ -17,7 +17,7 @@ import { ButtonModule } from 'primeng/button';
     standalone: true,
     imports: [FormsModule, TableModule, PrimeTemplate, NgIf, PaginatorModule, LocalizePipe, ButtonModule],
 })
-export class GoldTypesComponent extends PagedListingComponentBase<GoldTypeDto> {
+export class GoldTypesComponent extends PagedListingComponentBase<GoldType> {
     @ViewChild('dataTable', { static: true }) dataTable: Table;
     @ViewChild('paginator', { static: true }) paginator: Paginator;
 
@@ -43,26 +43,21 @@ export class GoldTypesComponent extends PagedListingComponentBase<GoldTypeDto> {
         this.primengTableHelper.showLoadingIndicator();
 
         this._goldTypeService
-            .getAll(
-                this.keyword,
-                this.primengTableHelper.getSorting(this.dataTable),
-                this.primengTableHelper.getSkipCount(this.paginator, event),
-                this.primengTableHelper.getMaxResultCount(this.paginator, event)
-            )
+            .getAll()
             .pipe(
                 finalize(() => {
                     this.primengTableHelper.hideLoadingIndicator();
                 })
             )
-            .subscribe((result: GoldTypeDtoPagedResultDto) => {
-                this.primengTableHelper.records = result.items || [];
-                this.primengTableHelper.totalRecordsCount = result.totalCount;
+            .subscribe((result: GoldType[]) => {
+                this.primengTableHelper.records = result || [];
+                this.primengTableHelper.totalRecordsCount = (result || []).length;
                 this.primengTableHelper.hideLoadingIndicator();
                 this.cd.detectChanges();
             });
     }
 
-    delete(entity: GoldTypeDto): void {
+    delete(entity: GoldType): void {
         abp.message.confirm(this.l('DeleteConfirmation', entity.purity), undefined, (result: boolean) => {
             if (result) {
                 // Add delete functionality if needed
