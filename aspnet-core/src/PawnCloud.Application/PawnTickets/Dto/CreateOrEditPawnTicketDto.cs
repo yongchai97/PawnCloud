@@ -7,15 +7,14 @@ public class CreateOrEditPawnTicketDto : EntityDto<int>
 {
     public string TicketNo { get; set; }
     public int? Customer { get; set; }
-    public virtual int? ItemListing { get; set; }
-    public virtual int? ItemStatus { get; set; }
-    public string description { get; set; }
-    public virtual int? GoldType { get; set; }
     public decimal weight { get; set; }
-    public decimal length { get; set; }
-    public string brand { get; set; }
-    public virtual int? includedItems { get; set; } //getting data from basic code included items
     public decimal value { get; set; }
-    public decimal includedItemWeight { get; set; }
+    public DateTime pledgedDate { get; set; }
+    public DateTime expiryDate { get; set; }
+    public decimal amount { get; set; }
+    public decimal monthlyCustody { get; set; }
+    public virtual int? PaymentMethod { get; set; } // Get option from Basic code with type PaymentMethod
+    public decimal serviceCharge { get; set; }
+    public string slotNumber { get; set; }
 
 }

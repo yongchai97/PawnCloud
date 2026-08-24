@@ -29,7 +29,7 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
 
         var query = _repository.GetAll()
             .WhereIf(!string.IsNullOrWhiteSpace(input.Filter),
-                p => p.TicketNo.Contains(input.Filter) || p.description.Contains(input.Filter));
+                p => p.TicketNo.Contains(input.Filter));
 
         var totalCount = await query.CountAsync();
 
@@ -83,7 +83,7 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
             .Select(p => new PawnTicketLookupDto
             {
                 Id = p.Id,
-                DisplayName = p.TicketNo + " (" + p.description + ")"
+                DisplayName = p.TicketNo 
             })
             .ToList();
         return new ListResultDto<PawnTicketLookupDto>(lookup);

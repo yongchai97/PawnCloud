@@ -4684,16 +4684,15 @@ export class CreateOrEditPawnTicketDto implements ICreateOrEditPawnTicketDto {
     id: number;
     ticketNo: string | undefined;
     customer: number | undefined;
-    itemListing: number | undefined;
-    itemStatus: number | undefined;
-    description: string | undefined;
-    goldType: number | undefined;
     weight: number;
-    length: number;
-    brand: string | undefined;
-    includedItems: number | undefined;
     value: number;
-    includedItemWeight: number;
+    pledgedDate: moment.Moment;
+    expiryDate: moment.Moment;
+    amount: number;
+    monthlyCustody: number;
+    paymentMethod: number | undefined;
+    serviceCharge: number;
+    slotNumber: string | undefined;
 
     constructor(data?: ICreateOrEditPawnTicketDto) {
         if (data) {
@@ -4709,16 +4708,15 @@ export class CreateOrEditPawnTicketDto implements ICreateOrEditPawnTicketDto {
             this.id = _data["id"];
             this.ticketNo = _data["ticketNo"];
             this.customer = _data["customer"];
-            this.itemListing = _data["itemListing"];
-            this.itemStatus = _data["itemStatus"];
-            this.description = _data["description"];
-            this.goldType = _data["goldType"];
             this.weight = _data["weight"];
-            this.length = _data["length"];
-            this.brand = _data["brand"];
-            this.includedItems = _data["includedItems"];
             this.value = _data["value"];
-            this.includedItemWeight = _data["includedItemWeight"];
+            this.pledgedDate = _data["pledgedDate"] ? moment(_data["pledgedDate"].toString()) : <any>undefined;
+            this.expiryDate = _data["expiryDate"] ? moment(_data["expiryDate"].toString()) : <any>undefined;
+            this.amount = _data["amount"];
+            this.monthlyCustody = _data["monthlyCustody"];
+            this.paymentMethod = _data["paymentMethod"];
+            this.serviceCharge = _data["serviceCharge"];
+            this.slotNumber = _data["slotNumber"];
         }
     }
 
@@ -4734,16 +4732,15 @@ export class CreateOrEditPawnTicketDto implements ICreateOrEditPawnTicketDto {
         data["id"] = this.id;
         data["ticketNo"] = this.ticketNo;
         data["customer"] = this.customer;
-        data["itemListing"] = this.itemListing;
-        data["itemStatus"] = this.itemStatus;
-        data["description"] = this.description;
-        data["goldType"] = this.goldType;
         data["weight"] = this.weight;
-        data["length"] = this.length;
-        data["brand"] = this.brand;
-        data["includedItems"] = this.includedItems;
         data["value"] = this.value;
-        data["includedItemWeight"] = this.includedItemWeight;
+        data["pledgedDate"] = this.pledgedDate ? this.pledgedDate.toISOString() : <any>undefined;
+        data["expiryDate"] = this.expiryDate ? this.expiryDate.toISOString() : <any>undefined;
+        data["amount"] = this.amount;
+        data["monthlyCustody"] = this.monthlyCustody;
+        data["paymentMethod"] = this.paymentMethod;
+        data["serviceCharge"] = this.serviceCharge;
+        data["slotNumber"] = this.slotNumber;
         return data;
     }
 
@@ -4759,16 +4756,15 @@ export interface ICreateOrEditPawnTicketDto {
     id: number;
     ticketNo: string | undefined;
     customer: number | undefined;
-    itemListing: number | undefined;
-    itemStatus: number | undefined;
-    description: string | undefined;
-    goldType: number | undefined;
     weight: number;
-    length: number;
-    brand: string | undefined;
-    includedItems: number | undefined;
     value: number;
-    includedItemWeight: number;
+    pledgedDate: moment.Moment;
+    expiryDate: moment.Moment;
+    amount: number;
+    monthlyCustody: number;
+    paymentMethod: number | undefined;
+    serviceCharge: number;
+    slotNumber: string | undefined;
 }
 
 export class CreateRoleDto implements ICreateRoleDto {
@@ -6437,16 +6433,15 @@ export class PawnTicketDto implements IPawnTicketDto {
     tenantId: number | undefined;
     ticketNo: string | undefined;
     customer: number | undefined;
-    itemListing: number | undefined;
-    itemStatus: number | undefined;
-    description: string | undefined;
-    goldType: number | undefined;
     weight: number;
-    length: number;
-    brand: string | undefined;
-    includedItems: number | undefined;
     value: number;
-    includedItemWeight: number;
+    pledgedDate: moment.Moment;
+    expiryDate: moment.Moment;
+    amount: number;
+    monthlyCustody: number;
+    paymentMethod: number | undefined;
+    serviceCharge: number;
+    slotNumber: string | undefined;
 
     constructor(data?: IPawnTicketDto) {
         if (data) {
@@ -6463,16 +6458,15 @@ export class PawnTicketDto implements IPawnTicketDto {
             this.tenantId = _data["tenantId"];
             this.ticketNo = _data["ticketNo"];
             this.customer = _data["customer"];
-            this.itemListing = _data["itemListing"];
-            this.itemStatus = _data["itemStatus"];
-            this.description = _data["description"];
-            this.goldType = _data["goldType"];
             this.weight = _data["weight"];
-            this.length = _data["length"];
-            this.brand = _data["brand"];
-            this.includedItems = _data["includedItems"];
             this.value = _data["value"];
-            this.includedItemWeight = _data["includedItemWeight"];
+            this.pledgedDate = _data["pledgedDate"] ? moment(_data["pledgedDate"].toString()) : <any>undefined;
+            this.expiryDate = _data["expiryDate"] ? moment(_data["expiryDate"].toString()) : <any>undefined;
+            this.amount = _data["amount"];
+            this.monthlyCustody = _data["monthlyCustody"];
+            this.paymentMethod = _data["paymentMethod"];
+            this.serviceCharge = _data["serviceCharge"];
+            this.slotNumber = _data["slotNumber"];
         }
     }
 
@@ -6489,16 +6483,15 @@ export class PawnTicketDto implements IPawnTicketDto {
         data["tenantId"] = this.tenantId;
         data["ticketNo"] = this.ticketNo;
         data["customer"] = this.customer;
-        data["itemListing"] = this.itemListing;
-        data["itemStatus"] = this.itemStatus;
-        data["description"] = this.description;
-        data["goldType"] = this.goldType;
         data["weight"] = this.weight;
-        data["length"] = this.length;
-        data["brand"] = this.brand;
-        data["includedItems"] = this.includedItems;
         data["value"] = this.value;
-        data["includedItemWeight"] = this.includedItemWeight;
+        data["pledgedDate"] = this.pledgedDate ? this.pledgedDate.toISOString() : <any>undefined;
+        data["expiryDate"] = this.expiryDate ? this.expiryDate.toISOString() : <any>undefined;
+        data["amount"] = this.amount;
+        data["monthlyCustody"] = this.monthlyCustody;
+        data["paymentMethod"] = this.paymentMethod;
+        data["serviceCharge"] = this.serviceCharge;
+        data["slotNumber"] = this.slotNumber;
         return data;
     }
 
@@ -6515,16 +6508,15 @@ export interface IPawnTicketDto {
     tenantId: number | undefined;
     ticketNo: string | undefined;
     customer: number | undefined;
-    itemListing: number | undefined;
-    itemStatus: number | undefined;
-    description: string | undefined;
-    goldType: number | undefined;
     weight: number;
-    length: number;
-    brand: string | undefined;
-    includedItems: number | undefined;
     value: number;
-    includedItemWeight: number;
+    pledgedDate: moment.Moment;
+    expiryDate: moment.Moment;
+    amount: number;
+    monthlyCustody: number;
+    paymentMethod: number | undefined;
+    serviceCharge: number;
+    slotNumber: string | undefined;
 }
 
 export class PawnTicketDtoPagedResultDto implements IPawnTicketDtoPagedResultDto {

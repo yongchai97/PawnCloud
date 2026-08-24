@@ -46,12 +46,6 @@ import { CountriesComponent } from './admin/countries/countries.component';
                         canActivate: [AppRouteGuard],
                     },
                     {
-                        path: 'pawn-tickets',
-                        loadChildren: () => import('./pawn-tickets/pawn-tickets.module').then((m) => m.PawnTicketsModule),
-                        data: { permission: 'Pages.PawnTickets' },
-                        canActivate: [AppRouteGuard],
-                    },
-                    {
                         path: 'loans',
                         loadChildren: () => import('./loans/loans.module').then((m) => m.LoansModule),
                         data: { permission: 'Pages.Loans' },
