@@ -16,6 +16,7 @@ namespace PawnCloud.DailyGoldPrices.Dto
         public decimal price { get; set; }
         public decimal memberPrice { get; set; }
         public decimal nonMemberPrice { get; set; }
+        public decimal inputPrice { get; set; }
 
     }
 }

@@ -11,6 +11,7 @@ namespace PawnCloud.GeneralSetups.Dto
         AutoIncrementNumber = 1,
         AutoIncrementAlphabet = 2,
         RandomString = 3,
-        ManualInput = 4
+        ManualInput = 4,
+        PureRandomString = 5
     }
 }

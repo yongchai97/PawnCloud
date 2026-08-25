@@ -23,5 +23,6 @@ namespace PawnCloud.DailyGoldPrices
         public virtual GoldType GoldTypeFk { get; set; }
         public decimal memberPrice { get; set; }
         public decimal nonMemberPrice { get; set; }
+        public decimal inputPrice { get; set; }
     }
 }

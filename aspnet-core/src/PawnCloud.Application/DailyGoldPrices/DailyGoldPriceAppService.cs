@@ -39,7 +39,8 @@ namespace PawnCloud.DailyGoldPrices
                         effectiveDate = goldPrice.effectiveDate,
                         price = goldPrice.price,
                         memberPrice = goldPrice.memberPrice,
-                        nonMemberPrice = goldPrice.nonMemberPrice
+                        nonMemberPrice = goldPrice.nonMemberPrice,
+                        inputPrice = goldPrice.inputPrice
                     });
                 }
                 else
@@ -52,7 +53,9 @@ namespace PawnCloud.DailyGoldPrices
                         effectiveDate = date,
                         price = 0,
                         memberPrice = 0,
-                        nonMemberPrice = 0
+                        nonMemberPrice = 0,
+                        inputPrice = 0
+
                     });
                 }
             }
@@ -70,6 +73,7 @@ namespace PawnCloud.DailyGoldPrices
                     dailyGoldPriceChecker.price = Math.Round(input.price * goldType.defaultPercentage / 100, 2);
                     dailyGoldPriceChecker.memberPrice = Math.Round(input.price * goldType.defaultPercentage / 100, 2);
                     dailyGoldPriceChecker.nonMemberPrice = Math.Round(input.price * goldType.defaultPercentage / 100, 2);
+                    dailyGoldPriceChecker.inputPrice = Math.Round(input.price, 2);
                     await _dailyGoldPriceRepository.UpdateAsync(dailyGoldPriceChecker);
                 }
                 else
@@ -80,7 +84,8 @@ namespace PawnCloud.DailyGoldPrices
                         price = Math.Round(input.price * goldType.defaultPercentage / 100, 2),
                         GoldType = goldType.Id,
                         memberPrice = Math.Round(input.price * goldType.defaultPercentage / 100 , 2),
-                        nonMemberPrice = Math.Round(input.price * goldType.defaultPercentage / 100, 2)
+                        nonMemberPrice = Math.Round(input.price * goldType.defaultPercentage / 100, 2),
+                        inputPrice = Math.Round(input.price, 2)
                     };
                     dailyGoldPrice.TenantId = AbpSession.TenantId;
                     await _dailyGoldPriceRepository.InsertAsync(dailyGoldPrice);
@@ -112,7 +117,8 @@ namespace PawnCloud.DailyGoldPrices
                 price = input.price,
                 GoldType = input.GoldType,
                 memberPrice = input.memberPrice,
-                nonMemberPrice = input.nonMemberPrice
+                nonMemberPrice = input.nonMemberPrice,
+                inputPrice = input.inputPrice
             };
             dailyGoldPrice.TenantId = AbpSession.TenantId;
             await _dailyGoldPriceRepository.InsertAsync(dailyGoldPrice);
@@ -129,6 +135,7 @@ namespace PawnCloud.DailyGoldPrices
             dailyGoldPrice.GoldType = input.GoldType;
             dailyGoldPrice.memberPrice = input.memberPrice;
             dailyGoldPrice.nonMemberPrice = input.nonMemberPrice;
+            dailyGoldPrice.inputPrice = input.inputPrice;
             await _dailyGoldPriceRepository.UpdateAsync(dailyGoldPrice);
         }
     }

@@ -9,6 +9,11 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using PawnCloud.Authorization;
 using PawnCloud.PawnTickets.Dto;
+using PawnCloud.PawnItems;
+using PawnCloud.GeneralSetups;
+using PawnCloud.GoldTypes;
+using PawnCloud.DailyGoldPrices;
+using PawnCloud.SharedFunctions;
 
 namespace PawnCloud.PawnTickets;
 
@@ -16,11 +21,25 @@ namespace PawnCloud.PawnTickets;
 public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
 {
     private readonly IRepository<PawnTicket, int> _repository;
-
+    private readonly IRepository<PawnItem> _PawnItem;
+    private readonly IRepository<GeneralSetup> _GeneralSetup;
+    private readonly IRepository<GoldType> _GoldType;
+    private readonly IRepository<DailyGoldPrice> _DailyGoldPrice;
+    private SharedFunction sharedFunction;
     public PawnTicketAppService(
-        IRepository<PawnTicket, int> repository)
+        IRepository<PawnTicket, int> repository,
+        IRepository<PawnItem> pawnItemRepository,
+        IRepository<GeneralSetup> generalSetupRepository,
+        IRepository<GoldType> goldTypeRepository,
+        IRepository<DailyGoldPrice> dailyGoldPriceRepository,
+        SharedFunction sharedFunction)
     {
         _repository = repository;
+        _PawnItem = pawnItemRepository;
+        _GeneralSetup = generalSetupRepository;
+        _GoldType = goldTypeRepository;
+        this.sharedFunction = sharedFunction;
+        _DailyGoldPrice = dailyGoldPriceRepository;
     }
 
     public async Task<PagedResultDto<PawnTicketDto>> GetAll(PagedPawnTicketResultRequestDto input)
@@ -89,5 +108,64 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
         return new ListResultDto<PawnTicketLookupDto>(lookup);
     }
 
+    public async Task<string> CreateTicketAndPawnItem(CreatePawnTicketWithItemsDto input)
+    {
+        var generalSetup = await _GeneralSetup.GetAll().FirstOrDefaultAsync();
+        var dailyGoldPrices = await _DailyGoldPrice.GetAll().Where(x => x.effectiveDate <= input.Ticket.pledgedDate)
+            .OrderByDescending(x => x.effectiveDate).FirstOrDefaultAsync();
+        var allTickets = await _repository.GetAll().ToListAsync();
+        bool repeatedTicketNumber = true;
+        while (repeatedTicketNumber) 
+        {
+            string ticketNumber = sharedFunction.GenerateTicketNumber(allTickets.Count,generalSetup,input.Ticket.pledgedDate,input.Ticket.TicketNo);
+            var ticketNumberChecker = await _repository.GetAll().Where(x => x.TicketNo == ticketNumber).FirstOrDefaultAsync();
+            if(ticketNumberChecker == null)
+            {
+                repeatedTicketNumber = false;
+                input.Ticket.TicketNo = ticketNumber;
+            }
+            allTickets = await _repository.GetAll().ToListAsync();
+        }
+        var ticket = ObjectMapper.Map<PawnTicket>(input.Ticket);
+        ticket.TenantId = AbpSession.TenantId;
+        if(generalSetup != null && dailyGoldPrices != null)
+        {
+            if(input.Ticket.amount / input.Ticket.weight > dailyGoldPrices.inputPrice * generalSetup.maximumAllowedPercentage / 100)
+            {
+                return "Error: The amount per weight exceeds the maximum allowed percentage of the daily gold price.";
+            }
+        }
+        await _repository.InsertAsync(ticket);
 
+        foreach (var itemDto in input.Items)
+        {
+            var item = ObjectMapper.Map<PawnItem>(itemDto);
+            item.PawnTicket = ticket.Id;
+            await _PawnItem.InsertAsync(item);
+        }
+        return "Pawn Ticket and Items created successfully";
+    }
+    public async Task<CreateOrEditPawnTicketDto> DynamicCalculate(CreatePawnTicketWithItemsDto input)
+    {
+        var generalSetup = await _GeneralSetup.GetAll().FirstOrDefaultAsync();
+        var allDailyGoldPrices = await _DailyGoldPrice.GetAll().Where(x=>x.effectiveDate <= input.Ticket.pledgedDate).ToListAsync();
+        // Perform dynamic calculations here using generalSetup and input
+        foreach (var itemDto in input.Items)
+        {
+            var currentGoldPrice = allDailyGoldPrices
+                .Where(x => x.GoldType == itemDto.GoldType)
+                .OrderByDescending(x => x.effectiveDate)
+                .FirstOrDefault();
+            // Example calculation: Adjust weight based on gold type
+            if (currentGoldPrice != null)
+            {
+                decimal temporaryValue = itemDto.weight * currentGoldPrice.price;
+                input.Ticket.value += temporaryValue;
+                input.Ticket.weight += itemDto.weight;
+                input.Ticket.serviceCharge = generalSetup == null ? (decimal)0.5 : generalSetup.serviceCharge;
+            }
+        }
+        input.Ticket.expiryDate = input.Ticket.pledgedDate.AddMonths(generalSetup == null ? 6 : generalSetup.monthsBetweenPledgeAndExpiry);
+        return input.Ticket;
+    }
 }

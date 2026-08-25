@@ -39,7 +39,44 @@ namespace PawnCloud.CustomSeeders
         }
         public async Task SeedSubDb()
         {
+            await SeedBasicCode();
+        }
+        private async Task SeedBasicCode()
+        {
+            var allMiscMasterConfigs = await _MiscMasterConfig.GetAllListAsync();
+            var raceMiscMasterConfig = allMiscMasterConfigs.FirstOrDefault(m =>m.category == "RACE");
+            if (raceMiscMasterConfig != null)
+            {
+                await AddBasicCodeIfNotExist("BUMIPUTERA", "Bumiputera", true, raceMiscMasterConfig.Id);
+                await AddBasicCodeIfNotExist("MELAYU", "Melayu", true, raceMiscMasterConfig.Id);
+                await AddBasicCodeIfNotExist("CINA", "Cina", true, raceMiscMasterConfig.Id);
+                await AddBasicCodeIfNotExist("INDIA", "India", true, raceMiscMasterConfig.Id);
+                await AddBasicCodeIfNotExist("LAIN-LAIN", "Lain-lain", true, raceMiscMasterConfig.Id);
 
+
+            }
+            var genderMiscMasterConfig = allMiscMasterConfigs.FirstOrDefault(m => m.category == "GENDER");
+            if (genderMiscMasterConfig != null) 
+            {
+                await AddBasicCodeIfNotExist("LELAKI", "Male", true, genderMiscMasterConfig.Id);
+                await AddBasicCodeIfNotExist("PEREMPUAN", "Female", true, genderMiscMasterConfig.Id);
+            }
+            var businessNatureMiscMasterConfig = allMiscMasterConfigs.FirstOrDefault(m => m.category == "BUSINESS_NATURE");
+            if(businessNatureMiscMasterConfig != null)
+            {
+
+            }
+        }
+        private async Task AddBasicCodeIfNotExist(string codeName, string codeDescription, bool systemProvidedValue, int? MiscMasterConfig)
+        {
+            var basicCodeChecker = await _BasicCode.FirstOrDefaultAsync(bc => bc.codeName == codeName && bc.MiscMasterConfig == MiscMasterConfig);
+            if(basicCodeChecker != null)
+            {
+                return;
+            }
+            var basicCode = new BasicCode(codeName, codeDescription, systemProvidedValue, MiscMasterConfig);
+            basicCode.TenantId = AbpSession.TenantId;
+            await _BasicCode.InsertAsync(basicCode);
         }
         private async Task SeedCountry()
         {
