@@ -15,5 +15,5 @@ public interface ICustomerAppService : IApplicationService
 
     Task Delete(EntityDto<int> input);
 
-    Task<ListResultDto<CustomerLookupDto>> GetCustomersForLookup();
+    Task<ListResultDto<CustomerLookupDto>> GetCustomersForLookup(string filter = null);
 }

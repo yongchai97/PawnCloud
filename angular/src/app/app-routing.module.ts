@@ -3,6 +3,7 @@ import { RouterModule } from '@angular/router';
 import { AppRouteGuard } from '@shared/auth/auth-route-guard';
 import { AppComponent } from './app.component';
 import { CountriesComponent } from './admin/countries/countries.component';
+import { GeneralSetupComponent } from './admin/general-setup/general-setup.component';
 
 @NgModule({
     imports: [
@@ -52,6 +53,12 @@ import { CountriesComponent } from './admin/countries/countries.component';
                         canActivate: [AppRouteGuard],
                     },
                     {
+                        path: 'pawn-tickets',
+                        loadChildren: () => import('./pawn-tickets/pawn-tickets.module').then((m) => m.PawnTicketsModule),
+                        data: { permission: 'Pages.PawnTickets' },
+                        canActivate: [AppRouteGuard],
+                    },
+                    {
                         path: 'basic-codes',
                         loadChildren: () => import('./basic-codes/basic-codes.module').then((m) => m.BasicCodesModule),
                         data: { permission: 'Pages.BasicCodes' },
@@ -69,6 +76,11 @@ import { CountriesComponent } from './admin/countries/countries.component';
                             {
                                 path: 'countries',
                                 component: CountriesComponent,
+                                canActivate: [AppRouteGuard],
+                            },
+                            {
+                                path: 'general-setup',
+                                component: GeneralSetupComponent,
                                 canActivate: [AppRouteGuard],
                             },
                             {

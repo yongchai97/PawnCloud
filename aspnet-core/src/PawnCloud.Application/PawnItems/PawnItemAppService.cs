@@ -30,19 +30,19 @@ namespace PawnCloud.PawnItems
             var pawnItems = await _repository.GetAllListAsync();
             return pawnItems;
         }
-        public async Task <PawnItem> GetById(int id)
+        public async Task<PawnItem> GetById(int id)
         {
             var pawnItem = await _repository.GetAsync(id);
             return pawnItem;
         }
-        public async Task <List<PawnItemDto>> GetAllViaPawnTicketId(GetPawnItemViaPawnTicket input)
+        public async Task<List<PawnItemDto>> GetAllViaPawnTicketId(GetPawnItemViaPawnTicket input)
         {
             var pawnItems = await _repository.GetAllListAsync(p => p.PawnTicket == input.PawnTicket);
             return pawnItems.Select(p => ObjectMapper.Map<PawnItemDto>(p)).ToList();
         }
         public async Task CreateOrEdit(CreateOrEditPawnItemDto input)
         {
-            if(input.Id == null)
+            if (input.Id == null)
             {
                 var pawnItem = ObjectMapper.Map<PawnItem>(input);
                 await _repository.InsertAsync(pawnItem);
@@ -53,6 +53,10 @@ namespace PawnCloud.PawnItems
                 ObjectMapper.Map(input, pawnItem);
                 await _repository.UpdateAsync(pawnItem);
             }
+        }
+        public async Task Delete(int id)
+        {
+            await _repository.DeleteAsync(id);
         }
     }
 }

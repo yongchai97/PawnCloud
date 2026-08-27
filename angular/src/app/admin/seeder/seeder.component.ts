@@ -5,6 +5,7 @@ import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { ButtonModule } from 'primeng/button';
 import { LocalizePipe } from '@shared/pipes/localize.pipe';
 import { CustomSeederServiceProxy } from '@shared/service-proxies/service-proxies';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
     selector: 'app-seeder',
@@ -27,7 +28,7 @@ export class SeederComponent extends AppComponentBase {
         if (confirm(this.l('ConfirmSeedRootDb'))) {
             this.isSeedingRootDb = true;
 
-            this.seederService.seedRootDb().subscribe(
+            this.seederService.seedRootDb().pipe(switchMap(() => this.seederService.seedSubDb())).subscribe(
                 () => {
                     this.isSeedingRootDb = false;
                     abp.notify.success(this.l('SeedingCompletedSuccessfully'));

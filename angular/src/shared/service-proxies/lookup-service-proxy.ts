@@ -2,7 +2,7 @@ import { Injectable, Inject, Optional } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { API_BASE_URL } from './service-proxies';
+import { API_BASE_URL, BasicCodeLookupDto, MiscMasterConfigLookupDto } from './service-proxies';
 
 /**
  * ABP wraps every DynamicWebApi response in an AjaxResponse envelope:
@@ -36,6 +36,9 @@ function unwrapAjaxResponse<T>(source: Observable<any>): Observable<T> {
 export class CustomerLookupDto {
     id: number = 0;
     displayName: string = '';
+    customerNo: string = '';
+    fullName: string = '';
+    nric: string = '';
 }
 
 export class PawnTicketLookupDto {
@@ -73,6 +76,19 @@ export class LookupServiceProxy {
         }
         return unwrapAjaxResponse<LookupListResultDto<CustomerLookupDto>>(
             this.http.get(this.url('/Customer/GetCustomersForLookup'), { params })
+        );
+    }
+
+    getBasicCodesByCategory(categoryId: number): Observable<LookupListResultDto<BasicCodeLookupDto>> {
+        const params = new HttpParams().set('CategoryId', categoryId);
+        return unwrapAjaxResponse<LookupListResultDto<BasicCodeLookupDto>>(
+            this.http.get(this.url('/BasicCode/GetBasicCodesByCategory'), { params })
+        );
+    }
+
+    getMiscMasterConfigs(): Observable<LookupListResultDto<MiscMasterConfigLookupDto>> {
+        return unwrapAjaxResponse<LookupListResultDto<MiscMasterConfigLookupDto>>(
+            this.http.get(this.url('/MiscMasterConfig/GetForLookup'))
         );
     }
 

@@ -73,15 +73,21 @@ public class CustomerAppService : ApplicationService, ICustomerAppService
         await _repository.DeleteAsync(input.Id);
     }
 
-    public async Task<ListResultDto<CustomerLookupDto>> GetCustomersForLookup()
+    public async Task<ListResultDto<CustomerLookupDto>> GetCustomersForLookup(string filter = null)
     {
-        var customers = await _repository.GetAllListAsync();
+        var customers = await _repository.GetAllListAsync(c => string.IsNullOrWhiteSpace(filter)
+            || c.CustomerNo.Contains(filter)
+            || c.FullName.Contains(filter)
+            || (c.NRIC != null && c.NRIC.Contains(filter)));
         var lookup = customers
             .OrderBy(c => c.CustomerNo)
             .Select(c => new CustomerLookupDto
             {
                 Id = c.Id,
-                DisplayName = c.CustomerNo + " - " + c.FullName
+                DisplayName = c.CustomerNo + " - " + c.FullName,
+                CustomerNo = c.CustomerNo,
+                FullName = c.FullName,
+                NRIC = c.NRIC
             })
             .ToList();
         return new ListResultDto<CustomerLookupDto>(lookup);

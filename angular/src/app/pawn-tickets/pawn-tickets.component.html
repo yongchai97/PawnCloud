@@ -1,0 +1,29 @@
+<div [@routerTransition]><section class="content-header"><div class="container-fluid d-flex justify-content-between align-items-center"><h1>{{ 'PawnTickets' | localize }}</h1><p-button label="{{ 'New' | localize }}" icon="pi pi-plus" (onClick)="openCreate()"></p-button></div></section>
+<section class="content px-2"><div class="container-fluid"><div class="card"><div class="card-body table-responsive p-0"><table class="table table-hover text-nowrap"><thead><tr><th>{{ 'TicketNo' | localize }}</th><th>{{ 'Customer' | localize }}</th><th>{{ 'Weight' | localize }}</th><th>{{ 'Value' | localize }}</th><th>{{ 'ExpiryDate' | localize }}</th></tr></thead><tbody><tr *ngFor="let row of tickets"><td>{{ row.ticketNo }}</td><td>{{ row.customer }}</td><td>{{ row.weight }}</td><td>{{ row.value }}</td><td>{{ row.expiryDate | date }}</td></tr><tr *ngIf="tickets.length === 0"><td colspan="5" class="text-center p-4">{{ 'NoData' | localize }}</td></tr></tbody></table></div></div></div></section></div>
+
+<ng-template #editor>
+	<div class="modal-header"><h4 class="modal-title">{{ 'PawnTicket' | localize }}</h4><button type="button" class="close" aria-label="Close" (click)="modal.hide()"><span aria-hidden="true">&times;</span></button></div>
+	<form #ticketForm="ngForm" (ngSubmit)="save()">
+		<div class="modal-body">
+			<div class="row g-3">
+				<div class="col-md-6"><label>{{ 'ExistingTicket' | localize }}</label><p-dropdown appendTo="body" name="existingTicket" [(ngModel)]="selectedTicketId" [options]="ticketOptions" optionLabel="displayName" optionValue="id" [showClear]="true" (onChange)="selectTicket()" styleClass="w-100"></p-dropdown></div>
+				<div class="col-md-6"><label>{{ 'Customer' | localize }}</label><input class="form-control mb-1" name="customerFilter" [(ngModel)]="customerFilter" (ngModelChange)="loadCustomers()" placeholder="Customer No, name or NRIC" /><p-dropdown appendTo="body" name="customer" [(ngModel)]="ticket.customer" [options]="customers" optionLabel="displayName" optionValue="id" [filter]="true" styleClass="w-100" required></p-dropdown></div>
+				<div class="col-md-4"><label>{{ 'PledgedDate' | localize }}</label><input class="form-control" type="date" name="pledgedDate" [ngModel]="ticket.pledgedDate | date:'yyyy-MM-dd'" (ngModelChange)="ticket.pledgedDate = $event" required /></div>
+				<div class="col-md-4"><label>{{ 'ExpiryDate' | localize }}</label><input class="form-control" type="date" name="expiryDate" [ngModel]="ticket.expiryDate | date:'yyyy-MM-dd'" (ngModelChange)="ticket.expiryDate = $event" /></div>
+				<div class="col-md-4"><label>{{ 'Amount' | localize }}</label><input pInputText class="form-control" type="number" name="amount" [(ngModel)]="ticket.amount" /></div>
+			</div>
+			<hr />
+			<div class="d-flex justify-content-between align-items-center"><h5>{{ 'PawnItems' | localize }}</h5><p-button type="button" label="{{ 'AddItem' | localize }}" icon="pi pi-plus" (onClick)="addItem()"></p-button></div>
+			<div class="table-responsive"><table class="table table-sm"><thead><tr><th>{{ 'ItemListing' | localize }}</th><th>{{ 'ItemStatus' | localize }}</th><th>{{ 'GoldType' | localize }}</th><th>{{ 'Weight' | localize }}</th><th>{{ 'Quantity' | localize }}</th><th>{{ 'Description' | localize }}</th><th></th></tr></thead><tbody>
+				<tr *ngFor="let item of items; let i = index">
+					<td><p-dropdown appendTo="body" [name]="'listing' + i" [(ngModel)]="item.itemListing" [options]="itemListingOptions" optionLabel="label" optionValue="id" styleClass="w-100"></p-dropdown></td>
+					<td><p-dropdown appendTo="body" [name]="'status' + i" [(ngModel)]="item.itemStatus" [options]="itemStatusOptions" optionLabel="label" optionValue="id" styleClass="w-100"></p-dropdown></td>
+					<td><p-dropdown appendTo="body" [name]="'gold' + i" [(ngModel)]="item.goldType" [options]="goldTypeOptions" optionLabel="label" optionValue="id" (onChange)="calculate()" styleClass="w-100"></p-dropdown></td>
+					<td><input pInputText class="form-control" type="number" [name]="'weight' + i" [(ngModel)]="item.weight" (ngModelChange)="calculate()" min="0" /></td><td><input pInputText class="form-control" type="number" [name]="'quantity' + i" [(ngModel)]="item.quantity" min="1" /></td><td><input pInputText class="form-control" [name]="'description' + i" [(ngModel)]="item.description" /></td><td><p-button type="button" icon="pi pi-trash" severity="danger" [text]="true" (onClick)="removeItem(i)"></p-button></td>
+				</tr>
+			</tbody></table></div>
+			<div class="row"><div class="col-md-3"><strong>{{ 'TotalWeight' | localize }}:</strong> {{ ticket.weight }}</div><div class="col-md-3"><strong>{{ 'TotalValue' | localize }}:</strong> {{ ticket.value }}</div><div class="col-md-3"><strong>{{ 'ServiceCharge' | localize }}:</strong> {{ ticket.serviceCharge }}</div><div class="col-md-3"><strong>{{ 'ExpiryDate' | localize }}:</strong> {{ ticket.expiryDate | date }}</div></div>
+		</div>
+		<div class="modal-footer"><p-button type="button" label="{{ 'Cancel' | localize }}" severity="secondary" (onClick)="modal.hide()"></p-button><p-button type="submit" label="{{ 'Save' | localize }}" icon="pi pi-save" [loading]="saving" [disabled]="ticketForm.invalid || saving"></p-button></div>
+	</form>
+</ng-template>

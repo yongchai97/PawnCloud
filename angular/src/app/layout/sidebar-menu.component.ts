@@ -51,6 +51,7 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
             new MenuItem(this.l('HomePage'), '/app/home', 'fas fa-home'),
             new MenuItem(this.l('Customers'), '/app/customers', 'fas fa-user-friends', 'Pages.Customers'),
             new MenuItem(this.l('Loans'), '/app/loans', 'fas fa-hand-holding-usd', 'Pages.Loans'),
+            new MenuItem(this.l('PawnTickets'), '/app/pawn-tickets', 'fas fa-ticket-alt', 'Pages.PawnTickets'),
             new MenuItem(this.l('Admin'), '', 'fas fa-cog', null, [
                 new MenuItem(this.l('BasicCodes'), '/app/basic-codes', 'fas fa-list', 'Pages.BasicCodes'),
                 new MenuItem(this.l('Roles'), '/app/roles', 'fas fa-theater-masks', 'Pages.Roles'),
@@ -58,6 +59,7 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
                 new MenuItem(this.l('Users'), '/app/users', 'fas fa-users', 'Pages.Users'),
                 new MenuItem(this.l('GoldTypes'), '/app/admin/gold-types', 'fas fa-ring', 'Pages.GoldTypes'),
                 new MenuItem(this.l('Countries'), '/app/admin/countries', 'fas fa-globe'),
+                new MenuItem(this.l('GeneralSetup'), '/app/admin/general-setup', 'fas fa-sliders-h'),
                 new MenuItem('Gold Price Entry', '/app/admin/gold-price-entry', 'fas fa-coins'),
                 new MenuItem(this.l('Seeder'), '/app/admin/seeder', 'fas fa-database', null),
             ]),

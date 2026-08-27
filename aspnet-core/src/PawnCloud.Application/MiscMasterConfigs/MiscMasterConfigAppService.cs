@@ -21,7 +21,6 @@ public class MiscMasterConfigAppService : ApplicationService, IMiscMasterConfigA
     {
         var configs = await _repository.GetAllListAsync();
         var lookup = configs
-            .Where(c => c.availableForUser)
             .OrderBy(c => c.category)
             .Select(c => new MiscMasterConfigLookupDto
             {

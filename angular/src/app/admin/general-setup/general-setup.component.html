@@ -1,0 +1,15 @@
+<div class="content-header"><div class="container-fluid"><h1>{{ 'GeneralSetup' | localize }}</h1></div></div>
+<section class="content px-2 pb-5"><div class="container-fluid"><div class="card"><div class="card-body">
+    <form #setupForm="ngForm" (ngSubmit)="save()" novalidate>
+        <div class="row g-3">
+            <div class="col-md-6"><label for="serviceCharge">{{ 'ServiceCharge' | localize }}</label><input pInputText type="number" class="form-control" id="serviceCharge" name="serviceCharge" [(ngModel)]="setup.serviceCharge" required /></div>
+            <div class="col-md-6"><label for="maximumAllowedPercentage">{{ 'MaximumAllowedPercentage' | localize }}</label><input pInputText type="number" class="form-control" id="maximumAllowedPercentage" name="maximumAllowedPercentage" [(ngModel)]="setup.maximumAllowedPercentage" required /></div>
+            <div class="col-md-6"><label for="monthsBetweenPledgeAndExpiry">{{ 'MonthsBetweenPledgeAndExpiry' | localize }}</label><input pInputText type="number" class="form-control" id="monthsBetweenPledgeAndExpiry" name="monthsBetweenPledgeAndExpiry" [(ngModel)]="setup.monthsBetweenPledgeAndExpiry" required /></div>
+            <div class="col-md-6"><label for="ticketIdMethod">{{ 'TicketIdMethod' | localize }}</label><p-dropdown inputId="ticketIdMethod" name="ticketIdMethod" [(ngModel)]="setup.ticketIdMethod" [options]="idMethods" optionLabel="label" optionValue="value" [showClear]="true" [placeholder]="'Select' | localize" styleClass="w-100"></p-dropdown></div>
+            <div class="col-md-6"><label for="appendedString">{{ 'AppendedString' | localize }}</label><input pInputText class="form-control" id="appendedString" name="appendedString" [(ngModel)]="setup.appendedString" /></div>
+            <div class="col-md-6"><label for="appendedStringBackMethod">{{ 'AppendedStringBackMethod' | localize }}</label><p-dropdown inputId="appendedStringBackMethod" name="appendedStringBackMethod" [(ngModel)]="setup.appendedStringBackMethod" [options]="idMethods" optionLabel="label" optionValue="value" [showClear]="true" [placeholder]="'Select' | localize" styleClass="w-100"></p-dropdown></div>
+            <div class="col-12"><div class="form-check"><input class="form-check-input" type="checkbox" id="appendYearMonth" name="appendYearMonth" [(ngModel)]="setup.appendYearMonth" /><label class="form-check-label" for="appendYearMonth">{{ 'AppendYearMonth' | localize }}</label></div></div>
+        </div>
+        <div class="mt-4"><p-button type="submit" label="{{ 'Save' | localize }}" icon="pi pi-save" [disabled]="saving || setupForm.invalid"></p-button></div>
+    </form>
+</div></div></div></section>

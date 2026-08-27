@@ -2,6 +2,7 @@
 using Abp.Modules;
 using Abp.Reflection.Extensions;
 using PawnCloud.Authorization;
+using PawnCloud.SharedFunctions;
 
 namespace PawnCloud;
 
@@ -20,6 +21,7 @@ public class PawnCloudApplicationModule : AbpModule
         var thisAssembly = typeof(PawnCloudApplicationModule).GetAssembly();
 
         IocManager.RegisterAssemblyByConvention(thisAssembly);
+        IocManager.Register<SharedFunction>();
 
         Configuration.Modules.AbpAutoMapper().Configurators.Add(
             // Scan the assembly for classes which inherit from AutoMapper.Profile

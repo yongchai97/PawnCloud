@@ -62,47 +62,49 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
     }
 
     private loadBasicCodeDropdowns(): void {
-        this._miscMasterConfigService.getForLookup().subscribe((configs) => {
+        this._lookupService.getMiscMasterConfigs().subscribe((configs) => {
             const configMap = new Map<string, number>();
             configs.items?.forEach((config) => {
-                configMap.set(config.displayName.toLowerCase(), config.id);
+                configMap.set(config.displayName.trim().toLowerCase().replace(/\s+/g, ' '), config.id);
             });
 
             const categoryMap = {
-                'country': configMap.get('country'),
                 'race': configMap.get('race'),
                 'gender': configMap.get('gender'),
-                'nationality': configMap.get('nationality'),
-                'businessnature': configMap.get('businessnature') || configMap.get('business nature'),
-                'maritalstatus': configMap.get('maritalstatus') || configMap.get('marital status'),
+                'businessnature': configMap.get('business nature') || configMap.get('businessnature'),
+                'maritalstatus': configMap.get('marital status') || configMap.get('maritalstatus'),
             };
 
             // Load BasicCodes for each category
             if (categoryMap['race']) {
-                this._basicCodeService.getBasicCodesByCategory(categoryMap['race']).subscribe((result) => {
+                this._lookupService.getBasicCodesByCategory(categoryMap['race']).subscribe((result) => {
                     this.raceOptions = result.items || [];
                     this.cd.detectChanges();
                 });
             }
             if (categoryMap['gender']) {
-                this._basicCodeService.getBasicCodesByCategory(categoryMap['gender']).subscribe((result) => {
+                this._lookupService.getBasicCodesByCategory(categoryMap['gender']).subscribe((result) => {
                     this.genderOptions = result.items || [];
                     this.cd.detectChanges();
                 });
             }
             if (categoryMap['businessnature']) {
-                this._basicCodeService.getBasicCodesByCategory(categoryMap['businessnature']).subscribe((result) => {
+                this._lookupService.getBasicCodesByCategory(categoryMap['businessnature']).subscribe((result) => {
                     this.businessNatureOptions = result.items || [];
                     this.cd.detectChanges();
                 });
             }
             if (categoryMap['maritalstatus']) {
-                this._basicCodeService.getBasicCodesByCategory(categoryMap['maritalstatus']).subscribe((result) => {
+                this._lookupService.getBasicCodesByCategory(categoryMap['maritalstatus']).subscribe((result) => {
                     this.maritalStatusOptions = result.items || [];
                     this.cd.detectChanges();
                 });
             }
         });
+    }
+
+    onDropdownChange(): void {
+        this.cd.detectChanges();
     }
 
     save(): void {

@@ -90,6 +90,7 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
     public async Task Delete(EntityDto<int> input)
     {
         //await PermissionChecker.AuthorizeAsync(PermissionNames.Pages_PawnTickets_Delete);
+        await _PawnItem.DeleteAsync(x=>x.PawnTicket == input.Id);
         await _repository.DeleteAsync(input.Id);
     }
 
@@ -113,21 +114,35 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
         var generalSetup = await _GeneralSetup.GetAll().FirstOrDefaultAsync();
         var dailyGoldPrices = await _DailyGoldPrice.GetAll().Where(x => x.effectiveDate <= input.Ticket.pledgedDate)
             .OrderByDescending(x => x.effectiveDate).FirstOrDefaultAsync();
-        var allTickets = await _repository.GetAll().ToListAsync();
-        bool repeatedTicketNumber = true;
-        while (repeatedTicketNumber) 
+        if (input.Ticket.Id <= 0)
         {
-            string ticketNumber = sharedFunction.GenerateTicketNumber(allTickets.Count,generalSetup,input.Ticket.pledgedDate,input.Ticket.TicketNo);
-            var ticketNumberChecker = await _repository.GetAll().Where(x => x.TicketNo == ticketNumber).FirstOrDefaultAsync();
-            if(ticketNumberChecker == null)
+            var allTickets = await _repository.GetAll().ToListAsync();
+            bool repeatedTicketNumber = true;
+            while (repeatedTicketNumber)
             {
-                repeatedTicketNumber = false;
-                input.Ticket.TicketNo = ticketNumber;
+                string ticketNumber = sharedFunction.GenerateTicketNumber(allTickets.Count, generalSetup, input.Ticket.pledgedDate, input.Ticket.TicketNo);
+                var ticketNumberChecker = await _repository.GetAll().Where(x => x.TicketNo == ticketNumber).FirstOrDefaultAsync();
+                if (ticketNumberChecker == null)
+                {
+                    repeatedTicketNumber = false;
+                    input.Ticket.TicketNo = ticketNumber;
+                }
+                allTickets = await _repository.GetAll().ToListAsync();
             }
-            allTickets = await _repository.GetAll().ToListAsync();
         }
-        var ticket = ObjectMapper.Map<PawnTicket>(input.Ticket);
-        ticket.TenantId = AbpSession.TenantId;
+        PawnTicket ticket;
+        if (input.Ticket.Id > 0)
+        {
+            ticket = await _repository.GetAsync(input.Ticket.Id);
+            ObjectMapper.Map(input.Ticket, ticket);
+            await _repository.UpdateAsync(ticket);
+        }
+        else
+        {
+            ticket = ObjectMapper.Map<PawnTicket>(input.Ticket);
+            ticket.TenantId = AbpSession.TenantId;
+            await _repository.InsertAsync(ticket);
+        }
         if(generalSetup != null && dailyGoldPrices != null)
         {
             if(input.Ticket.amount / input.Ticket.weight > dailyGoldPrices.inputPrice * generalSetup.maximumAllowedPercentage / 100)
@@ -135,8 +150,6 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
                 return "Error: The amount per weight exceeds the maximum allowed percentage of the daily gold price.";
             }
         }
-        await _repository.InsertAsync(ticket);
-
         foreach (var itemDto in input.Items)
         {
             var item = ObjectMapper.Map<PawnItem>(itemDto);
@@ -149,7 +162,9 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
     {
         var generalSetup = await _GeneralSetup.GetAll().FirstOrDefaultAsync();
         var allDailyGoldPrices = await _DailyGoldPrice.GetAll().Where(x=>x.effectiveDate <= input.Ticket.pledgedDate).ToListAsync();
-        // Perform dynamic calculations here using generalSetup and input
+        input.Ticket.weight = 0;
+        input.Ticket.value = 0;
+        input.Ticket.serviceCharge = generalSetup == null ? (decimal)0.5 : generalSetup.serviceCharge;
         foreach (var itemDto in input.Items)
         {
             var currentGoldPrice = allDailyGoldPrices
@@ -162,7 +177,6 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
                 decimal temporaryValue = itemDto.weight * currentGoldPrice.price;
                 input.Ticket.value += temporaryValue;
                 input.Ticket.weight += itemDto.weight;
-                input.Ticket.serviceCharge = generalSetup == null ? (decimal)0.5 : generalSetup.serviceCharge;
             }
         }
         input.Ticket.expiryDate = input.Ticket.pledgedDate.AddMonths(generalSetup == null ? 6 : generalSetup.monthsBetweenPledgeAndExpiry);

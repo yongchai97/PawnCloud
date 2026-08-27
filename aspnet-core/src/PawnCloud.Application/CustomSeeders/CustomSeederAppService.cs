@@ -61,10 +61,17 @@ namespace PawnCloud.CustomSeeders
                 await AddBasicCodeIfNotExist("LELAKI", "Male", true, genderMiscMasterConfig.Id);
                 await AddBasicCodeIfNotExist("PEREMPUAN", "Female", true, genderMiscMasterConfig.Id);
             }
-            var businessNatureMiscMasterConfig = allMiscMasterConfigs.FirstOrDefault(m => m.category == "BUSINESS_NATURE");
+            var businessNatureMiscMasterConfig = allMiscMasterConfigs.FirstOrDefault(m => m.category == "BUSINESS NATURE");
             if(businessNatureMiscMasterConfig != null)
             {
+                await AddBasicCodeIfNotExist("INFORMATION TECHNOLOGY", "Information Technology", true, businessNatureMiscMasterConfig.Id); 
 
+            }
+            var maritalStatusMiscMasterConfig = allMiscMasterConfigs.FirstOrDefault(m => m.category == "MARITAL STATUS");
+            if (maritalStatusMiscMasterConfig != null)
+            {
+                await AddBasicCodeIfNotExist("SINGLE", "Single", true, maritalStatusMiscMasterConfig.Id);
+                await AddBasicCodeIfNotExist("MARRIED", "Married", true, maritalStatusMiscMasterConfig.Id);
             }
         }
         private async Task AddBasicCodeIfNotExist(string codeName, string codeDescription, bool systemProvidedValue, int? MiscMasterConfig)
@@ -434,6 +441,8 @@ namespace PawnCloud.CustomSeeders
             await AddMiscMasterConfigIfNotExist("RACE", false);
             await AddMiscMasterConfigIfNotExist("GENDER", false);
             await AddMiscMasterConfigIfNotExist("BUSINESS NATURE", false);
+            await AddMiscMasterConfigIfNotExist("MARITAL STATUS", false);
+
 
         }
         private async Task AddMiscMasterConfigIfNotExist(string category, bool availableForUser)

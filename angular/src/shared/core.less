@@ -115,9 +115,45 @@ input[type="date"].date-picker:focus::-webkit-calendar-picker-indicator {
 
 /* PrimeNG overlay panels - ensure they sit above ngx-bootstrap modal */
 .p-datepicker-panel,
+.p-dropdown-panel,
 .p-select-overlay,
-.p-overlaypanel {
+.p-overlaypanel,
+.p-autocomplete-panel,
+.p-multiselect-panel,
+.p-component-overlay {
     z-index: 2000 !important;
+}
+
+body > .p-dropdown-panel,
+body > .p-select-overlay,
+body > .p-datepicker-panel,
+body > .p-autocomplete-panel,
+body > .p-multiselect-panel,
+body > .p-component-overlay,
+body > .p-connected-overlay {
+    z-index: 10000 !important;
+}
+
+/* PrimeNG can leave an empty appended wrapper behind during overlay changes. */
+body > .p-overlay:empty {
+    display: none !important;
+    pointer-events: none !important;
+}
+
+body > .p-overlay {
+    z-index: 10000 !important;
+}
+
+#sidebar-overlay {
+    pointer-events: none !important;
+}
+
+/* The mobile sidebar backdrop must not block the desktop application surface. */
+@media (min-width: 992px) {
+    #sidebar-overlay {
+        display: none !important;
+        pointer-events: none !important;
+    }
 }
 
 /* Keep ngx-bootstrap modal content above its backdrop and the application shell. */
@@ -127,6 +163,64 @@ input[type="date"].date-picker:focus::-webkit-calendar-picker-indicator {
 
 .modal {
     z-index: 1050 !important;
+}
+
+/* Keep the pawn item editor readable as more fields and items are added. */
+.pawn-ticket-modal {
+    width: min(96vw, 1500px);
+    max-width: none;
+    margin: 1.75rem auto;
+}
+
+.pawn-ticket-modal .modal-content {
+    max-height: calc(100vh - 3.5rem);
+}
+
+.pawn-ticket-modal .modal-body {
+    overflow: auto;
+}
+
+.pawn-ticket-modal .modal-body .table-responsive {
+    overflow-x: auto;
+}
+
+.pawn-ticket-modal .modal-body table {
+    min-width: 1050px;
+}
+
+.pawn-ticket-modal .modal-body table th,
+.pawn-ticket-modal .modal-body table td {
+    min-width: 150px;
+    vertical-align: middle;
+}
+
+.pawn-ticket-modal .modal-body table th:first-child,
+.pawn-ticket-modal .modal-body table td:first-child {
+    min-width: 210px;
+}
+
+.pawn-ticket-modal .modal-body table th:nth-child(2),
+.pawn-ticket-modal .modal-body table td:nth-child(2) {
+    min-width: 190px;
+}
+
+.pawn-ticket-modal .modal-body table th:last-child,
+.pawn-ticket-modal .modal-body table td:last-child {
+    min-width: 60px;
+    width: 60px;
+}
+
+@media (max-width: 767.98px) {
+    .pawn-ticket-modal {
+        width: 100vw;
+        margin: 0;
+    }
+
+    .pawn-ticket-modal .modal-content {
+        min-height: 100vh;
+        max-height: 100vh;
+        border-radius: 0;
+    }
 }
 
 /* Sidebar submenu positioned as right panel with multi-column layout */

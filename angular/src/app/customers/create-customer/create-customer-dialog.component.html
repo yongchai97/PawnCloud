@@ -34,6 +34,7 @@
             <div class="col-md-3 form-group">
                 <label for="Gender">{{ 'Gender' | localize }}</label>
                 <p-dropdown
+                    appendTo="body"
                     inputId="Gender"
                     name="gender"
                     [(ngModel)]="customer.gender"
@@ -41,6 +42,7 @@
                     optionLabel="displayName"
                     optionValue="id"
                     [showClear]="true"
+                    (onChange)="onDropdownChange()"
                     [placeholder]="'Select' | localize"
                     styleClass="w-100"></p-dropdown>
             </div>
@@ -48,6 +50,7 @@
             <div class="col-md-3 form-group">
                 <label for="Race">{{ 'Race' | localize }}</label>
                 <p-dropdown
+                    appendTo="body"
                     inputId="Race"
                     name="race"
                     [(ngModel)]="customer.race"
@@ -55,6 +58,7 @@
                     optionLabel="displayName"
                     optionValue="id"
                     [showClear]="true"
+                    (onChange)="onDropdownChange()"
                     [placeholder]="'Select' | localize"
                     styleClass="w-100"></p-dropdown>
             </div>
@@ -62,6 +66,7 @@
             <div class="col-md-3 form-group">
                 <label for="Nationality">{{ 'Nationality' | localize }}</label>
                 <p-dropdown
+                    appendTo="body"
                     inputId="Nationality"
                     name="nationality"
                     [(ngModel)]="customer.nationality"
@@ -72,6 +77,7 @@
                     filterBy="label"
                     filterMatchMode="contains"
                     [showClear]="true"
+                    (onChange)="onDropdownChange()"
                     [placeholder]="'Select' | localize"
                     styleClass="w-100"></p-dropdown>
             </div>
@@ -79,6 +85,7 @@
             <div class="col-md-3 form-group">
                 <label for="MaritalStatus">{{ 'MaritalStatus' | localize }}</label>
                 <p-dropdown
+                    appendTo="body"
                     inputId="MaritalStatus"
                     name="maritalStatus"
                     [(ngModel)]="customer.maritalStatus"
@@ -86,6 +93,7 @@
                     optionLabel="displayName"
                     optionValue="id"
                     [showClear]="true"
+                    (onChange)="onDropdownChange()"
                     [placeholder]="'Select' | localize"
                     styleClass="w-100"></p-dropdown>
             </div>
@@ -113,6 +121,7 @@
             <div class="col-md-4 form-group">
                 <label for="Country">{{ 'Country' | localize }}</label>
                 <p-dropdown
+                    appendTo="body"
                     inputId="Country"
                     name="country"
                     [(ngModel)]="customer.country"
@@ -123,6 +132,7 @@
                     filterBy="label"
                     filterMatchMode="contains"
                     [showClear]="true"
+                    (onChange)="onDropdownChange()"
                     [placeholder]="'Select' | localize"
                     styleClass="w-100"></p-dropdown>
             </div>
@@ -150,6 +160,7 @@
             <div class="col-md-4 form-group">
                 <label for="MailingCountry">{{ 'Country' | localize }}</label>
                 <p-dropdown
+                    appendTo="body"
                     inputId="MailingCountry"
                     name="mailingCountry"
                     [(ngModel)]="customer.mailingCountry"
@@ -160,6 +171,7 @@
                     filterBy="label"
                     filterMatchMode="contains"
                     [showClear]="true"
+                    (onChange)="onDropdownChange()"
                     [placeholder]="'Select' | localize"
                     styleClass="w-100"></p-dropdown>
             </div>
@@ -182,6 +194,7 @@
             <div class="col-md-6 form-group">
                 <label for="BusinessNature">{{ 'BusinessNature' | localize }}</label>
                 <p-dropdown
+                    appendTo="body"
                     inputId="BusinessNature"
                     name="businessNature"
                     [(ngModel)]="customer.businessNature"
@@ -189,6 +202,7 @@
                     optionLabel="displayName"
                     optionValue="id"
                     [showClear]="true"
+                    (onChange)="onDropdownChange()"
                     [placeholder]="'Select' | localize"
                     styleClass="w-100"></p-dropdown>
             </div>
