@@ -15,5 +15,8 @@ namespace PawnCloud.GeneralSetups.Dto
         public string appendedString { get; set; }
         public bool AppendYearMonth { get; set; }
         public virtual int? appendedStringBackMethod { get; set; } // get option from the enum list
+        public string outletName { get; set; }
+        public string outletRegistrationNumber { get; set; }
+
     }
 }

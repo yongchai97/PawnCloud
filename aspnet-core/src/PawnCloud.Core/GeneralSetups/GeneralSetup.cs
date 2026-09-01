@@ -19,9 +19,12 @@ namespace PawnCloud.GeneralSetups
         public string appendedString { get; set; }
         public bool AppendYearMonth { get; set; } = true;
         public virtual int? appendedStringBackMethod { get; set;  } // get option from the enum list
+        public string outletName { get; set; }
+        public string outletRegistrationNumber { get; set; }
         public GeneralSetup() { }
         public GeneralSetup(decimal serviceCharge, decimal maximumAllowedPercentage,
-            int monthsBetweenPledgeAndExpiry, int? ticketIdMethod, string appendedString, bool appendYearMonth, int? appendedStringBackMethod)
+            int monthsBetweenPledgeAndExpiry, int? ticketIdMethod, string appendedString, bool appendYearMonth,
+            int? appendedStringBackMethod, string outletName, string outletRegistrationNumber)
         {
             this.serviceCharge = serviceCharge;
             this.maximumAllowedPercentage = maximumAllowedPercentage;
@@ -30,6 +33,8 @@ namespace PawnCloud.GeneralSetups
             this.appendedString = appendedString;
             this.AppendYearMonth = appendYearMonth;
             this.appendedStringBackMethod = appendedStringBackMethod;
+            this.outletName = outletName;
+            this.outletRegistrationNumber = outletRegistrationNumber;
         }
     }
 }

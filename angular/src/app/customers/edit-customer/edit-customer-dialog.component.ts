@@ -6,14 +6,17 @@ import { AbpModalHeaderComponent } from '../../../shared/components/modal/abp-mo
 import { AbpValidationSummaryComponent } from '../../../shared/components/validation/abp-validation.summary.component';
 import { AbpModalFooterComponent } from '../../../shared/components/modal/abp-modal-footer.component';
 import { LocalizePipe } from '@shared/pipes/localize.pipe';
-import { CustomerServiceProxy, CreateOrEditCustomerDto, GetCustomerForEditOutput, BasicCodeServiceProxy, BasicCodeLookupDto, Country, CountryServiceProxy, MiscMasterConfigServiceProxy, MiscMasterConfigLookupDto } from '@shared/service-proxies/service-proxies';
+import { CustomerServiceProxy, CreateOrEditCustomerDto, GetCustomerForEditOutput, BasicCodeServiceProxy, BasicCodeLookupDto, Country, CountryServiceProxy, MiscMasterConfigServiceProxy, MiscMasterConfigLookupDto, CustomerPicture, CustomerOutletDto, CreateOrEditCustomerOutletDto, GeneralSetup } from '@shared/service-proxies/service-proxies';
 import { LookupServiceProxy } from '@shared/service-proxies/lookup-service-proxy';
+import { CustomerPictureServiceProxy } from '@shared/service-proxies/customer-picture-service-proxy';
+import { OutletServiceProxy } from '@shared/service-proxies/outlet-service-proxy';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { NgIf, NgFor } from '@angular/common';
 import { DropdownModule } from 'primeng/dropdown';
+import moment from 'moment';
 
 @Component({
     templateUrl: './edit-customer-dialog.component.html',
@@ -32,6 +35,12 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
     nationalityOptions: { label: string; value: number }[] = [];
     businessNatureOptions: BasicCodeLookupDto[] = [];
     maritalStatusOptions: BasicCodeLookupDto[] = [];
+    customerPictures: CustomerPicture[] = [];
+    pictureUrls = new Map<number, string>();
+    uploadingPicture = false;
+    outletOptions: { label: string; value: number }[] = [];
+    customerOutlets: CustomerOutletDto[] = [];
+    selectedOutlet?: number;
 
     onSave = output<EventEmitter<any>>();
 
@@ -42,6 +51,8 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
         private _basicCodeService: BasicCodeServiceProxy,
         private _countryService: CountryServiceProxy,
         private _miscMasterConfigService: MiscMasterConfigServiceProxy,
+        private _customerPictureService: CustomerPictureServiceProxy,
+        private _outletService: OutletServiceProxy,
         public bsModalRef: BsModalRef,
         private cd: ChangeDetectorRef
     ) {
@@ -51,12 +62,51 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
     ngOnInit(): void {
         this.loadCountries();
         this.loadBasicCodeDropdowns();
+        this.loadOutlets();
         if (this.id) {
             this._customerService.getViaIdForEdit(this.id).subscribe((result: GetCustomerForEditOutput) => {
                 this.customer = result.customer;
+                this.loadCustomerOutlets();
+                this.loadCustomerPictures();
                 this.cd.detectChanges();
             });
         }
+    }
+
+    private loadOutlets(): void {
+        this._outletService.getAll().subscribe((outlets: GeneralSetup[]) => {
+            this.outletOptions = (outlets || []).filter((outlet) => !!outlet.id).map((outlet) => ({
+                label: outlet.outletName || `Outlet ${outlet.id}`,
+                value: outlet.id,
+            }));
+            this.cd.detectChanges();
+        });
+    }
+
+    private loadCustomerOutlets(): void {
+        if (!this.id) return;
+        this._customerService.getCustomerOutletViaCustomerId(this.id).subscribe((result) => {
+            this.customerOutlets = result?.items || [];
+            this.cd.detectChanges();
+        });
+    }
+
+    addCustomerOutlet(): void {
+        if (!this.id || !this.selectedOutlet || this.customerOutlets.some((link) => link.generalSetup === this.selectedOutlet)) return;
+        const input = new CreateOrEditCustomerOutletDto({ id: undefined, customer: this.id, generalSetup: this.selectedOutlet });
+        this._customerService.createOrEditCustomerOutlet(input).subscribe(() => {
+            this.selectedOutlet = undefined;
+            this.loadCustomerOutlets();
+        });
+    }
+
+    removeCustomerOutlet(link: CustomerOutletDto): void {
+        if (!link.id) return;
+        this._customerService.deleteCustomerOutlet(link.id).subscribe(() => this.loadCustomerOutlets());
+    }
+
+    outletName(id: number | undefined): string {
+        return this.outletOptions.find((outlet) => outlet.value === id)?.label || `Outlet ${id}`;
     }
 
     private loadCountries(): void {
@@ -116,8 +166,65 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
         this.cd.detectChanges();
     }
 
+    loadCustomerPictures(): void {
+        if (!this.id) return;
+        this._customerPictureService.getList(this.id).subscribe((pictures) => {
+            this.customerPictures = pictures || [];
+            this.customerPictures.forEach((picture) => {
+                if (picture.id) {
+                    this._customerPictureService.download(picture.id).subscribe((blob) => {
+                        this.pictureUrls.set(picture.id!, URL.createObjectURL(blob));
+                        this.cd.detectChanges();
+                    });
+                }
+            });
+            this.cd.detectChanges();
+        });
+    }
+
+    uploadPicture(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0];
+        if (!file || !this.id) return;
+
+        this.uploadingPicture = true;
+        this._customerPictureService.upload(this.id, file).subscribe({
+            next: () => {
+                input.value = '';
+                this.loadCustomerPictures();
+            },
+            error: (error) => {
+                this.uploadingPicture = false;
+                const message = error?.error?.error?.message || error?.error?.message || error?.message || 'Unable to upload file.';
+                this.notify.error(message);
+                this.cd.detectChanges();
+            },
+            complete: () => {
+                this.uploadingPicture = false;
+                this.cd.detectChanges();
+            },
+        });
+    }
+
+    deletePicture(picture: CustomerPicture): void {
+        if (!picture.id) return;
+        this._customerPictureService.delete(picture.id).subscribe(() => {
+            const url = this.pictureUrls.get(picture.id!);
+            if (url) URL.revokeObjectURL(url);
+            this.pictureUrls.delete(picture.id!);
+            this.customerPictures = this.customerPictures.filter((item) => item.id !== picture.id);
+            this.cd.detectChanges();
+        });
+    }
+
+    isImage(picture: CustomerPicture): boolean {
+        return !!picture.contentType?.startsWith('image/');
+    }
+
     save(): void {
         this.saving = true;
+        const birthDate = this.customer.birthDate as any;
+        this.customer.birthDate = birthDate ? (moment.isMoment(birthDate) ? birthDate : moment(birthDate)) : (undefined as any);
         this.customer.id = this.id;
         this._customerService.createOrEdit(this.customer).subscribe(
             () => {

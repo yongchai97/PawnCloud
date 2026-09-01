@@ -14,11 +14,6 @@ public static class PermissionNames
     public const string Pages_Customers_Edit = "Pages.Customers.Edit";
     public const string Pages_Customers_Delete = "Pages.Customers.Delete";
 
-    public const string Pages_CustomerDocuments = "Pages.CustomerDocuments";
-    public const string Pages_CustomerDocuments_Create = "Pages.CustomerDocuments.Create";
-    public const string Pages_CustomerDocuments_Edit = "Pages.CustomerDocuments.Edit";
-    public const string Pages_CustomerDocuments_Delete = "Pages.CustomerDocuments.Delete";
-
     public const string Pages_PawnTickets = "Pages.PawnTickets";
     public const string Pages_PawnTickets_Create = "Pages.PawnTickets.Create";
     public const string Pages_PawnTickets_Edit = "Pages.PawnTickets.Edit";

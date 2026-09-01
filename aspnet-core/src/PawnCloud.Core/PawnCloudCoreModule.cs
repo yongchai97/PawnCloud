@@ -1,4 +1,7 @@
-﻿using Abp.Localization;
+﻿using Abp.BlobStoring;
+using Abp.BlobStoring.Azure;
+using Abp.BlobStoring.FileSystem;
+using Abp.Localization;
 using Abp.Modules;
 using Abp.Reflection.Extensions;
 using Abp.Runtime.Security;
@@ -11,12 +14,16 @@ using PawnCloud.Configuration;
 using PawnCloud.Localization;
 using PawnCloud.MultiTenancy;
 using PawnCloud.Timing;
+using System;
 
 namespace PawnCloud;
 
-[DependsOn(typeof(AbpZeroCoreModule))]
+[DependsOn(typeof(AbpZeroCoreModule), typeof(AbpBlobStoringModule),
+    typeof(AbpBlobStoringFileSystemModule),
+    typeof(AbpBlobStoringAzureModule))]
 public class PawnCloudCoreModule : AbpModule
 {
+    
     public override void PreInitialize()
     {
         Configuration.Auditing.IsEnabledForAnonymousUsers = true;
@@ -40,6 +47,7 @@ public class PawnCloudCoreModule : AbpModule
 
         Configuration.Settings.SettingEncryptionConfiguration.DefaultPassPhrase = PawnCloudConsts.DefaultPassPhrase;
         SimpleStringCipher.DefaultPassPhrase = PawnCloudConsts.DefaultPassPhrase;
+        ConfigureBlobStorage();
     }
 
     public override void Initialize()
@@ -50,5 +58,80 @@ public class PawnCloudCoreModule : AbpModule
     public override void PostInitialize()
     {
         IocManager.Resolve<AppTimes>().StartupTime = Clock.Now;
+    }
+    private void ConfigureBlobStorage()
+    {
+        var environmentName =
+    Environment.GetEnvironmentVariable(
+        "ASPNETCORE_ENVIRONMENT");
+
+        var configuration =
+            AppConfigurations.Get(
+                AppContext.BaseDirectory,
+                environmentName);
+
+        var provider =
+            configuration["BlobStorage:Provider"];
+
+        if (string.Equals(
+            provider,
+            "FileSystem",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            var basePath =
+                configuration[
+                    "BlobStorage:FileSystem:BasePath"];
+
+            Configuration.Modules
+                .AbpBlobStoring()
+                .Containers
+                .ConfigureDefault(container =>
+                {
+                    container.UseFileSystem(fileSystem =>
+                    {
+                        fileSystem.BasePath = basePath;
+                    });
+                });
+
+            return;
+        }
+
+        if (string.Equals(
+            provider,
+            "Azure",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            var connectionString =
+                configuration[
+                    "BlobStorage:Azure:ConnectionString"];
+
+            var containerName =
+                configuration[
+                    "BlobStorage:Azure:ContainerName"];
+
+            Configuration.Modules
+                .AbpBlobStoring()
+                .Containers
+                .ConfigureDefault(container =>
+                {
+                    container.UseAzure(azure =>
+                    {
+                        azure.ConnectionString =
+                            connectionString;
+
+                        azure.ContainerName =
+                            containerName;
+
+                        azure.CreateContainerIfNotExists =
+                            true;
+                    });
+                });
+
+            return;
+        }
+
+        throw new InvalidOperationException(
+            $"Unsupported BlobStorage provider: '{provider}'. " +
+            "Supported providers are 'FileSystem' and 'Azure'.");
     }
 }

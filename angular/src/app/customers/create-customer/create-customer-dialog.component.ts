@@ -13,6 +13,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { ButtonModule } from 'primeng/button';
 import { DropdownModule } from 'primeng/dropdown';
 import { NgFor } from '@angular/common';
+import moment from 'moment';
 
 @Component({
     templateUrl: './create-customer-dialog.component.html',
@@ -109,6 +110,8 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
 
     save(): void {
         this.saving = true;
+        const birthDate = this.customer.birthDate as any;
+        this.customer.birthDate = birthDate ? (moment.isMoment(birthDate) ? birthDate : moment(birthDate)) : (undefined as any);
         this._lookupService.createCustomer(this.customer).subscribe(
             (newId) => {
                 this.customer.id = newId;
@@ -116,8 +119,10 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
                 this.bsModalRef.hide();
                 this.onSave.emit(null);
             },
-            () => {
+            (error) => {
                 this.saving = false;
+                const message = error?.error?.error?.message || error?.error?.message || error?.message || 'Unable to save customer.';
+                this.notify.error(message);
                 this.cd.detectChanges();
             }
         );

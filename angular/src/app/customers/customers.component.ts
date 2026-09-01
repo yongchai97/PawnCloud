@@ -97,11 +97,11 @@ export class CustomersComponent extends PagedListingComponentBase<CustomerDto> {
         let dialog: BsModalRef;
         if (!id) {
             dialog = this._modalService.show(CreateCustomerDialogComponent, {
-                class: 'modal-lg',
+                class: 'modal-xl',
             });
         } else {
             dialog = this._modalService.show(EditCustomerDialogComponent, {
-                class: 'modal-lg',
+                class: 'modal-xl',
                 initialState: {
                     id: id,
                 },

@@ -65,6 +65,11 @@ import { GeneralSetupComponent } from './admin/general-setup/general-setup.compo
                         canActivate: [AppRouteGuard],
                     },
                     {
+                        path: 'outlet',
+                        component: GeneralSetupComponent,
+                        canActivate: [AppRouteGuard],
+                    },
+                    {
                         path: 'admin',
                         children: [
                             {
@@ -79,9 +84,14 @@ import { GeneralSetupComponent } from './admin/general-setup/general-setup.compo
                                 canActivate: [AppRouteGuard],
                             },
                             {
+                                path: 'outlet',
+                                redirectTo: '../outlet',
+                                pathMatch: 'full',
+                            },
+                            {
                                 path: 'general-setup',
-                                component: GeneralSetupComponent,
-                                canActivate: [AppRouteGuard],
+                                redirectTo: 'outlet',
+                                pathMatch: 'full',
                             },
                             {
                                 path: 'gold-price-entry',

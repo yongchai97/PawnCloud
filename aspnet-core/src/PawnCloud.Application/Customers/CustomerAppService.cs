@@ -16,10 +16,13 @@ namespace PawnCloud.Customers;
 public class CustomerAppService : ApplicationService, ICustomerAppService
 {
     private readonly IRepository<Customer, int> _repository;
+    private readonly IRepository<CustomerOutlet> _customerOutletRepository;
 
-    public CustomerAppService(IRepository<Customer, int> repository)
+
+    public CustomerAppService(IRepository<Customer, int> repository, IRepository<CustomerOutlet> customerOutletRepository)
     {
         _repository = repository;
+        _customerOutletRepository = customerOutletRepository;
     }
 
     public async Task<PagedResultDto<CustomerDto>> GetAll(PagedCustomerResultRequestDto input)
@@ -91,5 +94,32 @@ public class CustomerAppService : ApplicationService, ICustomerAppService
             })
             .ToList();
         return new ListResultDto<CustomerLookupDto>(lookup);
+    }
+    public async Task<ListResultDto<CustomerOutletDto>> GetCustomerOutletViaCustomerId(EntityDto<int> input)
+    {
+        var customerOutlets = await _customerOutletRepository.GetAllListAsync(co => co.Customer == input.Id);
+        var dtos = ObjectMapper.Map<List<CustomerOutletDto>>(customerOutlets);
+        return new ListResultDto<CustomerOutletDto>(dtos);
+    }
+    public async Task<int> CreateOrEditCustomerOutlet(CreateOrEditCustomerOutletDto input)
+    {
+        if (input.Id > 0)
+        {
+            var entity = await _customerOutletRepository.GetAsync((int)input.Id);
+            ObjectMapper.Map(input, entity);
+            await _customerOutletRepository.UpdateAsync(entity);
+            return entity.Id;
+        }
+        else
+        {
+            var entity = ObjectMapper.Map<CustomerOutlet>(input);
+            await _customerOutletRepository.InsertAndGetIdAsync(entity);
+            return entity.Id;
+        }
+    }
+    public async Task DeleteCustomerOutlet(int id)
+    {
+        await _customerOutletRepository.DeleteAsync(id);
+
     }
 }

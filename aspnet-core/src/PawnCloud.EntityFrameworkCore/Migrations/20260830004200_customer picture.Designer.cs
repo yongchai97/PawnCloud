@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PawnCloud.EntityFrameworkCore;
 
@@ -11,9 +12,11 @@ using PawnCloud.EntityFrameworkCore;
 namespace PawnCloud.Migrations
 {
     [DbContext(typeof(PawnCloudDbContext))]
-    partial class PawnCloudDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260830004200_customer picture")]
+    partial class customerpicture
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1882,7 +1885,7 @@ namespace PawnCloud.Migrations
                     b.ToTable("Customers");
                 });
 
-            modelBuilder.Entity("PawnCloud.Customers.CustomerOutlet", b =>
+            modelBuilder.Entity("PawnCloud.Customers.CustomerDocument", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1896,7 +1899,7 @@ namespace PawnCloud.Migrations
                     b.Property<long?>("CreatorUserId")
                         .HasColumnType("bigint");
 
-                    b.Property<int?>("Customer")
+                    b.Property<int>("Customer")
                         .HasColumnType("int");
 
                     b.Property<long?>("DeleterUserId")
@@ -1904,9 +1907,6 @@ namespace PawnCloud.Migrations
 
                     b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("datetime2");
-
-                    b.Property<int?>("GeneralSetup")
-                        .HasColumnType("int");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -1924,9 +1924,7 @@ namespace PawnCloud.Migrations
 
                     b.HasIndex("Customer");
 
-                    b.HasIndex("GeneralSetup");
-
-                    b.ToTable("CustomerOutlets");
+                    b.ToTable("CustomerDocuments");
                 });
 
             modelBuilder.Entity("PawnCloud.DailyGoldPrices.DailyGoldPrice", b =>
@@ -2032,12 +2030,6 @@ namespace PawnCloud.Migrations
 
                     b.Property<int>("monthsBetweenPledgeAndExpiry")
                         .HasColumnType("int");
-
-                    b.Property<string>("outletName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("outletRegistrationNumber")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("serviceCharge")
                         .HasColumnType("decimal(18,2)");
@@ -2756,19 +2748,15 @@ namespace PawnCloud.Migrations
                     b.Navigation("CustomerFk");
                 });
 
-            modelBuilder.Entity("PawnCloud.Customers.CustomerOutlet", b =>
+            modelBuilder.Entity("PawnCloud.Customers.CustomerDocument", b =>
                 {
                     b.HasOne("PawnCloud.Customers.Customer", "CustomerFk")
                         .WithMany()
-                        .HasForeignKey("Customer");
-
-                    b.HasOne("PawnCloud.GeneralSetups.GeneralSetup", "GeneralSetupFk")
-                        .WithMany()
-                        .HasForeignKey("GeneralSetup");
+                        .HasForeignKey("Customer")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("CustomerFk");
-
-                    b.Navigation("GeneralSetupFk");
                 });
 
             modelBuilder.Entity("PawnCloud.DailyGoldPrices.DailyGoldPrice", b =>

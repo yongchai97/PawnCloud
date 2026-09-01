@@ -46,14 +46,6 @@ export class PawnTicketLookupDto {
     displayName: string = '';
 }
 
-export class CustomerDocumentSummaryDto {
-    id: number = 0;
-    customer: number = 0;
-    documentType?: string;
-    fileName?: string;
-    creationTime?: string;
-}
-
 export class LookupListResultDto<T> {
     items: T[] = [];
 }
@@ -141,22 +133,11 @@ export class LookupServiceProxy {
         );
     }
 
-    getCustomerDocumentsByCustomerId(customerId: number): Observable<LookupListResultDto<CustomerDocumentSummaryDto>> {
-        const params = new HttpParams().set('Id', customerId.toString());
-        return unwrapAjaxResponse<LookupListResultDto<CustomerDocumentSummaryDto>>(
-            this.http.get(this.url('/CustomerDocument/GetByCustomerId'), { params })
-        );
-    }
-
     // Backend CreateOrEdit now returns the entity id (int).
     // The NSwag-generated proxies still declare createOrEdit as Observable<void>, so these
     // wrappers re-issue the same POST and parse the int response.
     createCustomer(input: any): Observable<number> {
-        return this.http.post<number>(this.url('/Customer/CreateOrEdit'), input);
-    }
-
-    createCustomerDocument(input: any): Observable<number> {
-        return this.http.post<number>(this.url('/CustomerDocument/CreateOrEdit'), input);
+        return unwrapAjaxResponse<number>(this.http.post(this.url('/Customer/CreateOrEdit'), input));
     }
 
     createPawnTicket(input: any): Observable<number> {

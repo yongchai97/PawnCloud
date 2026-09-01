@@ -18,11 +18,6 @@ public class PawnCloudAuthorizationProvider : AuthorizationProvider
         customers.CreateChildPermission(PermissionNames.Pages_Customers_Edit, L("EditCustomer"));
         customers.CreateChildPermission(PermissionNames.Pages_Customers_Delete, L("DeleteCustomer"));
 
-        var docs = context.CreatePermission(PermissionNames.Pages_CustomerDocuments, L("CustomerDocuments"));
-        docs.CreateChildPermission(PermissionNames.Pages_CustomerDocuments_Create, L("CreateCustomerDocument"));
-        docs.CreateChildPermission(PermissionNames.Pages_CustomerDocuments_Edit, L("EditCustomerDocument"));
-        docs.CreateChildPermission(PermissionNames.Pages_CustomerDocuments_Delete, L("DeleteCustomerDocument"));
-
         var pawnTickets = context.CreatePermission(PermissionNames.Pages_PawnTickets, L("PawnTickets"));
         pawnTickets.CreateChildPermission(PermissionNames.Pages_PawnTickets_Create, L("CreatePawnTicket"));
         pawnTickets.CreateChildPermission(PermissionNames.Pages_PawnTickets_Edit, L("EditPawnTicket"));

@@ -11,6 +11,7 @@ export class LocalizePipe extends AppComponentBase implements PipeTransform {
     }
 
     transform(key: string, ...args: any[]): string {
-        return this.l(key, ...args);
+        const localizedText = this.l(key, ...args);
+        return localizedText === key ? key.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2') : localizedText;
     }
 }

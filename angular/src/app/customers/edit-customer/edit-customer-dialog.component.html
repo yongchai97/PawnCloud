@@ -28,7 +28,7 @@
 
             <div class="col-md-6 form-group">
                 <label for="BirthDate">{{ 'BirthDate' | localize }}</label>
-                <input pInputText type="date" class="w-100" id="BirthDate" name="birthDate" [(ngModel)]="customer.birthDate" />
+                <input pInputText type="date" class="w-100" id="BirthDate" name="birthDate" [(ngModel)]="customer.birthDate" required />
             </div>
 
             <div class="col-md-3 form-group">
@@ -42,6 +42,7 @@
                     optionLabel="displayName"
                     optionValue="id"
                     [showClear]="true"
+                    required
                     (onChange)="onDropdownChange()"
                     [placeholder]="'Select' | localize"
                     styleClass="w-100"></p-dropdown>
@@ -58,6 +59,7 @@
                     optionLabel="displayName"
                     optionValue="id"
                     [showClear]="true"
+                    required
                     (onChange)="onDropdownChange()"
                     [placeholder]="'Select' | localize"
                     styleClass="w-100"></p-dropdown>
@@ -77,6 +79,7 @@
                     filterBy="label"
                     filterMatchMode="contains"
                     [showClear]="true"
+                    required
                     (onChange)="onDropdownChange()"
                     [placeholder]="'Select' | localize"
                     styleClass="w-100"></p-dropdown>
@@ -93,6 +96,7 @@
                     optionLabel="displayName"
                     optionValue="id"
                     [showClear]="true"
+                    required
                     (onChange)="onDropdownChange()"
                     [placeholder]="'Select' | localize"
                     styleClass="w-100"></p-dropdown>
@@ -132,6 +136,7 @@
                     filterBy="label"
                     filterMatchMode="contains"
                     [showClear]="true"
+                    required
                     (onChange)="onDropdownChange()"
                     [placeholder]="'Select' | localize"
                     styleClass="w-100"></p-dropdown>
@@ -171,6 +176,7 @@
                     filterBy="label"
                     filterMatchMode="contains"
                     [showClear]="true"
+                    required
                     (onChange)="onDropdownChange()"
                     [placeholder]="'Select' | localize"
                     styleClass="w-100"></p-dropdown>
@@ -202,6 +208,7 @@
                     optionLabel="displayName"
                     optionValue="id"
                     [showClear]="true"
+                    required
                     (onChange)="onDropdownChange()"
                     [placeholder]="'Select' | localize"
                     styleClass="w-100"></p-dropdown>
@@ -209,12 +216,59 @@
 
             <div class="col-md-6 form-group">
                 <label for="MonthlyIncome">{{ 'MonthlyIncome' | localize }}</label>
-                <p-inputNumber inputId="MonthlyIncome" name="monthlyIncome" styleClass="w-100" [(ngModel)]="customer.monthlyIncome"></p-inputNumber>
+                <p-inputNumber inputId="MonthlyIncome" name="monthlyIncome" styleClass="w-100" [(ngModel)]="customer.monthlyIncome" required></p-inputNumber>
             </div>
         </div>
 
         <hr class="my-4" />
 
+        <h6 class="mb-3 text-muted">{{ 'CustomerOutlet' | localize }}</h6>
+        <div class="row g-3 align-items-end">
+            <div class="col-md-8">
+                <label for="customerOutlet">{{ 'Outlet' | localize }}</label>
+                <p-dropdown inputId="customerOutlet" name="customerOutlet" [(ngModel)]="selectedOutlet" [options]="outletOptions" [showClear]="true" [placeholder]="'Select' | localize" appendTo="body" styleClass="w-100"></p-dropdown>
+            </div>
+            <div class="col-md-4"><button type="button" class="btn btn-primary w-100" [disabled]="!selectedOutlet" (click)="addCustomerOutlet()"><i class="fas fa-link me-1"></i>{{ 'AddOutlet' | localize }}</button></div>
+        </div>
+        <div class="list-group mt-3" *ngIf="customerOutlets.length">
+            <div class="list-group-item d-flex justify-content-between align-items-center" *ngFor="let link of customerOutlets">
+                <span>{{ outletName(link.generalSetup) }}</span>
+                <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeCustomerOutlet(link)" [attr.aria-label]="'RemoveOutlet' | localize"><i class="fas fa-unlink"></i></button>
+            </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="mb-0 text-muted">Customer Pictures and Documents</h6>
+            <label class="btn btn-sm btn-primary mb-0" [class.disabled]="uploadingPicture">
+                <i class="fas fa-upload me-1"></i>
+                {{ uploadingPicture ? 'Uploading...' : 'Upload file' }}
+                <input type="file" class="d-none" accept=".jpg,.jpeg,.png,.webp,.gif,.pdf,.doc,.docx" [disabled]="uploadingPicture" (change)="uploadPicture($event)" />
+            </label>
+        </div>
+
+        <div class="row g-3" *ngIf="customerPictures.length; else noCustomerPictures">
+            <div class="col-6 col-md-3" *ngFor="let picture of customerPictures">
+                <div class="border rounded p-2 h-100">
+                    <img *ngIf="isImage(picture) && pictureUrls.get(picture.id!)" [src]="pictureUrls.get(picture.id!)" [alt]="picture.originalFileName" class="img-fluid rounded mb-2" style="height: 130px; width: 100%; object-fit: cover" />
+                    <a *ngIf="!isImage(picture) && pictureUrls.get(picture.id!)" [href]="pictureUrls.get(picture.id!)" target="_blank" rel="noopener" class="d-block mb-2 text-truncate">
+                        <i class="fas fa-file me-1"></i>{{ picture.originalFileName }}
+                    </a>
+                    <div class="small text-muted text-truncate" [title]="picture.originalFileName">{{ picture.originalFileName }}</div>
+                    <a *ngIf="pictureUrls.get(picture.id!)" [href]="pictureUrls.get(picture.id!)" [download]="picture.originalFileName" class="btn btn-sm btn-outline-primary mt-2 me-2" [attr.aria-label]="'Download' | localize">
+                        <i class="fas fa-download"></i>
+                    </a>
+                    <button type="button" class="btn btn-sm btn-outline-danger mt-2" (click)="deletePicture(picture)" [attr.aria-label]="'Delete' | localize">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <ng-template #noCustomerPictures>
+            <p class="text-muted small">No customer pictures or documents uploaded.</p>
+        </ng-template>
+
     </div>
-    <abp-modal-footer [saveDisabled]="saving || customerForm.invalid" [cancelDisabled]="saving" (onCancelClick)="bsModalRef.hide()" (onSaveClick)="save()"></abp-modal-footer>
+    <abp-modal-footer [saveDisabled]="saving || customerForm.invalid" [cancelDisabled]="saving" (onCancelClick)="bsModalRef.hide()"></abp-modal-footer>
 </form>

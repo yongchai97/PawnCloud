@@ -25,6 +25,38 @@ namespace PawnCloud.GeneralSetups
             var setup = list.FirstOrDefault();
             return setup;
         }
+
+        public async Task<List<GeneralSetup>> GetAll()
+        {
+            return await _repository.GetAll().OrderBy(x => x.outletName).ToListAsync();
+        }
+
+        public async Task<GeneralSetup> CreateOrEdit(GeneralSetup input)
+        {
+            if (input.Id > 0)
+            {
+                var existingSetup = await _repository.GetAsync(input.Id);
+                existingSetup.serviceCharge = input.serviceCharge;
+                existingSetup.maximumAllowedPercentage = input.maximumAllowedPercentage;
+                existingSetup.monthsBetweenPledgeAndExpiry = input.monthsBetweenPledgeAndExpiry;
+                existingSetup.ticketIdMethod = input.ticketIdMethod;
+                existingSetup.AppendYearMonth = input.AppendYearMonth;
+                existingSetup.appendedString = input.appendedString;
+                existingSetup.appendedStringBackMethod = input.appendedStringBackMethod;
+                existingSetup.outletName = input.outletName;
+                existingSetup.outletRegistrationNumber = input.outletRegistrationNumber;
+                await _repository.UpdateAsync(existingSetup);
+                return existingSetup;
+            }
+
+            input.TenantId = AbpSession.TenantId;
+            return await _repository.InsertAsync(input);
+        }
+
+        public async Task Delete(int id)
+        {
+            await _repository.DeleteAsync(id);
+        }
         public async Task<GeneralSetup> UpdateGeneralSetup(GeneralSetup input)
         {
             var existingSetup = await _repository.GetAll().FirstOrDefaultAsync();
@@ -37,6 +69,9 @@ namespace PawnCloud.GeneralSetups
                 existingSetup.AppendYearMonth = input.AppendYearMonth;
                 existingSetup.appendedString = input.appendedString;
                 existingSetup.appendedStringBackMethod = input.appendedStringBackMethod;
+                existingSetup.outletName = input.outletName;
+                existingSetup.outletRegistrationNumber = input.outletRegistrationNumber;
+
                 await _repository.UpdateAsync(existingSetup);
                 return existingSetup;
             }
@@ -44,7 +79,8 @@ namespace PawnCloud.GeneralSetups
             {
                 var newSetup = new GeneralSetup(input.serviceCharge, input.maximumAllowedPercentage,
                     input.monthsBetweenPledgeAndExpiry, input.ticketIdMethod, input.appendedString, 
-                    input.AppendYearMonth, input.appendedStringBackMethod);
+                    input.AppendYearMonth, input.appendedStringBackMethod, input.outletName, input.outletRegistrationNumber);
+                newSetup.TenantId = AbpSession.TenantId;
                 await _repository.InsertAsync(newSetup);
                 return newSetup;
             }

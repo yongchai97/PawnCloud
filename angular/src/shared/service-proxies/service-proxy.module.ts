@@ -4,6 +4,8 @@ import { AbpHttpInterceptor } from 'abp-ng2-module';
 
 import * as ApiServiceProxies from './service-proxies';
 import { LookupServiceProxy } from './lookup-service-proxy';
+import { CustomerPictureServiceProxy } from './customer-picture-service-proxy';
+import { OutletServiceProxy } from './outlet-service-proxy';
 
 @NgModule({
     providers: [
@@ -28,7 +30,9 @@ import { LookupServiceProxy } from './lookup-service-proxy';
         ApiServiceProxies.DailyGoldPriceServiceProxy,
         ApiServiceProxies.CustomSeederServiceProxy,
         ApiServiceProxies.GeneralSetupServiceProxy,
+        OutletServiceProxy,
         LookupServiceProxy,
+        CustomerPictureServiceProxy,
         { provide: HTTP_INTERCEPTORS, useClass: AbpHttpInterceptor, multi: true },
     ],
 })

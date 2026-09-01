@@ -50,4 +50,5 @@ public class Customer : FullAuditedEntity<int>, IMayHaveTenant
     public virtual int? BusinessNature { get; set; } //getting data from basic code business nature
     public virtual int? MaritalStatus { get; set; } //getting data from basic code marital status
     public virtual decimal? MonthlyIncome { get; set; }
+
 }
