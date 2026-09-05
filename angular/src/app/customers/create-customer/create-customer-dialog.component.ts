@@ -44,6 +44,7 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
         private cd: ChangeDetectorRef
     ) {
         super(injector);
+        this.customer.age = 0;
     }
 
     ngOnInit(): void {
@@ -105,6 +106,18 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
     }
 
     onDropdownChange(): void {
+        this.cd.detectChanges();
+    }
+
+    updateAge(): void {
+        const value = this.customer.birthDate as any;
+        if (!value) {
+            this.customer.age = 0;
+            return;
+        }
+        const birthDate = moment.isMoment(value) ? value.toDate() : new Date(`${value}T00:00:00`);
+        const age = (Date.now() - birthDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
+        this.customer.age = Number.isFinite(age) && age >= 0 ? Math.floor(age) : 0;
         this.cd.detectChanges();
     }
 

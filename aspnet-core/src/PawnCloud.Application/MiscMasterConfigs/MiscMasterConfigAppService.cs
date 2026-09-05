@@ -25,7 +25,8 @@ public class MiscMasterConfigAppService : ApplicationService, IMiscMasterConfigA
             .Select(c => new MiscMasterConfigLookupDto
             {
                 Id = c.Id,
-                DisplayName = c.category
+                DisplayName = c.category,
+                AvailableForUser = c.availableForUser
             })
             .ToList();
         return new ListResultDto<MiscMasterConfigLookupDto>(lookup);

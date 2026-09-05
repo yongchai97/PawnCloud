@@ -70,13 +70,10 @@ export class BasicCodesComponent extends PagedListingComponentBase<BasicCodeDto>
             if (result) {
                 this._basicCodeService
                     .delete(basicCode.id)
-                    .pipe(
-                        finalize(() => {
-                            abp.notify.success(this.l('SuccessfullyDeleted'));
-                            this.refresh();
-                        })
-                    )
-                    .subscribe(() => {});
+                    .subscribe(() => {
+                        abp.notify.success(this.l('SuccessfullyDeleted'));
+                        this.refresh();
+                    });
             }
         });
     }
@@ -86,6 +83,7 @@ export class BasicCodesComponent extends PagedListingComponentBase<BasicCodeDto>
     }
 
     editBasicCode(basicCode: BasicCodeDto): void {
+        if (basicCode.systemProvidedValue) return;
         this.showCreateOrEditBasicCodeDialog(basicCode.id);
     }
 

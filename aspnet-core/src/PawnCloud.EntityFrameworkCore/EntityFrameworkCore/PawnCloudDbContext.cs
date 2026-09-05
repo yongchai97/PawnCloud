@@ -14,6 +14,8 @@ using PawnCloud.ItemStatuses;
 using PawnCloud.MiscMasterConfigs;
 using PawnCloud.MultiTenancy;
 using PawnCloud.PawnItems;
+using PawnCloud.PawnTicketPayments;
+using PawnCloud.PawnTickets;
 
 namespace PawnCloud.EntityFrameworkCore;
 
@@ -34,6 +36,9 @@ public class PawnCloudDbContext : AbpZeroDbContext<Tenant, Role, User, PawnCloud
     public virtual DbSet<GeneralSetup> GeneralSetups { get; set; }
     public virtual DbSet<CustomerPicture> CustomerPictures { get; set; }
     public virtual DbSet<CustomerOutlet> CustomerOutlets { get; set; }
+    public virtual DbSet<PawnTicketPayment> PawnTicketPayments { get; set; }
+    public virtual DbSet<PawnTicketDocument> PawnTicketDocuments { get; set; }
+
     public PawnCloudDbContext(DbContextOptions<PawnCloudDbContext> options)
         : base(options)
     {

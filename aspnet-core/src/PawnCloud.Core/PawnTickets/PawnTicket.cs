@@ -2,6 +2,7 @@ using Abp.Domain.Entities;
 using Abp.Domain.Entities.Auditing;
 using PawnCloud.Customers;
 using PawnCloud.Customers;
+using PawnCloud.GeneralSetups;
 using PawnCloud.GoldTypes;
 using PawnCloud.ItemListings;  // Add this line
 using PawnCloud.ItemStatuses;
@@ -27,13 +28,17 @@ public class PawnTicket : FullAuditedEntity<int>, IMayHaveTenant
     public DateTime expiryDate { get; set; }
     public decimal amount { get; set; }
     public decimal monthlyCustody { get; set; }
-    public virtual int? PaymentMethod { get; set; } // Get option from Basic code with type PaymentMethod
     public decimal serviceCharge { get; set; }
     public string slotNumber { get; set; }
+    public virtual int? GeneralSetup { get; set; }
+    [ForeignKey("GeneralSetup")]
+
+    public GeneralSetup GeneralSetupFk { get; set; }
+
     public PawnTicket() { }
     public PawnTicket(string ticketNo, int? customer, decimal weight, decimal value, 
         DateTime pledgedDate, DateTime expiryDate, decimal amount, decimal monthlyCustody, 
-        int? paymentMethod, decimal serviceCharge, string slotNumber)
+        decimal serviceCharge, string slotNumber, int? generalSetup)
     {
         TicketNo = ticketNo;
         Customer = customer;
@@ -43,8 +48,8 @@ public class PawnTicket : FullAuditedEntity<int>, IMayHaveTenant
         this.expiryDate = expiryDate;
         this.amount = amount;
         this.monthlyCustody = monthlyCustody;
-        PaymentMethod = paymentMethod;
         this.serviceCharge = serviceCharge;
         this.slotNumber = slotNumber;
+        GeneralSetup = generalSetup;
     }
 }

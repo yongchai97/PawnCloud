@@ -16,6 +16,9 @@
                 <input pInputText class="w-100" id="FullName" name="fullName" [(ngModel)]="customer.fullName" required />
             </div>
 
+            <div class="col-md-4 form-group"><label for="Nric">{{ 'NRIC' | localize }}</label><input pInputText class="w-100" id="Nric" name="nric" [(ngModel)]="customer.nric" /></div>
+            <div class="col-md-4 form-group"><label for="PassportNo">{{ 'PassportNo' | localize }}</label><input pInputText class="w-100" id="PassportNo" name="passportNo" [(ngModel)]="customer.passportNo" /></div>
+
             <div class="col-md-6 form-group">
                 <label for="Email">{{ 'Email' | localize }}</label>
                 <input pInputText class="w-100" id="Email" name="email" [(ngModel)]="customer.email" />
@@ -28,7 +31,12 @@
 
             <div class="col-md-6 form-group">
                 <label for="BirthDate">{{ 'BirthDate' | localize }}</label>
-                <input pInputText type="date" class="w-100" id="BirthDate" name="birthDate" [(ngModel)]="customer.birthDate" required />
+                <input pInputText type="date" class="w-100" id="BirthDate" name="birthDate" [(ngModel)]="customer.birthDate" (ngModelChange)="updateAge()" required />
+            </div>
+
+            <div class="col-md-6 form-group">
+                <label for="Age">{{ 'Age' | localize }}</label>
+                <input pInputText class="w-100" id="Age" name="age" [ngModel]="customer.age" readonly />
             </div>
 
             <div class="col-md-3 form-group">

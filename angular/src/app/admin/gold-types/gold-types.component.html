@@ -3,7 +3,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0">{{ 'GoldTypes' | localize }}</h1>
+                    <h1 class="m-0">Gold Type</h1>
                 </div>
             </div>
         </div>
@@ -15,17 +15,17 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">{{ 'GoldTypesList' | localize }}</h3>
+                            <h3 class="card-title">Gold Types</h3>
                             <div class="card-tools">
+                                <button type="button" class="btn btn-primary btn-sm mr-2" (click)="newGoldType()"><i class="fas fa-plus"></i> Add Gold Type</button>
                                 <div class="input-group input-group-sm">
                                     <input
                                         type="text"
                                         class="form-control float-right"
                                         placeholder="{{ 'Search' | localize }}"
-                                        [(ngModel)]="keyword"
-                                        (keyup.enter)="refresh()" />
+                                        [(ngModel)]="keyword" />
                                     <div class="input-group-append">
-                                        <button class="btn btn-primary" (click)="refresh()">
+                                        <button class="btn btn-primary" (click)="loadRecords()">
                                             <i class="fas fa-search"></i>
                                         </button>
                                     </div>
@@ -36,40 +36,39 @@
                         <div class="card-body table-responsive p-0">
                             <p-table
                                 #dataTable
-                                [value]="primengTableHelper.records"
-                                [paginator]="false"
-                                [rows]="primengTableHelper.defaultRecordsCountPerPage"
-                                [loading]="primengTableHelper.isLoading"
+                                [value]="records | slice: 0"
+                                [paginator]="true"
+                                [rows]="10"
+                                [rowsPerPageOptions]="[10, 25, 50]"
+                                [loading]="loading"
                                 styleClass="p-datatable-sm">
                                 <ng-template pTemplate="header">
                                     <tr>
                                         <th style="min-width: 120px">{{ 'Purity' | localize }}</th>
                                         <th style="min-width: 200px">{{ 'Description' | localize }}</th>
+                                        <th style="min-width: 140px">Default percentage</th>
                                         <th style="min-width: 100px">{{ 'Active' | localize }}</th>
+                                        <th style="width: 160px">{{ 'Actions' | localize }}</th>
                                     </tr>
                                 </ng-template>
-                                <ng-template pTemplate="body" let-record="rowData">
+                                <ng-template pTemplate="body" let-record>
                                     <tr>
                                         <td>{{ record.purity }}</td>
                                         <td>{{ record.description }}</td>
+                                        <td>{{ record.defaultPercentage | number: '1.2-2' }}</td>
                                         <td>
                                             <span *ngIf="record.active" class="badge badge-success">{{ 'Active' | localize }}</span>
                                             <span *ngIf="!record.active" class="badge badge-danger">{{ 'Inactive' | localize }}</span>
                                         </td>
+                                        <td>
+                                            <button type="button" class="btn btn-sm btn-outline-primary mr-1" (click)="editGoldType(record)"><i class="fas fa-edit"></i></button>
+                                            <button type="button" class="btn btn-sm" [ngClass]="record.active ? 'btn-outline-danger' : 'btn-outline-success'" [attr.title]="record.active ? 'Deactivate' : 'Activate'" [attr.aria-label]="record.active ? 'Deactivate' : 'Activate'" (click)="toggleStatus(record)">
+                                                <i class="fas" [ngClass]="record.active ? 'fa-ban' : 'fa-check'"></i>
+                                            </button>
+                                        </td>
                                     </tr>
                                 </ng-template>
                             </p-table>
-                        </div>
-
-                        <div class="card-footer">
-                            <p-paginator
-                                #paginator
-                                [rows]="primengTableHelper.defaultRecordsCountPerPage"
-                                [totalRecords]="primengTableHelper.totalRecordsCount"
-                                [rowsPerPageOptions]="primengTableHelper.predefinedRecordsCountPerPage"
-                                (onPageChange)="list($event)"
-                                styleClass="p-paginator-sm">
-                            </p-paginator>
                         </div>
                     </div>
                 </div>

@@ -3,6 +3,7 @@ using Abp.Application.Services.Dto;
 using Abp.Authorization;
 using Abp.Domain.Repositories;
 using Abp.Linq.Extensions;
+using Abp.UI;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,6 +54,12 @@ public class BasicCodeAppService : ApplicationService, IBasicCodeAppService
         {
             await PermissionChecker.AuthorizeAsync(PermissionNames.Pages_BasicCodes_Edit);
             var entity = await _repository.GetAsync(input.Id);
+            if (entity.systemProvidedValue)
+            {
+                throw new UserFriendlyException("System-provided basic codes cannot be edited.");
+            }
+
+            input.SystemProvidedValue = false;
             ObjectMapper.Map(input, entity);
             await _repository.UpdateAsync(entity);
             return entity.Id;
@@ -61,6 +68,7 @@ public class BasicCodeAppService : ApplicationService, IBasicCodeAppService
         {
             await PermissionChecker.AuthorizeAsync(PermissionNames.Pages_BasicCodes_Create);
             var entity = ObjectMapper.Map<BasicCode>(input);
+            entity.systemProvidedValue = false;
             entity.TenantId = AbpSession.TenantId;
             await _repository.InsertAndGetIdAsync(entity);
             return entity.Id;
@@ -70,6 +78,12 @@ public class BasicCodeAppService : ApplicationService, IBasicCodeAppService
     public async Task Delete(EntityDto<int> input)
     {
         await PermissionChecker.AuthorizeAsync(PermissionNames.Pages_BasicCodes_Delete);
+        var entity = await _repository.GetAsync(input.Id);
+        if (entity.systemProvidedValue)
+        {
+            throw new UserFriendlyException("System-provided basic codes cannot be deleted.");
+        }
+
         await _repository.DeleteAsync(input.Id);
     }
 

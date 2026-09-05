@@ -49,18 +49,19 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
     getMenuItems(): MenuItem[] {
         return [
             new MenuItem(this.l('HomePage'), '/app/home', 'fas fa-home'),
-            new MenuItem(this.l('Customers'), '/app/customers', 'fas fa-user-friends', 'Pages.Customers'),
-            new MenuItem(this.l('Loans'), '/app/loans', 'fas fa-hand-holding-usd', 'Pages.Loans'),
-            new MenuItem(this.l('PawnTickets'), '/app/pawn-tickets', 'fas fa-ticket-alt', 'Pages.PawnTickets'),
             new MenuItem(this.l('Outlet'), '/app/outlet', 'fas fa-store'),
+            new MenuItem(this.l('Customers'), '/app/customers', 'fas fa-user-friends', 'Pages.Customers'),
+            new MenuItem(this.l('PawnTickets'), '/app/pawn-tickets', 'fas fa-ticket-alt', 'Pages.PawnTickets'),
             new MenuItem(this.l('Admin'), '', 'fas fa-cog', null, [
                 new MenuItem(this.l('BasicCodes'), '/app/basic-codes', 'fas fa-list', 'Pages.BasicCodes'),
+                new MenuItem(this.l('Countries'), '/app/admin/countries', 'fas fa-globe'),
+                new MenuItem('Gold Price Entry', '/app/admin/gold-price-entry', 'fas fa-coins'),
+                new MenuItem('Gold Type', '/app/admin/gold-types', 'fas fa-ring'),
+                new MenuItem('Item Status', '/app/admin/item-statuses', 'fas fa-tags'),
+                new MenuItem('Item Listing', '/app/admin/item-listings', 'fas fa-list-alt'),
                 new MenuItem(this.l('Roles'), '/app/roles', 'fas fa-theater-masks', 'Pages.Roles'),
                 new MenuItem(this.l('Tenants'), '/app/tenants', 'fas fa-building', 'Pages.Tenants'),
                 new MenuItem(this.l('Users'), '/app/users', 'fas fa-users', 'Pages.Users'),
-                new MenuItem(this.l('GoldTypes'), '/app/admin/gold-types', 'fas fa-ring', 'Pages.GoldTypes'),
-                new MenuItem(this.l('Countries'), '/app/admin/countries', 'fas fa-globe'),
-                new MenuItem('Gold Price Entry', '/app/admin/gold-price-entry', 'fas fa-coins'),
                 new MenuItem(this.l('Seeder'), '/app/admin/seeder', 'fas fa-database', null),
             ]),
         ];

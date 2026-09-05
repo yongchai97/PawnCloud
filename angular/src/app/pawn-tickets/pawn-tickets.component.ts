@@ -8,7 +8,8 @@ import { AppComponentBase } from '@shared/app-component-base';
 import { LocalizePipe } from '@shared/pipes/localize.pipe';
 import { LookupServiceProxy, CustomerLookupDto, PawnTicketLookupDto } from '@shared/service-proxies/lookup-service-proxy';
 import {
-    BasicCodeLookupDto, BasicCodeServiceProxy, CreateOrEditPawnItemDto, CreateOrEditPawnTicketDto,
+    BasicCodeLookupDto, BasicCodeServiceProxy, Country, CountryServiceProxy, CreateOrEditCustomerDto, CreateOrEditPawnItemDto, CreateOrEditPawnTicketDto,
+    CustomerServiceProxy,
     CreatePawnTicketWithItemsDto,
     GoldType, GoldTypeServiceProxy, ItemListing, ItemListingServiceProxy, ItemStatus,
     ItemStatusServiceProxy, PawnItemServiceProxy, PawnTicketDto, PawnTicketServiceProxy,
@@ -27,6 +28,8 @@ import { DropdownModule } from 'primeng/dropdown';
 export class PawnTicketsComponent extends AppComponentBase {
     tickets: PawnTicketDto[] = [];
     customers: CustomerLookupDto[] = [];
+    selectedCustomer?: CreateOrEditCustomerDto;
+    countryNames = new Map<number, string>();
     ticketOptions: PawnTicketLookupDto[] = [];
     itemListings: ItemListing[] = [];
     itemStatuses: ItemStatus[] = [];
@@ -46,6 +49,8 @@ export class PawnTicketsComponent extends AppComponentBase {
     constructor(
         injector: Injector,
         private lookup: LookupServiceProxy,
+        private customerService: CustomerServiceProxy,
+        private countryService: CountryServiceProxy,
         private ticketService: PawnTicketServiceProxy,
         private listingService: ItemListingServiceProxy,
         private statusService: ItemStatusServiceProxy,
@@ -62,13 +67,19 @@ export class PawnTicketsComponent extends AppComponentBase {
     ngOnInit(): void {
         this.loadTickets();
         this.loadCustomers();
+        this.countryService.getAllViaYear(new Date().getFullYear()).subscribe((countries: Country[]) => {
+            (countries || []).forEach((country) => this.countryNames.set(country.id, country.countryName));
+            this.cd.detectChanges();
+        });
         this.listingService.getAll().subscribe((items) => {
             this.itemListings = items || [];
             this.itemListingOptions = this.itemListings.map((item) => ({ id: item.id, label: [item.code, item.description].filter(Boolean).join(' - ') }));
+            this.items.forEach((item) => this.updateItemDescription(item));
         });
         this.statusService.getAll().subscribe((items) => {
             this.itemStatuses = items || [];
             this.itemStatusOptions = this.itemStatuses.map((item) => ({ id: item.id, label: [item.code, item.description].filter(Boolean).join(' - ') }));
+            this.items.forEach((item) => this.updateItemDescription(item));
         });
         this.goldService.getAll().subscribe((items) => {
             this.goldTypes = items || [];
@@ -86,6 +97,32 @@ export class PawnTicketsComponent extends AppComponentBase {
         this.lookup.getCustomersForLookup(this.customerFilter).subscribe((result) => (this.customers = result.items || []));
     }
 
+    selectCustomer(): void {
+        if (!this.ticket.customer) {
+            this.selectedCustomer = undefined;
+            return;
+        }
+        this.customerService.getViaIdForEdit(this.ticket.customer).subscribe((result) => {
+            this.selectedCustomer = result.customer;
+            this.cd.detectChanges();
+        });
+    }
+
+    customerIdentity(): string {
+        return this.selectedCustomer?.nric || this.selectedCustomer?.passportNo || '';
+    }
+
+    countryName(id: number | undefined): string {
+        return id ? this.countryNames.get(id) || '' : '';
+    }
+
+    updateItemDescription(item: CreateOrEditPawnItemDto): void {
+        const listing = this.itemListings.find((option) => option.id === item.itemListing);
+        const status = this.itemStatuses.find((option) => option.id === item.itemStatus);
+        item.description = [listing?.description, status?.description].filter(Boolean).join(' ');
+        this.cd.detectChanges();
+    }
+
     openCreate(): void {
         this.resetForm();
         this.modal.show(this.editor, { class: 'modal-xl pawn-ticket-modal' });
@@ -96,8 +133,10 @@ export class PawnTicketsComponent extends AppComponentBase {
         if (selected) {
             this.ticketService.getViaIdForEdit(selected.id).subscribe((result) => {
                 this.ticket = result.pawnTicket || this.ticket;
+                this.selectCustomer();
                 this.pawnItemService.getAllViaPawnTicketId(selected.id).subscribe((items) => {
                     this.items = (items || []).map((item) => new CreateOrEditPawnItemDto({ ...item, id: undefined }));
+                    this.items.forEach((item) => this.updateItemDescription(item));
                     if (this.items.length === 0) this.addItem();
                 });
             });
@@ -155,6 +194,7 @@ export class PawnTicketsComponent extends AppComponentBase {
         this.ticket.pledgedDate = (window as any).moment();
         this.items = [];
         this.selectedTicketId = undefined;
+        this.selectedCustomer = undefined;
         this.addItem();
     }
 }

@@ -95,24 +95,38 @@ public class CustomerAppService : ApplicationService, ICustomerAppService
             .ToList();
         return new ListResultDto<CustomerLookupDto>(lookup);
     }
-    public async Task<ListResultDto<CustomerOutletDto>> GetCustomerOutletViaCustomerId(EntityDto<int> input)
+    public async Task<List<CustomerOutletDto>> GetCustomerOutletViaCustomerId(EntityDto<int> input)
     {
         var customerOutlets = await _customerOutletRepository.GetAllListAsync(co => co.Customer == input.Id);
-        var dtos = ObjectMapper.Map<List<CustomerOutletDto>>(customerOutlets);
-        return new ListResultDto<CustomerOutletDto>(dtos);
+        List<CustomerOutletDto> listResultDto = new List<CustomerOutletDto>();
+        foreach (var customer in customerOutlets) 
+        {
+            CustomerOutletDto customerOutletDto = new CustomerOutletDto
+            {
+                Id = customer.Id,
+                Customer = customer.Customer,
+                GeneralSetup = customer.GeneralSetup
+            };
+            listResultDto.Add(customerOutletDto);
+        }
+        return listResultDto;
     }
     public async Task<int> CreateOrEditCustomerOutlet(CreateOrEditCustomerOutletDto input)
     {
-        if (input.Id > 0)
+        if (input.Id != null)
         {
             var entity = await _customerOutletRepository.GetAsync((int)input.Id);
-            ObjectMapper.Map(input, entity);
+            entity.GeneralSetup = input.GeneralSetup;
             await _customerOutletRepository.UpdateAsync(entity);
             return entity.Id;
         }
         else
         {
-            var entity = ObjectMapper.Map<CustomerOutlet>(input);
+            var entity = new CustomerOutlet
+            {
+                Customer = input.Customer,
+                GeneralSetup = input.GeneralSetup
+            };
             await _customerOutletRepository.InsertAndGetIdAsync(entity);
             return entity.Id;
         }

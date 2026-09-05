@@ -1,71 +1,83 @@
-import { ChangeDetectorRef, Component, Injector, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, Injector, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs/operators';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
-import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
+import { AppComponentBase } from '@shared/app-component-base';
 import { GoldTypeServiceProxy, GoldType } from '@shared/service-proxies/service-proxies';
-import { Table, TableModule } from 'primeng/table';
-import { LazyLoadEvent, PrimeTemplate } from 'primeng/api';
-import { Paginator, PaginatorModule } from 'primeng/paginator';
+import { TableModule } from 'primeng/table';
 import { FormsModule } from '@angular/forms';
-import { NgIf } from '@angular/common';
-import { LocalizePipe } from '@shared/pipes/localize.pipe';
 import { ButtonModule } from 'primeng/button';
+import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
+import { LocalizePipe } from '@shared/pipes/localize.pipe';
+import { CreateGoldTypeDialogComponent } from './create-gold-type/create-gold-type-dialog.component';
+import { EditGoldTypeDialogComponent } from './edit-gold-type/edit-gold-type-dialog.component';
 
 @Component({
     templateUrl: './gold-types.component.html',
     animations: [appModuleAnimation()],
     standalone: true,
-    imports: [FormsModule, TableModule, PrimeTemplate, NgIf, PaginatorModule, LocalizePipe, ButtonModule],
+    imports: [CommonModule, FormsModule, TableModule, ButtonModule, LocalizePipe],
 })
-export class GoldTypesComponent extends PagedListingComponentBase<GoldType> {
-    @ViewChild('dataTable', { static: true }) dataTable: Table;
-    @ViewChild('paginator', { static: true }) paginator: Paginator;
-
+export class GoldTypesComponent extends AppComponentBase implements OnInit {
     keyword = '';
+    records: GoldType[] = [];
+    loading = false;
 
     constructor(
         injector: Injector,
         private _goldTypeService: GoldTypeServiceProxy,
-        cd: ChangeDetectorRef
+        private _modalService: BsModalService,
+        private cd: ChangeDetectorRef
     ) {
-        super(injector, cd);
+        super(injector);
     }
 
-    list(event?: LazyLoadEvent): void {
-        if (this.primengTableHelper.shouldResetPaging(event)) {
-            this.paginator.changePage(0);
+    ngOnInit(): void {
+        this.loadRecords();
+    }
 
-            if (this.primengTableHelper.records && this.primengTableHelper.records.length > 0) {
-                return;
-            }
-        }
-
-        this.primengTableHelper.showLoadingIndicator();
-
+    loadRecords(): void {
+        this.loading = true;
         this._goldTypeService
             .getAll()
             .pipe(
                 finalize(() => {
-                    this.primengTableHelper.hideLoadingIndicator();
+                    this.loading = false;
+                    this.cd.detectChanges();
                 })
             )
             .subscribe((result: GoldType[]) => {
-                this.primengTableHelper.records = result || [];
-                this.primengTableHelper.totalRecordsCount = (result || []).length;
-                this.primengTableHelper.hideLoadingIndicator();
+                this.records = result || [];
                 this.cd.detectChanges();
+            }, () => {
+                this.records = [];
+                this.notify.error('Unable to load gold types.');
             });
     }
 
-    delete(entity: GoldType): void {
-        abp.message.confirm(this.l('DeleteConfirmation', entity.purity), undefined, (result: boolean) => {
+    toggleStatus(entity: GoldType): void {
+        if (!entity.id) return;
+        const action = entity.active ? 'Deactivate' : 'Activate';
+        abp.message.confirm(`${action} ${entity.purity}?`, undefined, (result: boolean) => {
             if (result) {
-                // Add delete functionality if needed
-                // this._goldTypeService.delete(entity.id).subscribe(() => {
-                //     abp.notify.success(this.l('SuccessfullyDeleted'));
-                //     this.refresh();
-                // });
+                this._goldTypeService.deactiveGoldType(entity.id).subscribe(() => {
+                    this.notify.success(`Gold type ${entity.active ? 'deactivated' : 'activated'}.`);
+                    this.loadRecords();
+                });
             }
         });
+    }
+
+    newGoldType(): void {
+        const dialog: BsModalRef = this._modalService.show(CreateGoldTypeDialogComponent, { class: 'modal-lg' });
+        dialog.content.onSave.subscribe(() => this.loadRecords());
+    }
+
+    editGoldType(entity: GoldType): void {
+        const dialog: BsModalRef = this._modalService.show(EditGoldTypeDialogComponent, {
+            class: 'modal-lg',
+            initialState: { id: entity.id },
+        });
+        dialog.content.onSave.subscribe(() => this.loadRecords());
     }
 }

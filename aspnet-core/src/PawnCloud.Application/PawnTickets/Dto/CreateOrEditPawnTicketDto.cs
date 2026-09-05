@@ -13,8 +13,8 @@ public class CreateOrEditPawnTicketDto : EntityDto<int>
     public DateTime expiryDate { get; set; }
     public decimal amount { get; set; }
     public decimal monthlyCustody { get; set; }
-    public virtual int? PaymentMethod { get; set; } // Get option from Basic code with type PaymentMethod
     public decimal serviceCharge { get; set; }
     public string slotNumber { get; set; }
+    public virtual int? GeneralSetup { get; set; }
 
 }

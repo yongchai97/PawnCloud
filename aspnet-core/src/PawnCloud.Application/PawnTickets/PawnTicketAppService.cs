@@ -111,7 +111,15 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
 
     public async Task<string> CreateTicketAndPawnItem(CreatePawnTicketWithItemsDto input)
     {
-        var generalSetup = await _GeneralSetup.GetAll().FirstOrDefaultAsync();
+        if(input.Ticket == null)
+        {
+            return "";
+        }
+        if(input.Ticket.GeneralSetup == null)
+        {
+            return "";
+        }
+        var generalSetup = await _GeneralSetup.FirstOrDefaultAsync(x=>x.Id == input.Ticket.GeneralSetup);
         var dailyGoldPrices = await _DailyGoldPrice.GetAll().Where(x => x.effectiveDate <= input.Ticket.pledgedDate)
             .OrderByDescending(x => x.effectiveDate).FirstOrDefaultAsync();
         if (input.Ticket.Id <= 0)
@@ -160,7 +168,15 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
     }
     public async Task<CreateOrEditPawnTicketDto> DynamicCalculate(CreatePawnTicketWithItemsDto input)
     {
-        var generalSetup = await _GeneralSetup.GetAll().FirstOrDefaultAsync();
+        if (input.Ticket == null)
+        {
+            return null;
+        }
+        if(input.Ticket.GeneralSetup == null)
+        {
+            return null;
+        }
+        var generalSetup = await _GeneralSetup.FirstOrDefaultAsync(x=>x.Id == input.Ticket.GeneralSetup);
         var allDailyGoldPrices = await _DailyGoldPrice.GetAll().Where(x=>x.effectiveDate <= input.Ticket.pledgedDate).ToListAsync();
         input.Ticket.weight = 0;
         input.Ticket.value = 0;

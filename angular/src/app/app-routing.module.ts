@@ -47,12 +47,6 @@ import { GeneralSetupComponent } from './admin/general-setup/general-setup.compo
                         canActivate: [AppRouteGuard],
                     },
                     {
-                        path: 'loans',
-                        loadChildren: () => import('./loans/loans.module').then((m) => m.LoansModule),
-                        data: { permission: 'Pages.Loans' },
-                        canActivate: [AppRouteGuard],
-                    },
-                    {
                         path: 'pawn-tickets',
                         loadChildren: () => import('./pawn-tickets/pawn-tickets.module').then((m) => m.PawnTicketsModule),
                         data: { permission: 'Pages.PawnTickets' },
@@ -73,12 +67,6 @@ import { GeneralSetupComponent } from './admin/general-setup/general-setup.compo
                         path: 'admin',
                         children: [
                             {
-                                path: 'gold-types',
-                                loadChildren: () => import('./admin/gold-types/gold-types.module').then((m) => m.GoldTypesModule),
-                                data: { permission: 'Pages.GoldTypes' },
-                                canActivate: [AppRouteGuard],
-                            },
-                            {
                                 path: 'countries',
                                 component: CountriesComponent,
                                 canActivate: [AppRouteGuard],
@@ -96,6 +84,21 @@ import { GeneralSetupComponent } from './admin/general-setup/general-setup.compo
                             {
                                 path: 'gold-price-entry',
                                 loadChildren: () => import('./admin/gold-price-entry/gold-price-entry.module').then((m) => m.GoldPriceEntryModule),
+                                canActivate: [AppRouteGuard],
+                            },
+                            {
+                                path: 'gold-types',
+                                loadChildren: () => import('./admin/gold-types/gold-types.module').then((m) => m.GoldTypesModule),
+                                canActivate: [AppRouteGuard],
+                            },
+                            {
+                                path: 'item-statuses',
+                                loadComponent: () => import('./admin/item-statuses/item-statuses.component').then((m) => m.ItemStatusesComponent),
+                                canActivate: [AppRouteGuard],
+                            },
+                            {
+                                path: 'item-listings',
+                                loadComponent: () => import('./admin/item-listings/item-listings.component').then((m) => m.ItemListingsComponent),
                                 canActivate: [AppRouteGuard],
                             },
                             {

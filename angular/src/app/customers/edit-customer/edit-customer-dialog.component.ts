@@ -57,6 +57,7 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
         private cd: ChangeDetectorRef
     ) {
         super(injector);
+        this.customer.age = 0;
     }
 
     ngOnInit(): void {
@@ -66,6 +67,10 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
         if (this.id) {
             this._customerService.getViaIdForEdit(this.id).subscribe((result: GetCustomerForEditOutput) => {
                 this.customer = result.customer;
+                if (this.customer.birthDate) {
+                    this.customer.birthDate = moment(this.customer.birthDate).format('YYYY-MM-DD') as any;
+                }
+                this.updateAge();
                 this.loadCustomerOutlets();
                 this.loadCustomerPictures();
                 this.cd.detectChanges();
@@ -86,7 +91,7 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
     private loadCustomerOutlets(): void {
         if (!this.id) return;
         this._customerService.getCustomerOutletViaCustomerId(this.id).subscribe((result) => {
-            this.customerOutlets = result?.items || [];
+            this.customerOutlets = result || [];
             this.cd.detectChanges();
         });
     }
@@ -163,6 +168,18 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
     }
 
     onDropdownChange(): void {
+        this.cd.detectChanges();
+    }
+
+    updateAge(): void {
+        const value = this.customer.birthDate as any;
+        if (!value) {
+            this.customer.age = 0;
+            return;
+        }
+        const birthDate = moment.isMoment(value) ? value.toDate() : new Date(`${value}T00:00:00`);
+        const age = (Date.now() - birthDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
+        this.customer.age = Number.isFinite(age) && age >= 0 ? Math.floor(age) : 0;
         this.cd.detectChanges();
     }
 

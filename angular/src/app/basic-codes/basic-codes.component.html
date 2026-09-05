@@ -70,8 +70,8 @@
                                         <td>{{ record.codeDescription }}</td>
                                         <td>{{ record.systemProvidedValue ? 'Yes' : 'No' }}</td>
                                         <td>
-                                            <button pButton type="button" class="p-button-sm p-button-info me-2" icon="pi pi-pencil" (click)="editBasicCode(record)"></button>
-                                            <button pButton type="button" class="p-button-sm p-button-danger" icon="pi pi-trash" (click)="delete(record)"></button>
+                                            <button *ngIf="!record.systemProvidedValue" pButton type="button" class="p-button-sm p-button-info me-2" icon="pi pi-pencil" (click)="editBasicCode(record)"></button>
+                                            <button *ngIf="!record.systemProvidedValue" pButton type="button" class="p-button-sm p-button-danger" icon="pi pi-trash" (click)="delete(record)"></button>
                                         </td>
                                     </tr>
                                 </ng-template>
@@ -83,7 +83,7 @@
         </div>
         <div class="row mt-3">
             <div class="col-md-5 m-auto">
-                <p-paginator #paginator [rows]="primengTableHelper.defaultRecordsCountPerPage" [totalRecords]="primengTableHelper.totalRecordsCount" (onPageChange)="paginator.changePage($event.page)"></p-paginator>
+                <p-paginator #paginator [rows]="primengTableHelper.defaultRecordsCountPerPage" [totalRecords]="primengTableHelper.totalRecordsCount" (onPageChange)="list($event)"></p-paginator>
             </div>
         </div>
     </section>
