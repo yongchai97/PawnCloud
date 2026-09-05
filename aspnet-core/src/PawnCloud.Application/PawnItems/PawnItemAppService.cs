@@ -35,10 +35,10 @@ namespace PawnCloud.PawnItems
             var pawnItem = await _repository.GetAsync(id);
             return pawnItem;
         }
-        public async Task<List<PawnItemDto>> GetAllViaPawnTicketId(GetPawnItemViaPawnTicket input)
+        public async Task<List<PawnItem>> GetAllViaPawnTicketId(GetPawnItemViaPawnTicket input)
         {
             var pawnItems = await _repository.GetAllListAsync(p => p.PawnTicket == input.PawnTicket);
-            return pawnItems.Select(p => ObjectMapper.Map<PawnItemDto>(p)).ToList();
+            return pawnItems;
         }
         public async Task CreateOrEdit(CreateOrEditPawnItemDto input)
         {

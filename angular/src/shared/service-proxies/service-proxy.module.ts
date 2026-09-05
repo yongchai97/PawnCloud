@@ -33,6 +33,8 @@ import { OutletServiceProxy } from './outlet-service-proxy';
         OutletServiceProxy,
         LookupServiceProxy,
         CustomerPictureServiceProxy,
+        ApiServiceProxies.PawnTicketDocumentServiceProxy,
+        ApiServiceProxies.PawnTicketPaymentServiceProxy,
         { provide: HTTP_INTERCEPTORS, useClass: AbpHttpInterceptor, multi: true },
     ],
 })

@@ -173,11 +173,28 @@ body > .p-overlay {
 }
 
 .pawn-ticket-modal .modal-content {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 3.5rem);
+    min-height: calc(100vh - 3.5rem);
     max-height: calc(100vh - 3.5rem);
+}
+
+.pawn-ticket-modal form {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    flex-direction: column;
 }
 
 .pawn-ticket-modal .modal-body {
     overflow: auto;
+    min-height: 0;
+    flex: 1 1 auto;
+}
+
+.pawn-ticket-modal .modal-footer {
+    flex: 0 0 auto;
 }
 
 .pawn-ticket-modal .modal-body .table-responsive {
@@ -210,6 +227,27 @@ body > .p-overlay {
     width: 60px;
 }
 
+.pawn-ticket-modal .pawn-items-table {
+    min-width: 980px;
+}
+
+.pawn-ticket-modal .pawn-items-table th.numeric-column,
+.pawn-ticket-modal .pawn-items-table td.numeric-column {
+    min-width: 85px;
+    width: 85px;
+}
+
+.pawn-ticket-modal .pawn-items-table th:nth-child(6),
+.pawn-ticket-modal .pawn-items-table td:nth-child(6) {
+    min-width: 260px;
+}
+
+.pawn-ticket-modal .row .border img {
+    height: 220px !important;
+    object-fit: contain !important;
+    background: #f8f9fa;
+}
+
 @media (max-width: 767.98px) {
     .pawn-ticket-modal {
         width: 100vw;
@@ -217,6 +255,7 @@ body > .p-overlay {
     }
 
     .pawn-ticket-modal .modal-content {
+        height: 100vh;
         min-height: 100vh;
         max-height: 100vh;
         border-radius: 0;

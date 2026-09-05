@@ -9,4 +9,5 @@ aspnet-core/src/PawnCloud.Web.Mvc/App_Data/Logs/
 aspnet-core/src/PawnCloud.Migrator/Logs/Logs.txt
 aspnet-core/build/outputs/
 aspnet-core/docker/mvc/Mvc-Logs/
+aspnet-core/docker/ng/.env
 

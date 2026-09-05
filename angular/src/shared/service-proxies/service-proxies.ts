@@ -3179,7 +3179,7 @@ export class PawnItemServiceProxy {
      * @param pawnTicket (optional) 
      * @return OK
      */
-    getAllViaPawnTicketId(pawnTicket: number | undefined): Observable<PawnItemDto[]> {
+    getAllViaPawnTicketId(pawnTicket: number | undefined): Observable<PawnItem[]> {
         let url_ = this.baseUrl + "/api/services/app/PawnItem/GetAllViaPawnTicketId?";
         if (pawnTicket === null)
             throw new Error("The parameter 'pawnTicket' cannot be null.");
@@ -3202,14 +3202,14 @@ export class PawnItemServiceProxy {
                 try {
                     return this.processGetAllViaPawnTicketId(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<PawnItemDto[]>;
+                    return _observableThrow(e) as any as Observable<PawnItem[]>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<PawnItemDto[]>;
+                return _observableThrow(response_) as any as Observable<PawnItem[]>;
         }));
     }
 
-    protected processGetAllViaPawnTicketId(response: HttpResponseBase): Observable<PawnItemDto[]> {
+    protected processGetAllViaPawnTicketId(response: HttpResponseBase): Observable<PawnItem[]> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -3223,7 +3223,7 @@ export class PawnItemServiceProxy {
             if (Array.isArray(resultData200)) {
                 result200 = [] as any;
                 for (let item of resultData200)
-                    result200.push(PawnItemDto.fromJS(item));
+                    result200.push(PawnItem.fromJS(item));
             }
             else {
                 result200 = <any>null;
@@ -3744,6 +3744,313 @@ export class PawnTicketServiceProxy {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result200 = CreateOrEditPawnTicketDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
+@Injectable()
+export class PawnTicketDocumentServiceProxy {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @param pawnTicket (optional) 
+     * @param file (optional) 
+     * @return OK
+     */
+    upload(pawnTicket: number | undefined, file: FileParameter | undefined): Observable<PawnTicketDocument> {
+        let url_ = this.baseUrl + "/api/services/app/PawnTicketDocument/Upload";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = new FormData();
+        if (pawnTicket === null || pawnTicket === undefined)
+            throw new Error("The parameter 'pawnTicket' cannot be null.");
+        else
+            content_.append("PawnTicket", pawnTicket.toString());
+        if (file === null || file === undefined)
+            throw new Error("The parameter 'file' cannot be null.");
+        else
+            content_.append("File", file.data, file.fileName ? file.fileName : "File");
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processUpload(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processUpload(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<PawnTicketDocument>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<PawnTicketDocument>;
+        }));
+    }
+
+    protected processUpload(response: HttpResponseBase): Observable<PawnTicketDocument> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = PawnTicketDocument.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param id (optional) 
+     * @return OK
+     */
+    delete(id: number | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/PawnTicketDocument/Delete?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+            })
+        };
+
+        return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processDelete(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processDelete(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processDelete(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param id (optional) 
+     * @return OK
+     */
+    download(id: number | undefined): Observable<FileResponse> {
+        let url_ = this.baseUrl + "/api/services/app/PawnTicketDocument/Download?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/octet-stream"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processDownload(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processDownload(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<FileResponse>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<FileResponse>;
+        }));
+    }
+
+    protected processDownload(response: HttpResponseBase): Observable<FileResponse> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return _observableOf({ fileName: fileName, data: responseBlob as any, status: status, headers: _headers });
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param pawnTicket (optional) 
+     * @return OK
+     */
+    getList(pawnTicket: number | undefined): Observable<PawnTicketDocument[]> {
+        let url_ = this.baseUrl + "/api/services/app/PawnTicketDocument/GetList?";
+        if (pawnTicket === null)
+            throw new Error("The parameter 'pawnTicket' cannot be null.");
+        else if (pawnTicket !== undefined)
+            url_ += "pawnTicket=" + encodeURIComponent("" + pawnTicket) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetList(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetList(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<PawnTicketDocument[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<PawnTicketDocument[]>;
+        }));
+    }
+
+    protected processGetList(response: HttpResponseBase): Observable<PawnTicketDocument[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200.push(PawnTicketDocument.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param id (optional) 
+     * @return OK
+     */
+    get(id: number | undefined): Observable<PawnTicketDocument> {
+        let url_ = this.baseUrl + "/api/services/app/PawnTicketDocument/Get?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGet(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGet(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<PawnTicketDocument>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<PawnTicketDocument>;
+        }));
+    }
+
+    protected processGet(response: HttpResponseBase): Observable<PawnTicketDocument> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = PawnTicketDocument.fromJS(resultData200);
             return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
@@ -6877,7 +7184,7 @@ export interface ICreateOrEditPawnItemDto {
 }
 
 export class CreateOrEditPawnTicketDto implements ICreateOrEditPawnTicketDto {
-    id: number;
+    id: number | undefined;
     ticketNo: string | undefined;
     customer: number | undefined;
     weight: number;
@@ -6888,6 +7195,7 @@ export class CreateOrEditPawnTicketDto implements ICreateOrEditPawnTicketDto {
     monthlyCustody: number;
     serviceCharge: number;
     slotNumber: string | undefined;
+    generalSetup: number | undefined;
 
     constructor(data?: ICreateOrEditPawnTicketDto) {
         if (data) {
@@ -6911,6 +7219,7 @@ export class CreateOrEditPawnTicketDto implements ICreateOrEditPawnTicketDto {
             this.monthlyCustody = _data["monthlyCustody"];
             this.serviceCharge = _data["serviceCharge"];
             this.slotNumber = _data["slotNumber"];
+            this.generalSetup = _data["generalSetup"];
         }
     }
 
@@ -6934,6 +7243,7 @@ export class CreateOrEditPawnTicketDto implements ICreateOrEditPawnTicketDto {
         data["monthlyCustody"] = this.monthlyCustody;
         data["serviceCharge"] = this.serviceCharge;
         data["slotNumber"] = this.slotNumber;
+        data["generalSetup"] = this.generalSetup;
         return data;
     }
 
@@ -6946,7 +7256,7 @@ export class CreateOrEditPawnTicketDto implements ICreateOrEditPawnTicketDto {
 }
 
 export interface ICreateOrEditPawnTicketDto {
-    id: number;
+    id: number | undefined;
     ticketNo: string | undefined;
     customer: number | undefined;
     weight: number;
@@ -6957,6 +7267,7 @@ export interface ICreateOrEditPawnTicketDto {
     monthlyCustody: number;
     serviceCharge: number;
     slotNumber: string | undefined;
+    generalSetup: number | undefined;
 }
 
 export class CreatePawnTicketWithItemsDto implements ICreatePawnTicketWithItemsDto {
@@ -9306,97 +9617,6 @@ export interface IPawnItem {
     includedItemValue: number;
 }
 
-export class PawnItemDto implements IPawnItemDto {
-    pawnItemNumber: string | undefined;
-    quantity: number;
-    pawnTicket: number | undefined;
-    itemListing: number | undefined;
-    itemStatus: number | undefined;
-    description: string | undefined;
-    goldType: number | undefined;
-    weight: number;
-    length: number;
-    brand: string | undefined;
-    includedItem: number | undefined;
-    includedItemWeight: number;
-    includedItemValue: number;
-
-    constructor(data?: IPawnItemDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.pawnItemNumber = _data["pawnItemNumber"];
-            this.quantity = _data["quantity"];
-            this.pawnTicket = _data["pawnTicket"];
-            this.itemListing = _data["itemListing"];
-            this.itemStatus = _data["itemStatus"];
-            this.description = _data["description"];
-            this.goldType = _data["goldType"];
-            this.weight = _data["weight"];
-            this.length = _data["length"];
-            this.brand = _data["brand"];
-            this.includedItem = _data["includedItem"];
-            this.includedItemWeight = _data["includedItemWeight"];
-            this.includedItemValue = _data["includedItemValue"];
-        }
-    }
-
-    static fromJS(data: any): PawnItemDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new PawnItemDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["pawnItemNumber"] = this.pawnItemNumber;
-        data["quantity"] = this.quantity;
-        data["pawnTicket"] = this.pawnTicket;
-        data["itemListing"] = this.itemListing;
-        data["itemStatus"] = this.itemStatus;
-        data["description"] = this.description;
-        data["goldType"] = this.goldType;
-        data["weight"] = this.weight;
-        data["length"] = this.length;
-        data["brand"] = this.brand;
-        data["includedItem"] = this.includedItem;
-        data["includedItemWeight"] = this.includedItemWeight;
-        data["includedItemValue"] = this.includedItemValue;
-        return data;
-    }
-
-    clone(): PawnItemDto {
-        const json = this.toJSON();
-        let result = new PawnItemDto();
-        result.init(json);
-        return result;
-    }
-}
-
-export interface IPawnItemDto {
-    pawnItemNumber: string | undefined;
-    quantity: number;
-    pawnTicket: number | undefined;
-    itemListing: number | undefined;
-    itemStatus: number | undefined;
-    description: string | undefined;
-    goldType: number | undefined;
-    weight: number;
-    length: number;
-    brand: string | undefined;
-    includedItem: number | undefined;
-    includedItemWeight: number;
-    includedItemValue: number;
-}
-
 export class PawnTicket implements IPawnTicket {
     id: number;
     creationTime: moment.Moment;
@@ -9418,6 +9638,8 @@ export class PawnTicket implements IPawnTicket {
     monthlyCustody: number;
     serviceCharge: number;
     slotNumber: string | undefined;
+    generalSetup: number | undefined;
+    generalSetupFk: GeneralSetup;
 
     constructor(data?: IPawnTicket) {
         if (data) {
@@ -9450,6 +9672,8 @@ export class PawnTicket implements IPawnTicket {
             this.monthlyCustody = _data["monthlyCustody"];
             this.serviceCharge = _data["serviceCharge"];
             this.slotNumber = _data["slotNumber"];
+            this.generalSetup = _data["generalSetup"];
+            this.generalSetupFk = _data["generalSetupFk"] ? GeneralSetup.fromJS(_data["generalSetupFk"]) : <any>undefined;
         }
     }
 
@@ -9482,6 +9706,8 @@ export class PawnTicket implements IPawnTicket {
         data["monthlyCustody"] = this.monthlyCustody;
         data["serviceCharge"] = this.serviceCharge;
         data["slotNumber"] = this.slotNumber;
+        data["generalSetup"] = this.generalSetup;
+        data["generalSetupFk"] = this.generalSetupFk ? this.generalSetupFk.toJSON() : <any>undefined;
         return data;
     }
 
@@ -9514,6 +9740,107 @@ export interface IPawnTicket {
     monthlyCustody: number;
     serviceCharge: number;
     slotNumber: string | undefined;
+    generalSetup: number | undefined;
+    generalSetupFk: GeneralSetup;
+}
+
+export class PawnTicketDocument implements IPawnTicketDocument {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    tenantId: number | undefined;
+    blobName: string;
+    originalFileName: string;
+    contentType: string;
+    fileSize: number;
+    pawnTicket: number | undefined;
+    pawnTicketFk: PawnTicket;
+
+    constructor(data?: IPawnTicketDocument) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.creationTime = _data["creationTime"] ? moment(_data["creationTime"].toString()) : <any>undefined;
+            this.creatorUserId = _data["creatorUserId"];
+            this.lastModificationTime = _data["lastModificationTime"] ? moment(_data["lastModificationTime"].toString()) : <any>undefined;
+            this.lastModifierUserId = _data["lastModifierUserId"];
+            this.isDeleted = _data["isDeleted"];
+            this.deleterUserId = _data["deleterUserId"];
+            this.deletionTime = _data["deletionTime"] ? moment(_data["deletionTime"].toString()) : <any>undefined;
+            this.tenantId = _data["tenantId"];
+            this.blobName = _data["blobName"];
+            this.originalFileName = _data["originalFileName"];
+            this.contentType = _data["contentType"];
+            this.fileSize = _data["fileSize"];
+            this.pawnTicket = _data["pawnTicket"];
+            this.pawnTicketFk = _data["pawnTicketFk"] ? PawnTicket.fromJS(_data["pawnTicketFk"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): PawnTicketDocument {
+        data = typeof data === 'object' ? data : {};
+        let result = new PawnTicketDocument();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["creationTime"] = this.creationTime ? this.creationTime.toISOString() : <any>undefined;
+        data["creatorUserId"] = this.creatorUserId;
+        data["lastModificationTime"] = this.lastModificationTime ? this.lastModificationTime.toISOString() : <any>undefined;
+        data["lastModifierUserId"] = this.lastModifierUserId;
+        data["isDeleted"] = this.isDeleted;
+        data["deleterUserId"] = this.deleterUserId;
+        data["deletionTime"] = this.deletionTime ? this.deletionTime.toISOString() : <any>undefined;
+        data["tenantId"] = this.tenantId;
+        data["blobName"] = this.blobName;
+        data["originalFileName"] = this.originalFileName;
+        data["contentType"] = this.contentType;
+        data["fileSize"] = this.fileSize;
+        data["pawnTicket"] = this.pawnTicket;
+        data["pawnTicketFk"] = this.pawnTicketFk ? this.pawnTicketFk.toJSON() : <any>undefined;
+        return data;
+    }
+
+    clone(): PawnTicketDocument {
+        const json = this.toJSON();
+        let result = new PawnTicketDocument();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IPawnTicketDocument {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    tenantId: number | undefined;
+    blobName: string;
+    originalFileName: string;
+    contentType: string;
+    fileSize: number;
+    pawnTicket: number | undefined;
+    pawnTicketFk: PawnTicket;
 }
 
 export class PawnTicketDto implements IPawnTicketDto {
@@ -9529,6 +9856,7 @@ export class PawnTicketDto implements IPawnTicketDto {
     monthlyCustody: number;
     serviceCharge: number;
     slotNumber: string | undefined;
+    generalSetup: number | undefined;
 
     constructor(data?: IPawnTicketDto) {
         if (data) {
@@ -9553,6 +9881,7 @@ export class PawnTicketDto implements IPawnTicketDto {
             this.monthlyCustody = _data["monthlyCustody"];
             this.serviceCharge = _data["serviceCharge"];
             this.slotNumber = _data["slotNumber"];
+            this.generalSetup = _data["generalSetup"];
         }
     }
 
@@ -9577,6 +9906,7 @@ export class PawnTicketDto implements IPawnTicketDto {
         data["monthlyCustody"] = this.monthlyCustody;
         data["serviceCharge"] = this.serviceCharge;
         data["slotNumber"] = this.slotNumber;
+        data["generalSetup"] = this.generalSetup;
         return data;
     }
 
@@ -9601,6 +9931,7 @@ export interface IPawnTicketDto {
     monthlyCustody: number;
     serviceCharge: number;
     slotNumber: string | undefined;
+    generalSetup: number | undefined;
 }
 
 export class PawnTicketDtoPagedResultDto implements IPawnTicketDtoPagedResultDto {
@@ -9769,6 +10100,7 @@ export class PawnTicketPayment implements IPawnTicketPayment {
     pawnTicket: number | undefined;
     pawnTicketFk: PawnTicket;
     amount: number;
+    paymentMethod: number | undefined;
 
     constructor(data?: IPawnTicketPayment) {
         if (data) {
@@ -9793,6 +10125,7 @@ export class PawnTicketPayment implements IPawnTicketPayment {
             this.pawnTicket = _data["pawnTicket"];
             this.pawnTicketFk = _data["pawnTicketFk"] ? PawnTicket.fromJS(_data["pawnTicketFk"]) : <any>undefined;
             this.amount = _data["amount"];
+            this.paymentMethod = _data["paymentMethod"];
         }
     }
 
@@ -9817,6 +10150,7 @@ export class PawnTicketPayment implements IPawnTicketPayment {
         data["pawnTicket"] = this.pawnTicket;
         data["pawnTicketFk"] = this.pawnTicketFk ? this.pawnTicketFk.toJSON() : <any>undefined;
         data["amount"] = this.amount;
+        data["paymentMethod"] = this.paymentMethod;
         return data;
     }
 
@@ -9841,12 +10175,14 @@ export interface IPawnTicketPayment {
     pawnTicket: number | undefined;
     pawnTicketFk: PawnTicket;
     amount: number;
+    paymentMethod: number | undefined;
 }
 
 export class PawnTicketPaymentDto implements IPawnTicketPaymentDto {
     id: number | undefined;
     pawnTicket: number | undefined;
     amount: number;
+    paymentMethod: number | undefined;
 
     constructor(data?: IPawnTicketPaymentDto) {
         if (data) {
@@ -9862,6 +10198,7 @@ export class PawnTicketPaymentDto implements IPawnTicketPaymentDto {
             this.id = _data["id"];
             this.pawnTicket = _data["pawnTicket"];
             this.amount = _data["amount"];
+            this.paymentMethod = _data["paymentMethod"];
         }
     }
 
@@ -9877,6 +10214,7 @@ export class PawnTicketPaymentDto implements IPawnTicketPaymentDto {
         data["id"] = this.id;
         data["pawnTicket"] = this.pawnTicket;
         data["amount"] = this.amount;
+        data["paymentMethod"] = this.paymentMethod;
         return data;
     }
 
@@ -9892,6 +10230,7 @@ export interface IPawnTicketPaymentDto {
     id: number | undefined;
     pawnTicket: number | undefined;
     amount: number;
+    paymentMethod: number | undefined;
 }
 
 export class PermissionDto implements IPermissionDto {
@@ -10976,6 +11315,13 @@ export interface IUserLoginInfoDto {
 export interface FileParameter {
     data: any;
     fileName: string;
+}
+
+export interface FileResponse {
+    data: Blob;
+    status: number;
+    fileName?: string;
+    headers?: { [name: string]: any };
 }
 
 export class ApiException extends Error {

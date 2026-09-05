@@ -51,6 +51,8 @@ namespace PawnCloud.CustomerPictures
         public async Task<CustomerPicture> UploadAsync(
             [FromForm] UploadCustomerPictureInput input)
         {
+            Logger.Info($"Customer picture upload started for customer {input?.Customer}, file '{input?.File?.FileName}'.");
+
             if (input.File == null ||
                 input.File.Length == 0)
             {
@@ -75,8 +77,7 @@ namespace PawnCloud.CustomerPictures
             }
 
             // Make sure the customer exists.
-            await _customerRepository.GetAsync(
-                input.Customer);
+            await _customerRepository.GetAsync(input.Customer);
 
             
 
@@ -101,6 +102,7 @@ namespace PawnCloud.CustomerPictures
                     stream);
 
                 blobSaved = true;
+                Logger.Info($"Customer picture blob saved for customer {input.Customer}.");
 
                 var picture = new CustomerPicture
                 {
@@ -116,16 +118,25 @@ namespace PawnCloud.CustomerPictures
                     await _customerPictureRepository
                         .InsertAndGetIdAsync(picture);
 
+                Logger.Info($"Customer picture metadata saved with id {pictureId} for customer {input.Customer}.");
                 return picture;
             }
-            catch
+            catch (Exception exception)
             {
+                Logger.Error($"Customer picture upload failed for customer {input.Customer}, file '{input.File.FileName}'.", exception);
+
                 // Database insertion failed after blob was uploaded.
                 // Remove the blob so we don't leave an orphan.
                 if (blobSaved)
                 {
-                    await _blobContainer.DeleteAsync(
-                        blobName);
+                    try
+                    {
+                        await _blobContainer.DeleteAsync(blobName);
+                    }
+                    catch (Exception cleanupException)
+                    {
+                        Logger.Error($"Customer picture cleanup failed for blob '{blobName}'.", cleanupException);
+                    }
                 }
 
                 throw;

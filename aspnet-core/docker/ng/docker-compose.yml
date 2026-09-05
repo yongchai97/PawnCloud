@@ -16,6 +16,8 @@ services:
 
   mssql:
     image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+    - "127.0.0.1:1433:1433"
     container_name: pmscloud-mssql
     restart: unless-stopped
     environment:
@@ -29,6 +31,8 @@ services:
     image: mcr.microsoft.com/dotnet/aspnet:9.0
     working_dir: /app
     command: ["dotnet", "/app/PawnCloud.Web.Host.dll"]
+    env_file:
+      - /opt/pmscloud/secrets/pawncloud-web.env
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:8080
@@ -36,7 +40,7 @@ services:
       ConnectionStrings__Default: Server=mssql,1433;Database=PawnCloud;User Id=sa;Password=Chai_2607;TrustServerCertificate=True;
       App__ServerRootAddress: https://api.pmscloudapp.com/
       App__ClientRootAddress: https://pmscloudapp.com/
-      App__CorsOrigins: https://pmscloudapp.com,https://www.pmscloudapp.com
+      App__CorsOrigins: https://pmscloudapp.com,https://www.pmscloudapp.com,https://api.pmscloudapp.com
       TZ: Asia/Kuala_Lumpur
     volumes:
       - ./Host-Logs:/app/App_Data/Logs

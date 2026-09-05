@@ -1,6 +1,7 @@
 ﻿using Abp.BlobStoring;
 using Abp.Domain.Repositories;
 using Abp.UI;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PawnCloud.CustomerPictures;
@@ -145,6 +146,8 @@ namespace PawnCloud.PawnTicketDocuments
             await _pawnTicketDocumentRepository.DeleteAsync(
                 document);
         }
+        [Produces("application/octet-stream")]
+        [ProducesResponseType(typeof(Stream), StatusCodes.Status200OK)]
         public async Task<FileResult> DownloadAsync(
     int id)
         {

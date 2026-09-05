@@ -80,7 +80,13 @@ namespace PawnCloud.CustomSeeders
                 await AddBasicCodeIfNotExist("BANK TRANSFER", "Bank Transfer", true, paymentMethodMiscMasterConfig.Id);
                 await AddBasicCodeIfNotExist("TOUCH N GO", "Touch N Go", true, paymentMethodMiscMasterConfig.Id);
             }
-
+            var includedItemMiscMasterConfig = allMiscMasterConfigs.FirstOrDefault(m => m.category == "INCLUDED ITEM");
+            if (includedItemMiscMasterConfig != null)
+            {
+                await AddBasicCodeIfNotExist("STONE", "Stone", false, includedItemMiscMasterConfig.Id);
+                await AddBasicCodeIfNotExist("RIBBON", "Ribbon", false, includedItemMiscMasterConfig.Id);
+                await AddBasicCodeIfNotExist("DIAMOND", "Diamond", false, includedItemMiscMasterConfig.Id);
+            }
         }
         private async Task AddBasicCodeIfNotExist(string codeName, string codeDescription, bool systemProvidedValue, int? MiscMasterConfig)
         {
@@ -451,7 +457,7 @@ namespace PawnCloud.CustomSeeders
             await AddMiscMasterConfigIfNotExist("BUSINESS NATURE", true);
             await AddMiscMasterConfigIfNotExist("MARITAL STATUS", false);
             await AddMiscMasterConfigIfNotExist("PAYMENT METHOD", false);
-
+            await AddMiscMasterConfigIfNotExist("INCLUDED ITEM", true);
 
         }
         private async Task AddMiscMasterConfigIfNotExist(string category, bool availableForUser)

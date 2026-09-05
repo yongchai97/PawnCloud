@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PawnCloud.EntityFrameworkCore;
 
@@ -11,9 +12,11 @@ using PawnCloud.EntityFrameworkCore;
 namespace PawnCloud.Migrations
 {
     [DbContext(typeof(PawnCloudDbContext))]
-    partial class PawnCloudDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260905125451_pawn ticket payments")]
+    partial class pawnticketpayments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

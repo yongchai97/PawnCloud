@@ -85,11 +85,11 @@ namespace PawnCloud.Web.Host.Startup
         {
             app.UseAbp(options => { options.UseAbpRequestLocalization = false; }); // Initializes ABP framework.
 
-            app.UseCors(_defaultCorsPolicyName); // Enable CORS!
-
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseCors(_defaultCorsPolicyName); // Enable CORS after endpoint routing.
 
             app.UseAuthentication();
             app.UseAuthorization();
