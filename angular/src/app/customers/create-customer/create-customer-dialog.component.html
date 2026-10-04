@@ -7,30 +7,21 @@
 
         <div class="row g-3">
             <div class="col-md-6 form-group">
-                <label for="CustomerNo" class="fw-bold">{{ 'CustomerNo' | localize }}</label>
+                <label for="CustomerNo" class="fw-bold">{{ 'CustomerNo' | localize }} <span class="text-danger" aria-hidden="true">*</span></label>
                 <input pInputText class="w-100" id="CustomerNo" name="customerNo" [(ngModel)]="customer.customerNo" required />
             </div>
 
             <div class="col-md-6 form-group">
-                <label for="FullName">{{ 'FullName' | localize }}</label>
+                <label for="FullName">{{ 'FullName' | localize }} <span class="text-danger" aria-hidden="true">*</span></label>
                 <input pInputText class="w-100" id="FullName" name="fullName" [(ngModel)]="customer.fullName" required />
             </div>
 
-            <div class="col-md-4 form-group"><label for="Nric">{{ 'NRIC' | localize }}</label><input pInputText class="w-100" id="Nric" name="nric" [(ngModel)]="customer.nric" /></div>
+            <div class="col-md-4 form-group"><label for="Nric">{{ 'NRIC' | localize }}</label><input pInputText class="w-100" id="Nric" name="nric" [(ngModel)]="customer.nric" (ngModelChange)="readBirthDateFromNric()" /></div>
             <div class="col-md-4 form-group"><label for="PassportNo">{{ 'PassportNo' | localize }}</label><input pInputText class="w-100" id="PassportNo" name="passportNo" [(ngModel)]="customer.passportNo" /></div>
+            <div class="col-md-4 form-group"><label for="OldIC">Old IC</label><input pInputText class="w-100" id="OldIC" name="oldIC" [(ngModel)]="customer.oldIC" /></div>
 
             <div class="col-md-6 form-group">
-                <label for="Email">{{ 'Email' | localize }}</label>
-                <input pInputText class="w-100" id="Email" name="email" [(ngModel)]="customer.email" />
-            </div>
-
-            <div class="col-md-6 form-group">
-                <label for="PhoneNo">{{ 'PhoneNo' | localize }}</label>
-                <input pInputText class="w-100" id="PhoneNo" name="phoneNo" [(ngModel)]="customer.phoneNo" />
-            </div>
-
-            <div class="col-md-6 form-group">
-                <label for="BirthDate">{{ 'BirthDate' | localize }}</label>
+                <label for="BirthDate">{{ 'BirthDate' | localize }} <span class="text-danger" aria-hidden="true">*</span></label>
                 <input pInputText type="date" class="w-100" id="BirthDate" name="birthDate" [(ngModel)]="customer.birthDate" (ngModelChange)="updateAge()" required />
             </div>
 
@@ -39,8 +30,27 @@
                 <input pInputText class="w-100" id="Age" name="age" [ngModel]="customer.age" readonly />
             </div>
 
+            <div class="col-12 alert alert-danger mb-0" role="alert" *ngIf="isUnderage()">
+                Minimum Age for The Operation is 18 Years Old
+            </div>
+
+            <div class="col-md-4 form-group">
+                <label for="Email">{{ 'Email' | localize }}</label>
+                <input pInputText class="w-100" id="Email" name="email" [(ngModel)]="customer.email" />
+            </div>
+
+            <div class="col-md-4 form-group">
+                <label for="PhoneNo">{{ 'PhoneNo' | localize }}</label>
+                <input pInputText class="w-100" id="PhoneNo" name="phoneNo" [(ngModel)]="customer.phoneNo" />
+            </div>
+
+            <div class="col-md-4 form-group">
+                <label for="TelephoneNumber">Home telephone number</label>
+                <input pInputText class="w-100" id="TelephoneNumber" name="telephoneNumber" [(ngModel)]="customer.telephoneNumber" />
+            </div>
+
             <div class="col-md-3 form-group">
-                <label for="Gender">{{ 'Gender' | localize }}</label>
+                <label for="Gender">{{ 'Gender' | localize }} <span class="text-danger" aria-hidden="true">*</span></label>
                 <p-dropdown
                     appendTo="body"
                     inputId="Gender"
@@ -57,7 +67,7 @@
             </div>
 
             <div class="col-md-3 form-group">
-                <label for="Race">{{ 'Race' | localize }}</label>
+                <label for="Race">{{ 'Race' | localize }} <span class="text-danger" aria-hidden="true">*</span></label>
                 <p-dropdown
                     appendTo="body"
                     inputId="Race"
@@ -74,7 +84,7 @@
             </div>
 
             <div class="col-md-3 form-group">
-                <label for="Nationality">{{ 'Nationality' | localize }}</label>
+                <label for="Nationality">{{ 'Nationality' | localize }} <span class="text-danger" aria-hidden="true">*</span></label>
                 <p-dropdown
                     appendTo="body"
                     inputId="Nationality"
@@ -94,7 +104,7 @@
             </div>
 
             <div class="col-md-3 form-group">
-                <label for="MaritalStatus">{{ 'MaritalStatus' | localize }}</label>
+                <label for="MaritalStatus">{{ 'MaritalStatus' | localize }} <span class="text-danger" aria-hidden="true">*</span></label>
                 <p-dropdown
                     appendTo="body"
                     inputId="MaritalStatus"
@@ -108,6 +118,11 @@
                     (onChange)="onDropdownChange()"
                     [placeholder]="'Select' | localize"
                     styleClass="w-100"></p-dropdown>
+            </div>
+
+            <div class="col-12 form-group">
+                <label for="Remark">Remark</label>
+                <textarea pInputText class="w-100" id="Remark" name="remark" [(ngModel)]="customer.remark" rows="3"></textarea>
             </div>
         </div>
 
@@ -131,7 +146,12 @@
             </div>
 
             <div class="col-md-4 form-group">
-                <label for="Country">{{ 'Country' | localize }}</label>
+                <label for="Postcode">{{ 'Postcode' | localize }}</label>
+                <input pInputText class="w-100" id="Postcode" name="postcode" [(ngModel)]="customer.postcode" />
+            </div>
+
+            <div class="col-md-4 form-group">
+                <label for="Country">{{ 'Country' | localize }} <span class="text-danger" aria-hidden="true">*</span></label>
                 <p-dropdown
                     appendTo="body"
                     inputId="Country"
@@ -152,7 +172,12 @@
         </div>
 
         <hr class="my-3" />
-        <h6 class="mb-3 text-muted">{{ 'MailingAddress' | localize }}</h6>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="mb-0 text-muted">{{ 'MailingAddress' | localize }}</h6>
+            <button type="button" class="btn btn-sm btn-outline-secondary" (click)="copyAddressToMailing()">
+                <i class="fas fa-copy me-1"></i>Same as Above Address
+            </button>
+        </div>
 
         <div class="row g-3">
             <div class="col-md-12 form-group">
@@ -171,7 +196,12 @@
             </div>
 
             <div class="col-md-4 form-group">
-                <label for="MailingCountry">{{ 'Country' | localize }}</label>
+                <label for="MailingPostcode">{{ 'Postcode' | localize }}</label>
+                <input pInputText class="w-100" id="MailingPostcode" name="mailingPostcode" [(ngModel)]="customer.mailingPostcode" />
+            </div>
+
+            <div class="col-md-4 form-group">
+                <label for="MailingCountry">{{ 'Country' | localize }} <span class="text-danger" aria-hidden="true">*</span></label>
                 <p-dropdown
                     appendTo="body"
                     inputId="MailingCountry"
@@ -206,7 +236,7 @@
             </div>
 
             <div class="col-md-6 form-group">
-                <label for="BusinessNature">{{ 'BusinessNature' | localize }}</label>
+                <label for="BusinessNature">{{ 'BusinessNature' | localize }} <span class="text-danger" aria-hidden="true">*</span></label>
                 <p-dropdown
                     appendTo="body"
                     inputId="BusinessNature"
@@ -223,10 +253,10 @@
             </div>
 
             <div class="col-md-6 form-group">
-                <label for="MonthlyIncome">{{ 'MonthlyIncome' | localize }}</label>
+                <label for="MonthlyIncome">{{ 'MonthlyIncome' | localize }} <span class="text-danger" aria-hidden="true">*</span></label>
                 <p-inputNumber inputId="MonthlyIncome" name="monthlyIncome" styleClass="w-100" [(ngModel)]="customer.monthlyIncome" required></p-inputNumber>
             </div>
         </div>
     </div>
-    <abp-modal-footer [saveDisabled]="saving || customerForm.invalid" [cancelDisabled]="saving" (onCancelClick)="bsModalRef.hide()"></abp-modal-footer>
+    <abp-modal-footer [saveDisabled]="saving || customerForm.invalid || isUnderage()" [cancelDisabled]="saving" (onCancelClick)="bsModalRef.hide()"></abp-modal-footer>
 </form>

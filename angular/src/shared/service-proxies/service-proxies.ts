@@ -1933,7 +1933,7 @@ export class GeneralSetupServiceProxy {
      * @param body (optional) 
      * @return OK
      */
-    createOrEdit(body: GeneralSetup | undefined): Observable<GeneralSetup> {
+    createOrEdit(body: GeneralSetup | undefined): Observable<void> {
         let url_ = this.baseUrl + "/api/services/app/GeneralSetup/CreateOrEdit";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -1945,7 +1945,6 @@ export class GeneralSetupServiceProxy {
             responseType: "blob",
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
-                "Accept": "text/plain"
             })
         };
 
@@ -1956,14 +1955,14 @@ export class GeneralSetupServiceProxy {
                 try {
                     return this.processCreateOrEdit(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<GeneralSetup>;
+                    return _observableThrow(e) as any as Observable<void>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<GeneralSetup>;
+                return _observableThrow(response_) as any as Observable<void>;
         }));
     }
 
-    protected processCreateOrEdit(response: HttpResponseBase): Observable<GeneralSetup> {
+    protected processCreateOrEdit(response: HttpResponseBase): Observable<void> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -1972,10 +1971,7 @@ export class GeneralSetupServiceProxy {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = GeneralSetup.fromJS(resultData200);
-            return _observableOf(result200);
+            return _observableOf(null as any);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -2038,62 +2034,6 @@ export class GeneralSetupServiceProxy {
     }
 
     /**
-     * @param body (optional) 
-     * @return OK
-     */
-    updateGeneralSetup(body: GeneralSetup | undefined): Observable<GeneralSetup> {
-        let url_ = this.baseUrl + "/api/services/app/GeneralSetup/UpdateGeneralSetup";
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_ : any = {
-            body: content_,
-            observe: "response",
-            responseType: "blob",
-            headers: new HttpHeaders({
-                "Content-Type": "application/json",
-                "Accept": "text/plain"
-            })
-        };
-
-        return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processUpdateGeneralSetup(response_);
-        })).pipe(_observableCatch((response_: any) => {
-            if (response_ instanceof HttpResponseBase) {
-                try {
-                    return this.processUpdateGeneralSetup(response_ as any);
-                } catch (e) {
-                    return _observableThrow(e) as any as Observable<GeneralSetup>;
-                }
-            } else
-                return _observableThrow(response_) as any as Observable<GeneralSetup>;
-        }));
-    }
-
-    protected processUpdateGeneralSetup(response: HttpResponseBase): Observable<GeneralSetup> {
-        const status = response.status;
-        const responseBlob =
-            response instanceof HttpResponse ? response.body :
-            (response as any).error instanceof Blob ? (response as any).error : undefined;
-
-        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
-            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = GeneralSetup.fromJS(resultData200);
-            return _observableOf(result200);
-            }));
-        } else if (status !== 200 && status !== 204) {
-            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            }));
-        }
-        return _observableOf(null as any);
-    }
-
-    /**
      * @return OK
      */
     returnOption(): Observable<IdMethodEnumList> {
@@ -2136,6 +2076,173 @@ export class GeneralSetupServiceProxy {
                 result200 = resultData200 !== undefined ? resultData200 : <any>null;
     
             return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param id (optional) 
+     * @return OK
+     */
+    getGeneralSetupTable(id: number | undefined): Observable<GeneralSetupTable[]> {
+        let url_ = this.baseUrl + "/api/services/app/GeneralSetup/GetGeneralSetupTable?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetGeneralSetupTable(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetGeneralSetupTable(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<GeneralSetupTable[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<GeneralSetupTable[]>;
+        }));
+    }
+
+    protected processGetGeneralSetupTable(response: HttpResponseBase): Observable<GeneralSetupTable[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200.push(GeneralSetupTable.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param id (optional) 
+     * @return OK
+     */
+    deleteGeneralSetupTable(id: number | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/GeneralSetup/DeleteGeneralSetupTable?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+            })
+        };
+
+        return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processDeleteGeneralSetupTable(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processDeleteGeneralSetupTable(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processDeleteGeneralSetupTable(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    createOrEditGeneralSetupTable(body: GeneralSetupTable | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/GeneralSetup/CreateOrEditGeneralSetupTable";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreateOrEditGeneralSetupTable(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreateOrEditGeneralSetupTable(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processCreateOrEditGeneralSetupTable(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -6684,10 +6791,12 @@ export class CreateOrEditCustomerDto implements ICreateOrEditCustomerDto {
     address: string | undefined;
     city: string | undefined;
     state: string | undefined;
+    postcode: string | undefined;
     country: number | undefined;
     mailingAddress: string | undefined;
     mailingCity: string | undefined;
     mailingState: string | undefined;
+    mailingPostcode: string | undefined;
     mailingCountry: number | undefined;
     race: number | undefined;
     gender: number | undefined;
@@ -6728,10 +6837,12 @@ export class CreateOrEditCustomerDto implements ICreateOrEditCustomerDto {
             this.address = _data["address"];
             this.city = _data["city"];
             this.state = _data["state"];
+            this.postcode = _data["postcode"];
             this.country = _data["country"];
             this.mailingAddress = _data["mailingAddress"];
             this.mailingCity = _data["mailingCity"];
             this.mailingState = _data["mailingState"];
+            this.mailingPostcode = _data["mailingPostcode"];
             this.mailingCountry = _data["mailingCountry"];
             this.race = _data["race"];
             this.gender = _data["gender"];
@@ -6772,10 +6883,12 @@ export class CreateOrEditCustomerDto implements ICreateOrEditCustomerDto {
         data["address"] = this.address;
         data["city"] = this.city;
         data["state"] = this.state;
+        data["postcode"] = this.postcode;
         data["country"] = this.country;
         data["mailingAddress"] = this.mailingAddress;
         data["mailingCity"] = this.mailingCity;
         data["mailingState"] = this.mailingState;
+        data["mailingPostcode"] = this.mailingPostcode;
         data["mailingCountry"] = this.mailingCountry;
         data["race"] = this.race;
         data["gender"] = this.gender;
@@ -6816,10 +6929,12 @@ export interface ICreateOrEditCustomerDto {
     address: string | undefined;
     city: string | undefined;
     state: string | undefined;
+    postcode: string | undefined;
     country: number | undefined;
     mailingAddress: string | undefined;
     mailingCity: string | undefined;
     mailingState: string | undefined;
+    mailingPostcode: string | undefined;
     mailingCountry: number | undefined;
     race: number | undefined;
     gender: number | undefined;
@@ -7545,10 +7660,12 @@ export class Customer implements ICustomer {
     address: string | undefined;
     city: string | undefined;
     state: string | undefined;
+    postcode: string | undefined;
     country: number | undefined;
     mailingAddress: string | undefined;
     mailingCity: string | undefined;
     mailingState: string | undefined;
+    mailingPostcode: string | undefined;
     mailingCountry: number | undefined;
     race: number | undefined;
     gender: number | undefined;
@@ -7597,10 +7714,12 @@ export class Customer implements ICustomer {
             this.address = _data["address"];
             this.city = _data["city"];
             this.state = _data["state"];
+            this.postcode = _data["postcode"];
             this.country = _data["country"];
             this.mailingAddress = _data["mailingAddress"];
             this.mailingCity = _data["mailingCity"];
             this.mailingState = _data["mailingState"];
+            this.mailingPostcode = _data["mailingPostcode"];
             this.mailingCountry = _data["mailingCountry"];
             this.race = _data["race"];
             this.gender = _data["gender"];
@@ -7649,10 +7768,12 @@ export class Customer implements ICustomer {
         data["address"] = this.address;
         data["city"] = this.city;
         data["state"] = this.state;
+        data["postcode"] = this.postcode;
         data["country"] = this.country;
         data["mailingAddress"] = this.mailingAddress;
         data["mailingCity"] = this.mailingCity;
         data["mailingState"] = this.mailingState;
+        data["mailingPostcode"] = this.mailingPostcode;
         data["mailingCountry"] = this.mailingCountry;
         data["race"] = this.race;
         data["gender"] = this.gender;
@@ -7701,10 +7822,12 @@ export interface ICustomer {
     address: string | undefined;
     city: string | undefined;
     state: string | undefined;
+    postcode: string | undefined;
     country: number | undefined;
     mailingAddress: string | undefined;
     mailingCity: string | undefined;
     mailingState: string | undefined;
+    mailingPostcode: string | undefined;
     mailingCountry: number | undefined;
     race: number | undefined;
     gender: number | undefined;
@@ -7737,10 +7860,12 @@ export class CustomerDto implements ICustomerDto {
     address: string | undefined;
     city: string | undefined;
     state: string | undefined;
+    postcode: string | undefined;
     country: number | undefined;
     mailingAddress: string | undefined;
     mailingCity: string | undefined;
     mailingState: string | undefined;
+    mailingPostcode: string | undefined;
     mailingCountry: number | undefined;
     race: number | undefined;
     gender: number | undefined;
@@ -7782,10 +7907,12 @@ export class CustomerDto implements ICustomerDto {
             this.address = _data["address"];
             this.city = _data["city"];
             this.state = _data["state"];
+            this.postcode = _data["postcode"];
             this.country = _data["country"];
             this.mailingAddress = _data["mailingAddress"];
             this.mailingCity = _data["mailingCity"];
             this.mailingState = _data["mailingState"];
+            this.mailingPostcode = _data["mailingPostcode"];
             this.mailingCountry = _data["mailingCountry"];
             this.race = _data["race"];
             this.gender = _data["gender"];
@@ -7827,10 +7954,12 @@ export class CustomerDto implements ICustomerDto {
         data["address"] = this.address;
         data["city"] = this.city;
         data["state"] = this.state;
+        data["postcode"] = this.postcode;
         data["country"] = this.country;
         data["mailingAddress"] = this.mailingAddress;
         data["mailingCity"] = this.mailingCity;
         data["mailingState"] = this.mailingState;
+        data["mailingPostcode"] = this.mailingPostcode;
         data["mailingCountry"] = this.mailingCountry;
         data["race"] = this.race;
         data["gender"] = this.gender;
@@ -7872,10 +8001,12 @@ export interface ICustomerDto {
     address: string | undefined;
     city: string | undefined;
     state: string | undefined;
+    postcode: string | undefined;
     country: number | undefined;
     mailingAddress: string | undefined;
     mailingCity: string | undefined;
     mailingState: string | undefined;
+    mailingPostcode: string | undefined;
     mailingCountry: number | undefined;
     race: number | undefined;
     gender: number | undefined;
@@ -8403,6 +8534,22 @@ export class GeneralSetup implements IGeneralSetup {
     appendedStringBackMethod: number | undefined;
     outletName: string | undefined;
     outletRegistrationNumber: string | undefined;
+    bandarayaLicenseExpiryDate: moment.Moment;
+    kpktLicenseExpiryDate: moment.Moment;
+    kpktPermitIklanExpiryDate: moment.Moment;
+    insuranceExpiryDate: moment.Moment;
+    pdpaExpiryDate: moment.Moment;
+    outletAddress: string | undefined;
+    outletCity: string | undefined;
+    outletState: string | undefined;
+    outletPostcode: string | undefined;
+    outletCountry: number | undefined;
+    insurancePolicyNumber: string | undefined;
+    bandarayaLicenseLastUpdate: moment.Moment;
+    kpktLicenseLastUpdate: moment.Moment;
+    kpktPermitIklanLastUpdate: moment.Moment;
+    insuranceLastUpdate: moment.Moment;
+    pdpaLastUpdate: moment.Moment;
 
     constructor(data?: IGeneralSetup) {
         if (data) {
@@ -8433,6 +8580,22 @@ export class GeneralSetup implements IGeneralSetup {
             this.appendedStringBackMethod = _data["appendedStringBackMethod"];
             this.outletName = _data["outletName"];
             this.outletRegistrationNumber = _data["outletRegistrationNumber"];
+            this.bandarayaLicenseExpiryDate = _data["bandarayaLicenseExpiryDate"] ? moment(_data["bandarayaLicenseExpiryDate"].toString()) : <any>undefined;
+            this.kpktLicenseExpiryDate = _data["kpktLicenseExpiryDate"] ? moment(_data["kpktLicenseExpiryDate"].toString()) : <any>undefined;
+            this.kpktPermitIklanExpiryDate = _data["kpktPermitIklanExpiryDate"] ? moment(_data["kpktPermitIklanExpiryDate"].toString()) : <any>undefined;
+            this.insuranceExpiryDate = _data["insuranceExpiryDate"] ? moment(_data["insuranceExpiryDate"].toString()) : <any>undefined;
+            this.pdpaExpiryDate = _data["pdpaExpiryDate"] ? moment(_data["pdpaExpiryDate"].toString()) : <any>undefined;
+            this.outletAddress = _data["outletAddress"];
+            this.outletCity = _data["outletCity"];
+            this.outletState = _data["outletState"];
+            this.outletPostcode = _data["outletPostcode"];
+            this.outletCountry = _data["outletCountry"];
+            this.insurancePolicyNumber = _data["insurancePolicyNumber"];
+            this.bandarayaLicenseLastUpdate = _data["bandarayaLicenseLastUpdate"] ? moment(_data["bandarayaLicenseLastUpdate"].toString()) : <any>undefined;
+            this.kpktLicenseLastUpdate = _data["kpktLicenseLastUpdate"] ? moment(_data["kpktLicenseLastUpdate"].toString()) : <any>undefined;
+            this.kpktPermitIklanLastUpdate = _data["kpktPermitIklanLastUpdate"] ? moment(_data["kpktPermitIklanLastUpdate"].toString()) : <any>undefined;
+            this.insuranceLastUpdate = _data["insuranceLastUpdate"] ? moment(_data["insuranceLastUpdate"].toString()) : <any>undefined;
+            this.pdpaLastUpdate = _data["pdpaLastUpdate"] ? moment(_data["pdpaLastUpdate"].toString()) : <any>undefined;
         }
     }
 
@@ -8463,6 +8626,22 @@ export class GeneralSetup implements IGeneralSetup {
         data["appendedStringBackMethod"] = this.appendedStringBackMethod;
         data["outletName"] = this.outletName;
         data["outletRegistrationNumber"] = this.outletRegistrationNumber;
+        data["bandarayaLicenseExpiryDate"] = this.bandarayaLicenseExpiryDate ? this.bandarayaLicenseExpiryDate.toISOString() : <any>undefined;
+        data["kpktLicenseExpiryDate"] = this.kpktLicenseExpiryDate ? this.kpktLicenseExpiryDate.toISOString() : <any>undefined;
+        data["kpktPermitIklanExpiryDate"] = this.kpktPermitIklanExpiryDate ? this.kpktPermitIklanExpiryDate.toISOString() : <any>undefined;
+        data["insuranceExpiryDate"] = this.insuranceExpiryDate ? this.insuranceExpiryDate.toISOString() : <any>undefined;
+        data["pdpaExpiryDate"] = this.pdpaExpiryDate ? this.pdpaExpiryDate.toISOString() : <any>undefined;
+        data["outletAddress"] = this.outletAddress;
+        data["outletCity"] = this.outletCity;
+        data["outletState"] = this.outletState;
+        data["outletPostcode"] = this.outletPostcode;
+        data["outletCountry"] = this.outletCountry;
+        data["insurancePolicyNumber"] = this.insurancePolicyNumber;
+        data["bandarayaLicenseLastUpdate"] = this.bandarayaLicenseLastUpdate ? this.bandarayaLicenseLastUpdate.toISOString() : <any>undefined;
+        data["kpktLicenseLastUpdate"] = this.kpktLicenseLastUpdate ? this.kpktLicenseLastUpdate.toISOString() : <any>undefined;
+        data["kpktPermitIklanLastUpdate"] = this.kpktPermitIklanLastUpdate ? this.kpktPermitIklanLastUpdate.toISOString() : <any>undefined;
+        data["insuranceLastUpdate"] = this.insuranceLastUpdate ? this.insuranceLastUpdate.toISOString() : <any>undefined;
+        data["pdpaLastUpdate"] = this.pdpaLastUpdate ? this.pdpaLastUpdate.toISOString() : <any>undefined;
         return data;
     }
 
@@ -8493,6 +8672,161 @@ export interface IGeneralSetup {
     appendedStringBackMethod: number | undefined;
     outletName: string | undefined;
     outletRegistrationNumber: string | undefined;
+    bandarayaLicenseExpiryDate: moment.Moment;
+    kpktLicenseExpiryDate: moment.Moment;
+    kpktPermitIklanExpiryDate: moment.Moment;
+    insuranceExpiryDate: moment.Moment;
+    pdpaExpiryDate: moment.Moment;
+    outletAddress: string | undefined;
+    outletCity: string | undefined;
+    outletState: string | undefined;
+    outletPostcode: string | undefined;
+    outletCountry: number | undefined;
+    insurancePolicyNumber: string | undefined;
+    bandarayaLicenseLastUpdate: moment.Moment;
+    kpktLicenseLastUpdate: moment.Moment;
+    kpktPermitIklanLastUpdate: moment.Moment;
+    insuranceLastUpdate: moment.Moment;
+    pdpaLastUpdate: moment.Moment;
+}
+
+export class GeneralSetupTable implements IGeneralSetupTable {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    tenantId: number | undefined;
+    generalSetup: number | undefined;
+    generalSetupFk: GeneralSetup;
+    effectiveDate: moment.Moment;
+    maximumPercentage: number;
+    firstMonthInterestRate: number;
+    secondMonthInterestRate: number;
+    thirdMonthInterestRate: number;
+    fourthMonthInterestRate: number;
+    fifthMonthInterestRate: number;
+    sixthMonthInterestRate: number;
+    seventhMonthInterestRate: number;
+    eighthMonthInterestRate: number;
+    ninthMonthInterestRate: number;
+    tenthMonthInterestRate: number;
+    eleventhMonthInterestRate: number;
+    twelfthMonthInterestRate: number;
+
+    constructor(data?: IGeneralSetupTable) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.creationTime = _data["creationTime"] ? moment(_data["creationTime"].toString()) : <any>undefined;
+            this.creatorUserId = _data["creatorUserId"];
+            this.lastModificationTime = _data["lastModificationTime"] ? moment(_data["lastModificationTime"].toString()) : <any>undefined;
+            this.lastModifierUserId = _data["lastModifierUserId"];
+            this.isDeleted = _data["isDeleted"];
+            this.deleterUserId = _data["deleterUserId"];
+            this.deletionTime = _data["deletionTime"] ? moment(_data["deletionTime"].toString()) : <any>undefined;
+            this.tenantId = _data["tenantId"];
+            this.generalSetup = _data["generalSetup"];
+            this.generalSetupFk = _data["generalSetupFk"] ? GeneralSetup.fromJS(_data["generalSetupFk"]) : <any>undefined;
+            this.effectiveDate = _data["effectiveDate"] ? moment(_data["effectiveDate"].toString()) : <any>undefined;
+            this.maximumPercentage = _data["maximumPercentage"];
+            this.firstMonthInterestRate = _data["firstMonthInterestRate"];
+            this.secondMonthInterestRate = _data["secondMonthInterestRate"];
+            this.thirdMonthInterestRate = _data["thirdMonthInterestRate"];
+            this.fourthMonthInterestRate = _data["fourthMonthInterestRate"];
+            this.fifthMonthInterestRate = _data["fifthMonthInterestRate"];
+            this.sixthMonthInterestRate = _data["sixthMonthInterestRate"];
+            this.seventhMonthInterestRate = _data["seventhMonthInterestRate"];
+            this.eighthMonthInterestRate = _data["eighthMonthInterestRate"];
+            this.ninthMonthInterestRate = _data["ninthMonthInterestRate"];
+            this.tenthMonthInterestRate = _data["tenthMonthInterestRate"];
+            this.eleventhMonthInterestRate = _data["eleventhMonthInterestRate"];
+            this.twelfthMonthInterestRate = _data["twelfthMonthInterestRate"];
+        }
+    }
+
+    static fromJS(data: any): GeneralSetupTable {
+        data = typeof data === 'object' ? data : {};
+        let result = new GeneralSetupTable();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["creationTime"] = this.creationTime ? this.creationTime.toISOString() : <any>undefined;
+        data["creatorUserId"] = this.creatorUserId;
+        data["lastModificationTime"] = this.lastModificationTime ? this.lastModificationTime.toISOString() : <any>undefined;
+        data["lastModifierUserId"] = this.lastModifierUserId;
+        data["isDeleted"] = this.isDeleted;
+        data["deleterUserId"] = this.deleterUserId;
+        data["deletionTime"] = this.deletionTime ? this.deletionTime.toISOString() : <any>undefined;
+        data["tenantId"] = this.tenantId;
+        data["generalSetup"] = this.generalSetup;
+        data["generalSetupFk"] = this.generalSetupFk ? this.generalSetupFk.toJSON() : <any>undefined;
+        data["effectiveDate"] = this.effectiveDate ? this.effectiveDate.toISOString() : <any>undefined;
+        data["maximumPercentage"] = this.maximumPercentage;
+        data["firstMonthInterestRate"] = this.firstMonthInterestRate;
+        data["secondMonthInterestRate"] = this.secondMonthInterestRate;
+        data["thirdMonthInterestRate"] = this.thirdMonthInterestRate;
+        data["fourthMonthInterestRate"] = this.fourthMonthInterestRate;
+        data["fifthMonthInterestRate"] = this.fifthMonthInterestRate;
+        data["sixthMonthInterestRate"] = this.sixthMonthInterestRate;
+        data["seventhMonthInterestRate"] = this.seventhMonthInterestRate;
+        data["eighthMonthInterestRate"] = this.eighthMonthInterestRate;
+        data["ninthMonthInterestRate"] = this.ninthMonthInterestRate;
+        data["tenthMonthInterestRate"] = this.tenthMonthInterestRate;
+        data["eleventhMonthInterestRate"] = this.eleventhMonthInterestRate;
+        data["twelfthMonthInterestRate"] = this.twelfthMonthInterestRate;
+        return data;
+    }
+
+    clone(): GeneralSetupTable {
+        const json = this.toJSON();
+        let result = new GeneralSetupTable();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IGeneralSetupTable {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    tenantId: number | undefined;
+    generalSetup: number | undefined;
+    generalSetupFk: GeneralSetup;
+    effectiveDate: moment.Moment;
+    maximumPercentage: number;
+    firstMonthInterestRate: number;
+    secondMonthInterestRate: number;
+    thirdMonthInterestRate: number;
+    fourthMonthInterestRate: number;
+    fifthMonthInterestRate: number;
+    sixthMonthInterestRate: number;
+    seventhMonthInterestRate: number;
+    eighthMonthInterestRate: number;
+    ninthMonthInterestRate: number;
+    tenthMonthInterestRate: number;
+    eleventhMonthInterestRate: number;
+    twelfthMonthInterestRate: number;
 }
 
 export class GetBasicCodeForEditOutput implements IGetBasicCodeForEditOutput {

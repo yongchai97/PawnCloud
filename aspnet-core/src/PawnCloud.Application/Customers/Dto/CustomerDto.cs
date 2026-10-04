@@ -23,11 +23,14 @@ public class CustomerDto : EntityDto<int>
     public virtual string? City { get; set; }
 
     public virtual string? State { get; set; }
+    public virtual string postcode { get; set; }
     public virtual int? Country { get; set; } //getting data from basic code country
     public virtual string? mailingAddress { get; set; }
     public virtual string? mailingCity { get; set; }
 
     public virtual string? mailingState { get; set; }
+    public virtual string? mailingPostcode { get; set; }
+
     public virtual int? mailingCountry { get; set; } //getting data from basic code country
     public virtual int? Race { get; set; }//getting data from basic code nationality
     public virtual int? Gender { get; set; }//getting data from basic code nationality

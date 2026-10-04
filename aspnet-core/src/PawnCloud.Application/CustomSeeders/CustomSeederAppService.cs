@@ -87,6 +87,13 @@ namespace PawnCloud.CustomSeeders
                 await AddBasicCodeIfNotExist("RIBBON", "Ribbon", false, includedItemMiscMasterConfig.Id);
                 await AddBasicCodeIfNotExist("DIAMOND", "Diamond", false, includedItemMiscMasterConfig.Id);
             }
+            var deliveryChannelMiscMasterConfig = allMiscMasterConfigs.FirstOrDefault(m => m.category == "DELIVERY CHANNEL");
+            if (deliveryChannelMiscMasterConfig != null)
+            {
+                await AddBasicCodeIfNotExist("FACE-TO-FACE", "Face-to-Face", false, deliveryChannelMiscMasterConfig.Id);
+                await AddBasicCodeIfNotExist("ONLINE", "Online", false, deliveryChannelMiscMasterConfig.Id);
+                await AddBasicCodeIfNotExist("MIXED", "Mixed", false, deliveryChannelMiscMasterConfig.Id);
+            }
         }
         private async Task AddBasicCodeIfNotExist(string codeName, string codeDescription, bool systemProvidedValue, int? MiscMasterConfig)
         {
@@ -458,7 +465,7 @@ namespace PawnCloud.CustomSeeders
             await AddMiscMasterConfigIfNotExist("MARITAL STATUS", false);
             await AddMiscMasterConfigIfNotExist("PAYMENT METHOD", false);
             await AddMiscMasterConfigIfNotExist("INCLUDED ITEM", true);
-
+            await AddMiscMasterConfigIfNotExist("DELIVERY CHANNEL", false);
         }
         private async Task AddMiscMasterConfigIfNotExist(string category, bool availableForUser)
         {

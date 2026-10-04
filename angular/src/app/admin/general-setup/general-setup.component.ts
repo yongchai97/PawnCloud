@@ -1,23 +1,21 @@
 import { ChangeDetectorRef, Component, Injector, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { GeneralSetup } from '@shared/service-proxies/service-proxies';
-import { OutletServiceProxy } from '@shared/service-proxies/outlet-service-proxy';
+import { Country, CountryServiceProxy, GeneralSetup, GeneralSetupServiceProxy } from '@shared/service-proxies/service-proxies';
 import { AppComponentBase } from '@shared/app-component-base';
 import { LocalizePipe } from '@shared/pipes/localize.pipe';
-import { DropdownModule } from 'primeng/dropdown';
+import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
+import { GeneralSetupDialogComponent } from './general-setup-dialog/general-setup-dialog.component';
 
 @Component({
     selector: 'app-general-setup',
     templateUrl: './general-setup.component.html',
     standalone: true,
-    imports: [CommonModule, FormsModule, LocalizePipe, DropdownModule],
+    imports: [CommonModule, LocalizePipe],
 })
 export class GeneralSetupComponent extends AppComponentBase implements OnInit {
     setups: GeneralSetup[] = [];
-    setup = new GeneralSetup();
-    editing = false;
-    saving = false;
+    countries: Country[] = [];
+    countryOptions: { label: string; value: number }[] = [];
     idMethods = [
         { label: 'Auto Increment Number', value: 1 },
         { label: 'Auto Increment Alphabet', value: 2 },
@@ -25,14 +23,30 @@ export class GeneralSetupComponent extends AppComponentBase implements OnInit {
         { label: 'Manual Input', value: 4 },
         { label: 'Pure Random String', value: 5 },
     ];
-
-    constructor(injector: Injector, private setupService: OutletServiceProxy, private cd: ChangeDetectorRef) {
+    constructor(
+        injector: Injector,
+        private setupService: GeneralSetupServiceProxy,
+        private countryService: CountryServiceProxy,
+        private modalService: BsModalService,
+        private cd: ChangeDetectorRef
+    ) {
         super(injector);
-        this.setDefaults();
     }
 
     ngOnInit(): void {
+        this.loadCountries();
         this.refresh();
+    }
+
+    private loadCountries(): void {
+        this.countryService.getAll().subscribe((countries) => {
+            this.countries = countries || [];
+            this.countryOptions = this.countries.map((country) => ({
+                label: country.countryName || country.countryCodeThreeAlphabet || String(country.id),
+                value: country.id,
+            }));
+            this.cd.detectChanges();
+        });
     }
 
     refresh(): void {
@@ -43,37 +57,24 @@ export class GeneralSetupComponent extends AppComponentBase implements OnInit {
     }
 
     newOutlet(): void {
-        this.setup = new GeneralSetup();
-        this.setDefaults();
-        this.editing = true;
+        this.openSetupDialog(new GeneralSetup());
     }
 
     editOutlet(outlet: GeneralSetup): void {
-        this.setup = GeneralSetup.fromJS(outlet);
-        this.editing = true;
+        this.openSetupDialog(outlet);
     }
 
-    cancel(): void {
-        this.editing = false;
-    }
-
-    save(): void {
-        this.saving = true;
-        this.setupService.createOrEdit(this.setup).subscribe(
-            (result) => {
-                this.setup = result;
-                this.notify.info(this.l('SavedSuccessfully'));
-                this.saving = false;
-                this.editing = false;
-                this.refresh();
-                this.cd.detectChanges();
+    private openSetupDialog(source: GeneralSetup): void {
+        const dialog: BsModalRef = this.modalService.show(GeneralSetupDialogComponent, {
+            class: 'modal-xl',
+            initialState: {
+                setup: GeneralSetup.fromJS(source),
+                countryOptions: this.countryOptions,
+                idMethods: this.idMethods,
             },
-            (error) => {
-                this.saving = false;
-                this.notify.error(error?.error?.error?.message || error?.error?.message || 'Unable to save outlet.');
-                this.cd.detectChanges();
-            }
-        );
+        });
+
+        dialog.content.onSave.subscribe(() => this.refresh());
     }
 
     delete(outlet: GeneralSetup): void {
@@ -85,10 +86,4 @@ export class GeneralSetupComponent extends AppComponentBase implements OnInit {
         });
     }
 
-    private setDefaults(): void {
-        this.setup.serviceCharge ??= 0.5;
-        this.setup.maximumAllowedPercentage ??= 100;
-        this.setup.monthsBetweenPledgeAndExpiry ??= 6;
-        this.setup.appendYearMonth ??= true;
-    }
 }

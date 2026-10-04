@@ -4,11 +4,13 @@ using Abp.Authorization;
 using Abp.Domain.Repositories;
 using Abp.Linq.Extensions;
 using Microsoft.EntityFrameworkCore;
+using PawnCloud.Authorization;
+using PawnCloud.CustomerCDDs;
+using PawnCloud.CustomerPictures;
+using PawnCloud.Customers.Dto;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using PawnCloud.Authorization;
-using PawnCloud.Customers.Dto;
 
 namespace PawnCloud.Customers;
 
@@ -17,12 +19,16 @@ public class CustomerAppService : ApplicationService, ICustomerAppService
 {
     private readonly IRepository<Customer, int> _repository;
     private readonly IRepository<CustomerOutlet> _customerOutletRepository;
+    private readonly IRepository<CustomerPicture> _CustomerPicture;
+    private readonly IRepository<CustomerCDD> _CustomerCDD;
 
-
-    public CustomerAppService(IRepository<Customer, int> repository, IRepository<CustomerOutlet> customerOutletRepository)
+    public CustomerAppService(IRepository<Customer, int> repository, IRepository<CustomerOutlet> customerOutletRepository,
+        IRepository<CustomerPicture> CustomerPicture, IRepository<CustomerCDD> CustomerCDD)
     {
         _repository = repository;
         _customerOutletRepository = customerOutletRepository;
+        _CustomerPicture = CustomerPicture;
+        _CustomerCDD = CustomerCDD;
     }
 
     public async Task<PagedResultDto<CustomerDto>> GetAll(PagedCustomerResultRequestDto input)
@@ -73,6 +79,9 @@ public class CustomerAppService : ApplicationService, ICustomerAppService
     public async Task Delete(EntityDto<int> input)
     {
         await PermissionChecker.AuthorizeAsync(PermissionNames.Pages_Customers_Delete);
+        await _CustomerPicture.DeleteAsync(p => p.Customer == input.Id);
+        await _customerOutletRepository.DeleteAsync(co => co.Customer == input.Id);
+        await _CustomerCDD.DeleteAsync(cdd => cdd.Customer == input.Id);
         await _repository.DeleteAsync(input.Id);
     }
 

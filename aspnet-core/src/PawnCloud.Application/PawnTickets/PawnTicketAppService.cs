@@ -28,13 +28,16 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
     private readonly IRepository<GoldType> _GoldType;
     private readonly IRepository<DailyGoldPrice> _DailyGoldPrice;
     private SharedFunction sharedFunction;
+    private readonly IRepository<GeneralSetupTable> _GeneralSetupTable;
+
     public PawnTicketAppService(
         IRepository<PawnTicket, int> repository,
         IRepository<PawnItem> pawnItemRepository,
         IRepository<GeneralSetup> generalSetupRepository,
         IRepository<GoldType> goldTypeRepository,
         IRepository<DailyGoldPrice> dailyGoldPriceRepository,
-        SharedFunction sharedFunction)
+        SharedFunction sharedFunction,
+        IRepository<GeneralSetupTable> generalSetupTable)
     {
         _repository = repository;
         _PawnItem = pawnItemRepository;
@@ -42,6 +45,7 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
         _GoldType = goldTypeRepository;
         this.sharedFunction = sharedFunction;
         _DailyGoldPrice = dailyGoldPriceRepository;
+        _GeneralSetupTable = generalSetupTable;
     }
 
     public async Task<PagedResultDto<PawnTicketDto>> GetAll(PagedPawnTicketResultRequestDto input)
@@ -70,7 +74,7 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
         {
             dto = new CreateOrEditPawnTicketDto(entity.Id, entity.TicketNo, entity.Customer, entity.weight, entity.value,
     entity.pledgedDate, entity.expiryDate, entity.amount, entity.monthlyCustody, entity.serviceCharge,
-    entity.slotNumber, entity.GeneralSetup);
+    entity.slotNumber, entity.GeneralSetup, entity.amountPerGram);
         }
         return new GetPawnTicketForEditOutput { PawnTicket = dto };
     }
@@ -94,6 +98,8 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
                 entity.serviceCharge = input.serviceCharge;
                 entity.slotNumber = input.slotNumber;
                 entity.GeneralSetup = input.GeneralSetup;
+                entity.amountPerGram = input.amountPerGram;
+
                 await _repository.UpdateAsync(entity);
             }
             return entity.Id;
@@ -103,7 +109,7 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
             //await PermissionChecker.AuthorizeAsync(PermissionNames.Pages_PawnTickets_Create);
             var entity = new PawnTicket(input.TicketNo, input.Customer, input.weight, input.value,
     input.pledgedDate, input.expiryDate, input.amount, input.monthlyCustody, input.serviceCharge,
-    input.slotNumber, input.GeneralSetup);
+    input.slotNumber, input.GeneralSetup, input.amountPerGram);
             entity.TenantId = AbpSession.TenantId;
             await _repository.InsertAndGetIdAsync(entity);
             return entity.Id;
@@ -182,6 +188,7 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
                 ticket.serviceCharge = input.Ticket.serviceCharge;
                 ticket.slotNumber = input.Ticket.slotNumber;
                 ticket.GeneralSetup = input.Ticket.GeneralSetup;
+                ticket.amountPerGram = input.Ticket.amountPerGram;
                 await _repository.UpdateAsync(ticket);
             }
         }
@@ -191,7 +198,7 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
             ticket = new PawnTicket(input.Ticket.TicketNo, input.Ticket.Customer, input.Ticket.weight, 
                 input.Ticket.value, input.Ticket.pledgedDate, input.Ticket.expiryDate, 
                 input.Ticket.amount, input.Ticket.monthlyCustody, input.Ticket.serviceCharge,
-                input.Ticket.slotNumber, input.Ticket.GeneralSetup);
+                input.Ticket.slotNumber, input.Ticket.GeneralSetup, input.Ticket.amountPerGram);
             ticket.TenantId = AbpSession.TenantId;
             input.Ticket.Id = await _repository.InsertAndGetIdAsync(ticket);
         }
@@ -247,6 +254,16 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
             }
         }
         input.Ticket.expiryDate = input.Ticket.pledgedDate.AddMonths(generalSetup == null ? 6 : generalSetup.monthsBetweenPledgeAndExpiry);
+        input.Ticket.amountPerGram = input.Ticket.weight == 0 ? 0 : input.Ticket.amount / input.Ticket.weight;
+        if (generalSetup != null)
+        {
+            var currentGeneralSetupTable = await _GeneralSetupTable.GetAll().Where(x => x.GeneralSetup == generalSetup.Id
+            && x.effectiveDate <= input.Ticket.pledgedDate).OrderByDescending(x => x.effectiveDate).FirstOrDefaultAsync();
+            if(currentGeneralSetupTable != null)
+            {
+                input.Ticket.monthlyCustody = input.Ticket.amount * currentGeneralSetupTable.firstMonthInterestRate / 100;
+            }
+        }
         return input.Ticket;
     }
 }

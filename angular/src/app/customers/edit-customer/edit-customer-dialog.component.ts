@@ -70,6 +70,7 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
                 if (this.customer.birthDate) {
                     this.customer.birthDate = moment(this.customer.birthDate).format('YYYY-MM-DD') as any;
                 }
+                this.readBirthDateFromNric();
                 this.updateAge();
                 this.loadCustomerOutlets();
                 this.loadCustomerPictures();
@@ -171,6 +172,29 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
         this.cd.detectChanges();
     }
 
+    readBirthDateFromNric(): void {
+        const digits = (this.customer.nric || '').replace(/\D/g, '');
+        if (digits.length < 6) {
+            return;
+        }
+
+        const currentYearTwoDigits = new Date().getFullYear() % 100;
+        const year = Number(digits.substring(0, 2));
+        const fullYear = year > currentYearTwoDigits ? 1900 + year : 2000 + year;
+        const month = digits.substring(2, 4);
+        const day = digits.substring(4, 6);
+        const birthDate = moment(`${fullYear}-${month}-${day}`, 'YYYY-MM-DD', true);
+
+        if (birthDate.isValid()) {
+            this.customer.birthDate = birthDate.format('YYYY-MM-DD') as any;
+            this.updateAge();
+        }
+    }
+
+    isUnderage(): boolean {
+        return !!this.customer.birthDate && this.customer.age < 18;
+    }
+
     updateAge(): void {
         const value = this.customer.birthDate as any;
         if (!value) {
@@ -238,7 +262,21 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
         return !!picture.contentType?.startsWith('image/');
     }
 
+    copyAddressToMailing(): void {
+        this.customer.mailingAddress = this.customer.address;
+        this.customer.mailingCity = this.customer.city;
+        this.customer.mailingState = this.customer.state;
+        this.customer.mailingPostcode = this.customer.postcode;
+        this.customer.mailingCountry = this.customer.country;
+        this.cd.detectChanges();
+    }
+
     save(): void {
+        if (this.isUnderage()) {
+            this.notify.error('Minimum Age for The Operation is 18 Years Old');
+            return;
+        }
+
         this.saving = true;
         const birthDate = this.customer.birthDate as any;
         this.customer.birthDate = birthDate ? (moment.isMoment(birthDate) ? birthDate : moment(birthDate)) : (undefined as any);

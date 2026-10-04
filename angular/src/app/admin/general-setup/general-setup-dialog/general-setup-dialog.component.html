@@ -1,0 +1,152 @@
+<form autocomplete="off" #setupForm="ngForm" novalidate (ngSubmit)="save()">
+    <abp-modal-header [title]="(setup.id ? 'EditOutlet' : 'AddOutlet') | localize" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+
+    <div class="modal-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label for="outletName">{{ 'OutletName' | localize }}</label>
+                <input class="form-control" id="outletName" name="outletName" [(ngModel)]="setup.outletName" required />
+            </div>
+            <div class="col-md-6">
+                <label for="outletRegistrationNumber">{{ 'OutletRegistrationNumber' | localize }}</label>
+                <input class="form-control" id="outletRegistrationNumber" name="outletRegistrationNumber" [(ngModel)]="setup.outletRegistrationNumber" required />
+            </div>
+            <div class="col-md-4">
+                <label for="serviceCharge">{{ 'ServiceCharge' | localize }}</label>
+                <input type="number" min="0" step="0.01" class="form-control" id="serviceCharge" name="serviceCharge" [(ngModel)]="setup.serviceCharge" required />
+            </div>
+            <div class="col-md-4">
+                <label for="maximumAllowedPercentage">{{ 'MaximumAllowedPercentage' | localize }}</label>
+                <input type="number" min="0" step="0.01" class="form-control" id="maximumAllowedPercentage" name="maximumAllowedPercentage" [(ngModel)]="setup.maximumAllowedPercentage" required />
+            </div>
+            <div class="col-md-4">
+                <label for="monthsBetweenPledgeAndExpiry">{{ 'MonthsBetweenPledgeAndExpiry' | localize }}</label>
+                <input type="number" min="1" step="1" class="form-control" id="monthsBetweenPledgeAndExpiry" name="monthsBetweenPledgeAndExpiry" [(ngModel)]="setup.monthsBetweenPledgeAndExpiry" required />
+            </div>
+            <div class="col-md-6">
+                <label for="ticketIdMethod">{{ 'TicketIdMethod' | localize }}</label>
+                <p-dropdown inputId="ticketIdMethod" name="ticketIdMethod" [(ngModel)]="setup.ticketIdMethod" [options]="idMethods" optionLabel="label" optionValue="value" [showClear]="true" [placeholder]="'Select' | localize" required styleClass="w-100"></p-dropdown>
+            </div>
+            <div class="col-md-6">
+                <label for="appendedString">{{ 'AppendedString' | localize }}</label>
+                <input class="form-control" id="appendedString" name="appendedString" [(ngModel)]="setup.appendedString" required />
+            </div>
+            <div class="col-md-6">
+                <label for="appendedStringBackMethod">{{ 'AppendedStringBackMethod' | localize }}</label>
+                <p-dropdown inputId="appendedStringBackMethod" name="appendedStringBackMethod" [(ngModel)]="setup.appendedStringBackMethod" [options]="idMethods" optionLabel="label" optionValue="value" [showClear]="true" [placeholder]="'Select' | localize" required styleClass="w-100"></p-dropdown>
+            </div>
+            <div class="col-md-6 d-flex align-items-center">
+                <div class="form-check mt-3">
+                    <input class="form-check-input" type="checkbox" id="appendYearMonth" name="appendYearMonth" [(ngModel)]="setup.appendYearMonth" />
+                    <label class="form-check-label" for="appendYearMonth">{{ 'AppendYearMonth' | localize }}</label>
+                </div>
+            </div>
+        </div>
+
+        <h6 class="mt-4 mb-3 text-muted">Licences and insurance</h6>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label for="bandarayaLicenseExpiryDate">Bandaraya licence expiry</label>
+                <input type="date" class="form-control" id="bandarayaLicenseExpiryDate" name="bandarayaLicenseExpiryDate" [ngModel]="dateValue(setup.bandarayaLicenseExpiryDate)" (ngModelChange)="setDate('bandarayaLicenseExpiryDate', $event)" required />
+            </div>
+            <div class="col-md-4">
+                <label for="kpktLicenseExpiryDate">KPKT licence expiry</label>
+                <input type="date" class="form-control" id="kpktLicenseExpiryDate" name="kpktLicenseExpiryDate" [ngModel]="dateValue(setup.kpktLicenseExpiryDate)" (ngModelChange)="setDate('kpktLicenseExpiryDate', $event)" required />
+            </div>
+            <div class="col-md-4">
+                <label for="kpktPermitIklanExpiryDate">KPKT permit iklan expiry</label>
+                <input type="date" class="form-control" id="kpktPermitIklanExpiryDate" name="kpktPermitIklanExpiryDate" [ngModel]="dateValue(setup.kpktPermitIklanExpiryDate)" (ngModelChange)="setDate('kpktPermitIklanExpiryDate', $event)" required />
+            </div>
+            <div class="col-md-6">
+                <label for="insuranceExpiryDate">Insurance expiry</label>
+                <input type="date" class="form-control" id="insuranceExpiryDate" name="insuranceExpiryDate" [ngModel]="dateValue(setup.insuranceExpiryDate)" (ngModelChange)="setDate('insuranceExpiryDate', $event)" required />
+            </div>
+            <div class="col-md-6">
+                <label for="pdpaExpiryDate">PDPA expiry</label>
+                <input type="date" class="form-control" id="pdpaExpiryDate" name="pdpaExpiryDate" [ngModel]="dateValue(setup.pdpaExpiryDate)" (ngModelChange)="setDate('pdpaExpiryDate', $event)" required />
+            </div>
+            <div class="col-md-6">
+                <label for="insurancePolicyNumber">{{ 'InsurancePolicyNumber' | localize }}</label>
+                <input class="form-control" id="insurancePolicyNumber" name="insurancePolicyNumber" [(ngModel)]="setup.insurancePolicyNumber" required />
+            </div>
+        </div>
+
+        <h6 class="mt-4 mb-3 text-muted">Outlet address</h6>
+        <div class="row g-3">
+            <div class="col-12">
+                <label for="outletAddress">{{ 'Address' | localize }}</label>
+                <input class="form-control" id="outletAddress" name="outletAddress" [(ngModel)]="setup.outletAddress" required />
+            </div>
+            <div class="col-md-4">
+                <label for="outletCity">{{ 'City' | localize }}</label>
+                <input class="form-control" id="outletCity" name="outletCity" [(ngModel)]="setup.outletCity" required />
+            </div>
+            <div class="col-md-4">
+                <label for="outletState">{{ 'State' | localize }}</label>
+                <input class="form-control" id="outletState" name="outletState" [(ngModel)]="setup.outletState" required />
+            </div>
+            <div class="col-md-4">
+                <label for="outletPostcode">{{ 'Postcode' | localize }}</label>
+                <input class="form-control" id="outletPostcode" name="outletPostcode" [(ngModel)]="setup.outletPostcode" required />
+            </div>
+            <div class="col-md-6">
+                <label for="outletCountry">{{ 'Country' | localize }}</label>
+                <p-dropdown inputId="outletCountry" name="outletCountry" [(ngModel)]="setup.outletCountry" [options]="countryOptions" optionLabel="label" optionValue="value" [filter]="true" [showClear]="true" [placeholder]="'Select' | localize" required styleClass="w-100"></p-dropdown>
+            </div>
+        </div>
+
+        <div *ngIf="setup.id" class="border-top pt-4 mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h6 class="mb-1">General Setup Tables</h6>
+                    <p class="text-muted small mb-0">Configure effective dates and monthly rates for this outlet.</p>
+                </div>
+                <button type="button" class="btn btn-primary btn-sm" (click)="newSetupTable()">
+                    <i class="fas fa-plus me-1"></i>Add rate table
+                </button>
+            </div>
+
+            <div class="table-responsive" *ngIf="setupTables.length; else noSetupTables">
+                <table class="table table-sm table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>Effective date</th>
+                            <th>Maximum %</th>
+                            <th *ngFor="let month of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]">Month {{ month }}</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let table of setupTables">
+                            <td class="text-nowrap">{{ dateValue(table.effectiveDate) }}</td>
+                            <td>{{ table.maximumPercentage }}</td>
+                            <td>{{ table.firstMonthInterestRate }}</td>
+                            <td>{{ table.secondMonthInterestRate }}</td>
+                            <td>{{ table.thirdMonthInterestRate }}</td>
+                            <td>{{ table.fourthMonthInterestRate }}</td>
+                            <td>{{ table.fifthMonthInterestRate }}</td>
+                            <td>{{ table.sixthMonthInterestRate }}</td>
+                            <td>{{ table.seventhMonthInterestRate }}</td>
+                            <td>{{ table.eighthMonthInterestRate }}</td>
+                            <td>{{ table.ninthMonthInterestRate }}</td>
+                            <td>{{ table.tenthMonthInterestRate }}</td>
+                            <td>{{ table.eleventhMonthInterestRate }}</td>
+                            <td>{{ table.twelfthMonthInterestRate }}</td>
+                            <td class="text-end text-nowrap">
+                                <button type="button" class="btn btn-sm btn-outline-primary me-2" (click)="editSetupTable(table)" aria-label="Edit rate table">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" (click)="deleteSetupTable(table)" aria-label="Delete rate table">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <ng-template #noSetupTables><p class="text-muted small">No rate tables configured for this outlet.</p></ng-template>
+        </div>
+    </div>
+
+    <abp-modal-footer [saveDisabled]="saving || setupForm.invalid" [cancelDisabled]="saving" (onCancelClick)="bsModalRef.hide()" (onSaveClick)="save()"></abp-modal-footer>
+</form>

@@ -34,14 +34,14 @@ namespace PawnCloud.PawnItems
         public decimal weight { get; set; }
         public decimal length { get; set; }
         public string brand { get; set; }
-        public virtual int? IncludedItem { get; set; } //get option from basic code included item
+        public virtual string IncludedItem { get; set; } //get option from basic code included item, each Id separated by a comma
         public decimal includedItemWeight { get; set; }
         public decimal includedItemValue { get; set; }
 
         public PawnItem() { }
         public PawnItem(string pawnItemNumber, int quantity, int? pawnTicket, 
             int? itemListing, int? itemStatus, string description, int? goldType, 
-            decimal weight, decimal length, string brand, int? includedItem, decimal includedItemWeight, decimal includedItemValue)
+            decimal weight, decimal length, string brand, string includedItem, decimal includedItemWeight, decimal includedItemValue)
         {
             this.pawnItemNumber = pawnItemNumber;
             this.quantity = quantity;

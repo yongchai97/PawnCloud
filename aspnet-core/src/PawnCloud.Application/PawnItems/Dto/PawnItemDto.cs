@@ -18,7 +18,7 @@ namespace PawnCloud.PawnItems.Dto
         public decimal weight { get; set; }
         public decimal length { get; set; }
         public string brand { get; set; }
-        public virtual int? IncludedItem { get; set; } //get option from basic code included item
+        public virtual string IncludedItem { get; set; } //get option from basic code included item
         public decimal includedItemWeight { get; set; }
         public decimal includedItemValue { get; set; }
 

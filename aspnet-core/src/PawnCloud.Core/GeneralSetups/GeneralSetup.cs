@@ -21,10 +21,32 @@ namespace PawnCloud.GeneralSetups
         public virtual int? appendedStringBackMethod { get; set;  } // get option from the enum list
         public string outletName { get; set; }
         public string outletRegistrationNumber { get; set; }
+        public DateTime bandarayaLicenseExpiryDate { get; set; }
+        public DateTime kpktLicenseExpiryDate { get; set; }
+        public DateTime kpktPermitIklanExpiryDate { get; set; }
+        public DateTime insuranceExpiryDate { get; set; }
+        public DateTime pdpaExpiryDate { get; set; }
+        public virtual string outletAddress { get; set; }
+        public virtual string outletCity { get; set; }
+
+        public virtual string outletState { get; set; }
+        public virtual string outletPostcode { get; set; }
+        public virtual int? outletCountry { get; set; } //getting data from country table
+        public string insurancePolicyNumber { get; set; }
+        public DateTime bandarayaLicenseLastUpdate { get; set; }
+        public DateTime kpktLicenseLastUpdate { get; set; }
+        public DateTime kpktPermitIklanLastUpdate { get; set; }
+        public DateTime insuranceLastUpdate { get; set; }
+        public DateTime pdpaLastUpdate { get; set; }
         public GeneralSetup() { }
         public GeneralSetup(decimal serviceCharge, decimal maximumAllowedPercentage,
             int monthsBetweenPledgeAndExpiry, int? ticketIdMethod, string appendedString, bool appendYearMonth,
-            int? appendedStringBackMethod, string outletName, string outletRegistrationNumber)
+            int? appendedStringBackMethod, string outletName, string outletRegistrationNumber, DateTime bandarayaLicenseExpiryDate,
+            DateTime kpktLicenseExpiryDate, DateTime kpktPermitIklanExpiryDate, DateTime insuranceExpiryDate, DateTime pdpaExpiryDate,
+            string outletAddress, string outletCity, string outletState, string outletPostcode, int? outletCountry,
+            string insurancePolicyNumber,
+            DateTime bandarayaLicenseLastUpdate, DateTime kpktLicenseLastUpdate, 
+            DateTime kpktPermitIklanLastUpdate, DateTime insuranceLastUpdate, DateTime pdpaLastUpdate)
         {
             this.serviceCharge = serviceCharge;
             this.maximumAllowedPercentage = maximumAllowedPercentage;
@@ -35,6 +57,23 @@ namespace PawnCloud.GeneralSetups
             this.appendedStringBackMethod = appendedStringBackMethod;
             this.outletName = outletName;
             this.outletRegistrationNumber = outletRegistrationNumber;
+            this.bandarayaLicenseExpiryDate = bandarayaLicenseExpiryDate;
+            this.kpktLicenseExpiryDate = kpktLicenseExpiryDate;
+            this.kpktPermitIklanExpiryDate = kpktPermitIklanExpiryDate;
+            this.insuranceExpiryDate = insuranceExpiryDate;
+            this.pdpaExpiryDate = pdpaExpiryDate;
+            this.outletAddress = outletAddress;
+            this.outletCity = outletCity;
+            this.outletState = outletState;
+            this.outletPostcode = outletPostcode;
+            this.outletCountry = outletCountry;
+            this.insurancePolicyNumber = insurancePolicyNumber;
+            this.bandarayaLicenseLastUpdate = bandarayaLicenseLastUpdate;
+            this.kpktLicenseLastUpdate = kpktLicenseLastUpdate;
+            this.kpktPermitIklanLastUpdate = kpktPermitIklanLastUpdate;
+            this.insuranceLastUpdate = insuranceLastUpdate;
+            this.pdpaLastUpdate = pdpaLastUpdate;
+
         }
     }
 }

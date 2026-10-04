@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PawnCloud.EntityFrameworkCore;
 
@@ -11,9 +12,11 @@ using PawnCloud.EntityFrameworkCore;
 namespace PawnCloud.Migrations
 {
     [DbContext(typeof(PawnCloudDbContext))]
-    partial class PawnCloudDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260910132111_detailed general setup")]
+    partial class detailedgeneralsetup
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1692,108 +1695,6 @@ namespace PawnCloud.Migrations
                     b.ToTable("Countries");
                 });
 
-            modelBuilder.Entity("PawnCloud.CustomerCDDs.CustomerCDD", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long?>("CreatorUserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int?>("Customer")
-                        .HasColumnType("int");
-
-                    b.Property<long?>("DeleterUserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletionTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("DeliveryChannel")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LastModificationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long?>("LastModifierUserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<bool>("MOHAMatching")
-                        .HasColumnType("bit");
-
-                    b.Property<int?>("PaymentMode")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TenantId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("UNSCRMatching")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("allowAnomaly")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("approval")
-                        .HasColumnType("bit");
-
-                    b.Property<int?>("approvedBy")
-                        .HasColumnType("int");
-
-                    b.Property<string>("businessSize")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("businessType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("crossBorderCustomer")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("highNetWorth")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("matchingDescription")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("matchingID")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("measureCustomer")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("nomineeCustomer")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("nomineeService")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("offerUnusualTransaction")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("otherMatching")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("publicResearchCompany")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("researchDescription")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Customer");
-
-                    b.ToTable("CustomerCDDs");
-                });
-
             modelBuilder.Entity("PawnCloud.CustomerPictures.CustomerPicture", b =>
                 {
                     b.Property<int>("Id")
@@ -2150,6 +2051,18 @@ namespace PawnCloud.Migrations
                     b.Property<string>("insurancePolicyNumber")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("interestOption")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("interestRate")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("interestRate2")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("interestRate3")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<DateTime>("kpktLicenseExpiryDate")
                         .HasColumnType("datetime2");
 
@@ -2204,90 +2117,6 @@ namespace PawnCloud.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("GeneralSetups");
-                });
-
-            modelBuilder.Entity("PawnCloud.GeneralSetups.GeneralSetupTable", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long?>("CreatorUserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("DeleterUserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletionTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("GeneralSetup")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LastModificationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long?>("LastModifierUserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int?>("TenantId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("effectiveDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("eighthMonthInterestRate")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("eleventhMonthInterestRate")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("fifthMonthInterestRate")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("firstMonthInterestRate")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("fourthMonthInterestRate")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("maximumPercentage")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("ninthMonthInterestRate")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("secondMonthInterestRate")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("seventhMonthInterestRate")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("sixthMonthInterestRate")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("tenthMonthInterestRate")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("thirdMonthInterestRate")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("twelfthMonthInterestRate")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GeneralSetup");
-
-                    b.ToTable("GeneralSetupTables");
                 });
 
             modelBuilder.Entity("PawnCloud.GoldTypes.GoldType", b =>
@@ -2627,8 +2456,8 @@ namespace PawnCloud.Migrations
                     b.Property<int?>("GoldType")
                         .HasColumnType("int");
 
-                    b.Property<string>("IncludedItem")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("IncludedItem")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -2778,9 +2607,6 @@ namespace PawnCloud.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("amountPerGram")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("expiryDate")
@@ -3100,15 +2926,6 @@ namespace PawnCloud.Migrations
                     b.Navigation("MiscMasterConfigFk");
                 });
 
-            modelBuilder.Entity("PawnCloud.CustomerCDDs.CustomerCDD", b =>
-                {
-                    b.HasOne("PawnCloud.Customers.Customer", "CustomerFk")
-                        .WithMany()
-                        .HasForeignKey("Customer");
-
-                    b.Navigation("CustomerFk");
-                });
-
             modelBuilder.Entity("PawnCloud.CustomerPictures.CustomerPicture", b =>
                 {
                     b.HasOne("PawnCloud.Customers.Customer", "CustomerFk")
@@ -3142,15 +2959,6 @@ namespace PawnCloud.Migrations
                         .IsRequired();
 
                     b.Navigation("GoldTypeFk");
-                });
-
-            modelBuilder.Entity("PawnCloud.GeneralSetups.GeneralSetupTable", b =>
-                {
-                    b.HasOne("PawnCloud.GeneralSetups.GeneralSetup", "GeneralSetupFk")
-                        .WithMany()
-                        .HasForeignKey("GeneralSetup");
-
-                    b.Navigation("GeneralSetupFk");
                 });
 
             modelBuilder.Entity("PawnCloud.Loans.Loan", b =>

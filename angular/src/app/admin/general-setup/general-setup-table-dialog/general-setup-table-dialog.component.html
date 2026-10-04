@@ -1,0 +1,22 @@
+<form autocomplete="off" #setupTableForm="ngForm" novalidate (ngSubmit)="save()">
+    <abp-modal-header [title]="(setupTable.id ? 'Edit rate table' : 'Add rate table')" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+
+    <div class="modal-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label for="effectiveDate">Effective date</label>
+                <input type="date" class="form-control" id="effectiveDate" name="effectiveDate" [ngModel]="dateValue(setupTable.effectiveDate)" (ngModelChange)="setDate($event)" required />
+            </div>
+            <div class="col-md-6">
+                <label for="maximumPercentage">Maximum percentage</label>
+                <input type="number" min="0" step="0.01" class="form-control" id="maximumPercentage" name="maximumPercentage" [(ngModel)]="setupTable.maximumPercentage" required />
+            </div>
+            <div class="col-md-3" *ngFor="let month of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]">
+                <label [for]="'month' + month">Month {{ month }} rate</label>
+                <input type="number" min="0" step="0.01" class="form-control" [id]="'month' + month" [name]="'month' + month" [(ngModel)]="setupTable[monthRateProperties[month - 1]]" required />
+            </div>
+        </div>
+    </div>
+
+    <abp-modal-footer [saveDisabled]="saving || setupTableForm.invalid" [cancelDisabled]="saving" (onCancelClick)="bsModalRef.hide()" (onSaveClick)="save()"></abp-modal-footer>
+</form>
