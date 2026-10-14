@@ -17,6 +17,7 @@ import { OutletServiceProxy } from './outlet-service-proxy';
         ApiServiceProxies.AccountServiceProxy,
         ApiServiceProxies.ConfigurationServiceProxy,
         ApiServiceProxies.CustomerServiceProxy,
+        ApiServiceProxies.CustomerCDDServiceProxy,
         ApiServiceProxies.PawnTicketServiceProxy,
         ApiServiceProxies.PawnItemServiceProxy,
         ApiServiceProxies.ItemListingServiceProxy,

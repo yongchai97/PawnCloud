@@ -1,12 +1,13 @@
 import { Component, Injector, ChangeDetectorRef, EventEmitter, output, OnInit } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
+import { TabsModule } from 'ngx-bootstrap/tabs';
 import { AppComponentBase } from '@shared/app-component-base';
 import { FormsModule } from '@angular/forms';
 import { AbpModalHeaderComponent } from '../../../shared/components/modal/abp-modal-header.component';
 import { AbpValidationSummaryComponent } from '../../../shared/components/validation/abp-validation.summary.component';
 import { AbpModalFooterComponent } from '../../../shared/components/modal/abp-modal-footer.component';
 import { LocalizePipe } from '@shared/pipes/localize.pipe';
-import { CreateOrEditCustomerDto, BasicCodeServiceProxy, BasicCodeLookupDto, Country, CountryServiceProxy, MiscMasterConfigServiceProxy, MiscMasterConfigLookupDto } from '@shared/service-proxies/service-proxies';
+import { CreateOrEditCustomerDto, CreateOrEditCustomerCDDDto, SearchCDDDto, CustomerCDDServiceProxy, BasicCodeServiceProxy, BasicCodeLookupDto, Country, CountryServiceProxy, MiscMasterConfigServiceProxy, MiscMasterConfigLookupDto } from '@shared/service-proxies/service-proxies';
 import { LookupServiceProxy } from '@shared/service-proxies/lookup-service-proxy';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -18,11 +19,14 @@ import moment from 'moment';
 @Component({
     templateUrl: './create-customer-dialog.component.html',
     standalone: true,
-    imports: [FormsModule, AbpModalHeaderComponent, AbpValidationSummaryComponent, AbpModalFooterComponent, LocalizePipe, InputTextModule, InputNumberModule, ButtonModule, DropdownModule, NgFor],
+    imports: [FormsModule, AbpModalHeaderComponent, AbpValidationSummaryComponent, AbpModalFooterComponent, LocalizePipe, InputTextModule, InputNumberModule, ButtonModule, DropdownModule, NgFor, TabsModule],
 })
 export class CreateCustomerDialogComponent extends AppComponentBase implements OnInit {
     saving = false;
     customer = new CreateOrEditCustomerDto();
+    customerCDD = new CreateOrEditCustomerCDDDto();
+    checkingCDD = false;
+    private lastCheckedCustomerName = '';
 
     // BasicCode dropdowns
     countryOptions: { label: string; value: number }[] = [];
@@ -31,6 +35,8 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
     nationalityOptions: { label: string; value: number }[] = [];
     businessNatureOptions: BasicCodeLookupDto[] = [];
     maritalStatusOptions: BasicCodeLookupDto[] = [];
+    paymentModeOptions: BasicCodeLookupDto[] = [];
+    deliveryChannelOptions: BasicCodeLookupDto[] = [];
 
     onSave = output<EventEmitter<any>>();
 
@@ -40,6 +46,7 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
         private _basicCodeService: BasicCodeServiceProxy,
         private _countryService: CountryServiceProxy,
         private _miscMasterConfigService: MiscMasterConfigServiceProxy,
+        private _customerCDDService: CustomerCDDServiceProxy,
         public bsModalRef: BsModalRef,
         private cd: ChangeDetectorRef
     ) {
@@ -50,6 +57,7 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
     ngOnInit(): void {
         this.loadCountries();
         this.loadBasicCodeDropdowns();
+        this.customerCDD.approvedBy = this.appSession.userId;
     }
 
     private loadCountries(): void {
@@ -75,6 +83,8 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
                 'gender': configMap.get('gender'),
                 'businessnature': configMap.get('business nature') || configMap.get('businessnature'),
                 'maritalstatus': configMap.get('marital status') || configMap.get('maritalstatus'),
+                'paymentmethod': configMap.get('payment method') || configMap.get('paymentmode'),
+                'deliverychannel': configMap.get('delivery channel') || configMap.get('deliverychannel'),
             };
 
             // Load BasicCodes for each category
@@ -99,6 +109,18 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
             if (categoryMap['maritalstatus']) {
                 this._lookupService.getBasicCodesByCategory(categoryMap['maritalstatus']).subscribe((result) => {
                     this.maritalStatusOptions = result.items || [];
+                    this.cd.detectChanges();
+                });
+            }
+            if (categoryMap['paymentmethod']) {
+                this._lookupService.getBasicCodesByCategory(categoryMap['paymentmethod']).subscribe((result) => {
+                    this.paymentModeOptions = result.items || [];
+                    this.cd.detectChanges();
+                });
+            }
+            if (categoryMap['deliverychannel']) {
+                this._lookupService.getBasicCodesByCategory(categoryMap['deliverychannel']).subscribe((result) => {
+                    this.deliveryChannelOptions = result.items || [];
                     this.cd.detectChanges();
                 });
             }
@@ -144,6 +166,41 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
         this.cd.detectChanges();
     }
 
+    checkCustomerCDD(): void {
+        const customerName = (this.customer.fullName || '').trim();
+        if (!customerName || this.checkingCDD || customerName === this.lastCheckedCustomerName) {
+            return;
+        }
+
+        this.checkingCDD = true;
+        this._customerCDDService
+            .checkCustomerCDD(new SearchCDDDto({ customerName, createOrEditCustomerCDDDto: this.customerCDD }))
+            .subscribe({
+                next: (result) => {
+                    if (result) {
+                        this.customerCDD = result;
+                    }
+                    this.lastCheckedCustomerName = customerName;
+                    this.cd.detectChanges();
+                },
+                error: (error) => {
+                    this.checkingCDD = false;
+                    const message = error?.error?.error?.message || error?.error?.message || error?.message || 'Unable to check customer risk profile.';
+                    this.notify.error(message);
+                    this.cd.detectChanges();
+                },
+                complete: () => {
+                    this.checkingCDD = false;
+                    this.cd.detectChanges();
+                },
+            });
+    }
+
+        recheckCustomerCDD(): void {
+            this.lastCheckedCustomerName = '';
+            this.checkCustomerCDD();
+        }
+
     copyAddressToMailing(): void {
         this.customer.mailingAddress = this.customer.address;
         this.customer.mailingCity = this.customer.city;
@@ -159,15 +216,36 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
             return;
         }
 
+        const customerName = (this.customer.fullName || '').trim();
+        if (this.checkingCDD) {
+            return;
+        }
+        if (customerName && customerName !== this.lastCheckedCustomerName) {
+            this.checkCustomerCDD();
+            return;
+        }
+
         this.saving = true;
+        this.customerCDD.approvedBy = this.appSession.userId;
         const birthDate = this.customer.birthDate as any;
         this.customer.birthDate = birthDate ? (moment.isMoment(birthDate) ? birthDate : moment(birthDate)) : (undefined as any);
         this._lookupService.createCustomer(this.customer).subscribe(
             (newId) => {
                 this.customer.id = newId;
-                this.notify.info(this.l('SavedSuccessfully'));
-                this.bsModalRef.hide();
-                this.onSave.emit(null);
+                this.customerCDD.customer = newId;
+                this._customerCDDService.createOrEdit(this.customerCDD).subscribe(
+                    () => {
+                        this.notify.info(this.l('SavedSuccessfully'));
+                        this.bsModalRef.hide();
+                        this.onSave.emit(null);
+                    },
+                    (error) => {
+                        this.saving = false;
+                        const message = error?.error?.error?.message || error?.error?.message || error?.message || 'Unable to save customer risk profile.';
+                        this.notify.error(message);
+                        this.cd.detectChanges();
+                    }
+                );
             },
             (error) => {
                 this.saving = false;

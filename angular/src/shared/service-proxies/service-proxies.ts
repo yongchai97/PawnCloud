@@ -1221,6 +1221,182 @@ export class CustomerServiceProxy {
 }
 
 @Injectable()
+export class CustomerCDDServiceProxy {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    checkCustomerCDD(body: SearchCDDDto | undefined): Observable<CreateOrEditCustomerCDDDto> {
+        let url_ = this.baseUrl + "/api/services/app/CustomerCDD/CheckCustomerCDD";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCheckCustomerCDD(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCheckCustomerCDD(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<CreateOrEditCustomerCDDDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<CreateOrEditCustomerCDDDto>;
+        }));
+    }
+
+    protected processCheckCustomerCDD(response: HttpResponseBase): Observable<CreateOrEditCustomerCDDDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = CreateOrEditCustomerCDDDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param customer (optional) 
+     * @return OK
+     */
+    getViaCustomerId(customer: number | undefined): Observable<CustomerCDD> {
+        let url_ = this.baseUrl + "/api/services/app/CustomerCDD/GetViaCustomerId?";
+        if (customer === null)
+            throw new Error("The parameter 'customer' cannot be null.");
+        else if (customer !== undefined)
+            url_ += "Customer=" + encodeURIComponent("" + customer) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetViaCustomerId(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetViaCustomerId(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<CustomerCDD>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<CustomerCDD>;
+        }));
+    }
+
+    protected processGetViaCustomerId(response: HttpResponseBase): Observable<CustomerCDD> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = CustomerCDD.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    createOrEdit(body: CreateOrEditCustomerCDDDto | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/CustomerCDD/CreateOrEdit";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreateOrEdit(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreateOrEdit(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processCreateOrEdit(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
+@Injectable()
 export class CustomerPictureServiceProxy {
     private http: HttpClient;
     private baseUrl: string;
@@ -6780,6 +6956,133 @@ export interface ICreateOrEditBasicCodeDto {
     miscMasterConfig: number | undefined;
 }
 
+export class CreateOrEditCustomerCDDDto implements ICreateOrEditCustomerCDDDto {
+    id: number | undefined;
+    customer: number | undefined;
+    highNetWorth: boolean;
+    businessSize: string | undefined;
+    businessType: string | undefined;
+    publicResearchCompany: boolean;
+    researchDescription: string | undefined;
+    allowAnomaly: boolean;
+    measureCustomer: boolean;
+    offerUnusualTransaction: boolean;
+    nomineeService: boolean;
+    nomineeCustomer: boolean;
+    crossBorderCustomer: boolean;
+    paymentMode: number | undefined;
+    deliveryChannel: number | undefined;
+    unscrMatching: boolean;
+    mohaMatching: boolean;
+    otherMatching: boolean;
+    matchingID: string | undefined;
+    approval: boolean;
+    approvedBy: number | undefined;
+    matchingDescription: string | undefined;
+
+    constructor(data?: ICreateOrEditCustomerCDDDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.customer = _data["customer"];
+            this.highNetWorth = _data["highNetWorth"];
+            this.businessSize = _data["businessSize"];
+            this.businessType = _data["businessType"];
+            this.publicResearchCompany = _data["publicResearchCompany"];
+            this.researchDescription = _data["researchDescription"];
+            this.allowAnomaly = _data["allowAnomaly"];
+            this.measureCustomer = _data["measureCustomer"];
+            this.offerUnusualTransaction = _data["offerUnusualTransaction"];
+            this.nomineeService = _data["nomineeService"];
+            this.nomineeCustomer = _data["nomineeCustomer"];
+            this.crossBorderCustomer = _data["crossBorderCustomer"];
+            this.paymentMode = _data["paymentMode"];
+            this.deliveryChannel = _data["deliveryChannel"];
+            this.unscrMatching = _data["unscrMatching"];
+            this.mohaMatching = _data["mohaMatching"];
+            this.otherMatching = _data["otherMatching"];
+            this.matchingID = _data["matchingID"];
+            this.approval = _data["approval"];
+            this.approvedBy = _data["approvedBy"];
+            this.matchingDescription = _data["matchingDescription"];
+        }
+    }
+
+    static fromJS(data: any): CreateOrEditCustomerCDDDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateOrEditCustomerCDDDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["customer"] = this.customer;
+        data["highNetWorth"] = this.highNetWorth;
+        data["businessSize"] = this.businessSize;
+        data["businessType"] = this.businessType;
+        data["publicResearchCompany"] = this.publicResearchCompany;
+        data["researchDescription"] = this.researchDescription;
+        data["allowAnomaly"] = this.allowAnomaly;
+        data["measureCustomer"] = this.measureCustomer;
+        data["offerUnusualTransaction"] = this.offerUnusualTransaction;
+        data["nomineeService"] = this.nomineeService;
+        data["nomineeCustomer"] = this.nomineeCustomer;
+        data["crossBorderCustomer"] = this.crossBorderCustomer;
+        data["paymentMode"] = this.paymentMode;
+        data["deliveryChannel"] = this.deliveryChannel;
+        data["unscrMatching"] = this.unscrMatching;
+        data["mohaMatching"] = this.mohaMatching;
+        data["otherMatching"] = this.otherMatching;
+        data["matchingID"] = this.matchingID;
+        data["approval"] = this.approval;
+        data["approvedBy"] = this.approvedBy;
+        data["matchingDescription"] = this.matchingDescription;
+        return data;
+    }
+
+    clone(): CreateOrEditCustomerCDDDto {
+        const json = this.toJSON();
+        let result = new CreateOrEditCustomerCDDDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ICreateOrEditCustomerCDDDto {
+    id: number | undefined;
+    customer: number | undefined;
+    highNetWorth: boolean;
+    businessSize: string | undefined;
+    businessType: string | undefined;
+    publicResearchCompany: boolean;
+    researchDescription: string | undefined;
+    allowAnomaly: boolean;
+    measureCustomer: boolean;
+    offerUnusualTransaction: boolean;
+    nomineeService: boolean;
+    nomineeCustomer: boolean;
+    crossBorderCustomer: boolean;
+    paymentMode: number | undefined;
+    deliveryChannel: number | undefined;
+    unscrMatching: boolean;
+    mohaMatching: boolean;
+    otherMatching: boolean;
+    matchingID: string | undefined;
+    approval: boolean;
+    approvedBy: number | undefined;
+    matchingDescription: string | undefined;
+}
+
 export class CreateOrEditCustomerDto implements ICreateOrEditCustomerDto {
     id: number;
     customerNo: string | undefined;
@@ -7215,7 +7518,7 @@ export class CreateOrEditPawnItemDto implements ICreateOrEditPawnItemDto {
     weight: number;
     length: number;
     brand: string | undefined;
-    includedItem: number | undefined;
+    includedItem: string | undefined;
     includedItemWeight: number;
     includedItemValue: number;
 
@@ -7293,7 +7596,7 @@ export interface ICreateOrEditPawnItemDto {
     weight: number;
     length: number;
     brand: string | undefined;
-    includedItem: number | undefined;
+    includedItem: string | undefined;
     includedItemWeight: number;
     includedItemValue: number;
 }
@@ -7311,6 +7614,7 @@ export class CreateOrEditPawnTicketDto implements ICreateOrEditPawnTicketDto {
     serviceCharge: number;
     slotNumber: string | undefined;
     generalSetup: number | undefined;
+    amountPerGram: number;
 
     constructor(data?: ICreateOrEditPawnTicketDto) {
         if (data) {
@@ -7335,6 +7639,7 @@ export class CreateOrEditPawnTicketDto implements ICreateOrEditPawnTicketDto {
             this.serviceCharge = _data["serviceCharge"];
             this.slotNumber = _data["slotNumber"];
             this.generalSetup = _data["generalSetup"];
+            this.amountPerGram = _data["amountPerGram"];
         }
     }
 
@@ -7359,6 +7664,7 @@ export class CreateOrEditPawnTicketDto implements ICreateOrEditPawnTicketDto {
         data["serviceCharge"] = this.serviceCharge;
         data["slotNumber"] = this.slotNumber;
         data["generalSetup"] = this.generalSetup;
+        data["amountPerGram"] = this.amountPerGram;
         return data;
     }
 
@@ -7383,6 +7689,7 @@ export interface ICreateOrEditPawnTicketDto {
     serviceCharge: number;
     slotNumber: string | undefined;
     generalSetup: number | undefined;
+    amountPerGram: number;
 }
 
 export class CreatePawnTicketWithItemsDto implements ICreatePawnTicketWithItemsDto {
@@ -7846,6 +8153,169 @@ export interface ICustomer {
     businessNature: number | undefined;
     maritalStatus: number | undefined;
     monthlyIncome: number | undefined;
+}
+
+export class CustomerCDD implements ICustomerCDD {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    tenantId: number | undefined;
+    customer: number | undefined;
+    customerFk: Customer;
+    highNetWorth: boolean;
+    businessSize: string | undefined;
+    businessType: string | undefined;
+    publicResearchCompany: boolean;
+    researchDescription: string | undefined;
+    allowAnomaly: boolean;
+    measureCustomer: boolean;
+    offerUnusualTransaction: boolean;
+    nomineeService: boolean;
+    nomineeCustomer: boolean;
+    crossBorderCustomer: boolean;
+    paymentMode: number | undefined;
+    deliveryChannel: number | undefined;
+    unscrMatching: boolean;
+    mohaMatching: boolean;
+    otherMatching: boolean;
+    matchingID: string | undefined;
+    approval: boolean;
+    approvedBy: number | undefined;
+    matchingDescription: string | undefined;
+
+    constructor(data?: ICustomerCDD) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.creationTime = _data["creationTime"] ? moment(_data["creationTime"].toString()) : <any>undefined;
+            this.creatorUserId = _data["creatorUserId"];
+            this.lastModificationTime = _data["lastModificationTime"] ? moment(_data["lastModificationTime"].toString()) : <any>undefined;
+            this.lastModifierUserId = _data["lastModifierUserId"];
+            this.isDeleted = _data["isDeleted"];
+            this.deleterUserId = _data["deleterUserId"];
+            this.deletionTime = _data["deletionTime"] ? moment(_data["deletionTime"].toString()) : <any>undefined;
+            this.tenantId = _data["tenantId"];
+            this.customer = _data["customer"];
+            this.customerFk = _data["customerFk"] ? Customer.fromJS(_data["customerFk"]) : <any>undefined;
+            this.highNetWorth = _data["highNetWorth"];
+            this.businessSize = _data["businessSize"];
+            this.businessType = _data["businessType"];
+            this.publicResearchCompany = _data["publicResearchCompany"];
+            this.researchDescription = _data["researchDescription"];
+            this.allowAnomaly = _data["allowAnomaly"];
+            this.measureCustomer = _data["measureCustomer"];
+            this.offerUnusualTransaction = _data["offerUnusualTransaction"];
+            this.nomineeService = _data["nomineeService"];
+            this.nomineeCustomer = _data["nomineeCustomer"];
+            this.crossBorderCustomer = _data["crossBorderCustomer"];
+            this.paymentMode = _data["paymentMode"];
+            this.deliveryChannel = _data["deliveryChannel"];
+            this.unscrMatching = _data["unscrMatching"];
+            this.mohaMatching = _data["mohaMatching"];
+            this.otherMatching = _data["otherMatching"];
+            this.matchingID = _data["matchingID"];
+            this.approval = _data["approval"];
+            this.approvedBy = _data["approvedBy"];
+            this.matchingDescription = _data["matchingDescription"];
+        }
+    }
+
+    static fromJS(data: any): CustomerCDD {
+        data = typeof data === 'object' ? data : {};
+        let result = new CustomerCDD();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["creationTime"] = this.creationTime ? this.creationTime.toISOString() : <any>undefined;
+        data["creatorUserId"] = this.creatorUserId;
+        data["lastModificationTime"] = this.lastModificationTime ? this.lastModificationTime.toISOString() : <any>undefined;
+        data["lastModifierUserId"] = this.lastModifierUserId;
+        data["isDeleted"] = this.isDeleted;
+        data["deleterUserId"] = this.deleterUserId;
+        data["deletionTime"] = this.deletionTime ? this.deletionTime.toISOString() : <any>undefined;
+        data["tenantId"] = this.tenantId;
+        data["customer"] = this.customer;
+        data["customerFk"] = this.customerFk ? this.customerFk.toJSON() : <any>undefined;
+        data["highNetWorth"] = this.highNetWorth;
+        data["businessSize"] = this.businessSize;
+        data["businessType"] = this.businessType;
+        data["publicResearchCompany"] = this.publicResearchCompany;
+        data["researchDescription"] = this.researchDescription;
+        data["allowAnomaly"] = this.allowAnomaly;
+        data["measureCustomer"] = this.measureCustomer;
+        data["offerUnusualTransaction"] = this.offerUnusualTransaction;
+        data["nomineeService"] = this.nomineeService;
+        data["nomineeCustomer"] = this.nomineeCustomer;
+        data["crossBorderCustomer"] = this.crossBorderCustomer;
+        data["paymentMode"] = this.paymentMode;
+        data["deliveryChannel"] = this.deliveryChannel;
+        data["unscrMatching"] = this.unscrMatching;
+        data["mohaMatching"] = this.mohaMatching;
+        data["otherMatching"] = this.otherMatching;
+        data["matchingID"] = this.matchingID;
+        data["approval"] = this.approval;
+        data["approvedBy"] = this.approvedBy;
+        data["matchingDescription"] = this.matchingDescription;
+        return data;
+    }
+
+    clone(): CustomerCDD {
+        const json = this.toJSON();
+        let result = new CustomerCDD();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ICustomerCDD {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    tenantId: number | undefined;
+    customer: number | undefined;
+    customerFk: Customer;
+    highNetWorth: boolean;
+    businessSize: string | undefined;
+    businessType: string | undefined;
+    publicResearchCompany: boolean;
+    researchDescription: string | undefined;
+    allowAnomaly: boolean;
+    measureCustomer: boolean;
+    offerUnusualTransaction: boolean;
+    nomineeService: boolean;
+    nomineeCustomer: boolean;
+    crossBorderCustomer: boolean;
+    paymentMode: number | undefined;
+    deliveryChannel: number | undefined;
+    unscrMatching: boolean;
+    mohaMatching: boolean;
+    otherMatching: boolean;
+    matchingID: string | undefined;
+    approval: boolean;
+    approvedBy: number | undefined;
+    matchingDescription: string | undefined;
 }
 
 export class CustomerDto implements ICustomerDto {
@@ -9832,7 +10302,7 @@ export class PawnItem implements IPawnItem {
     weight: number;
     length: number;
     brand: string | undefined;
-    includedItem: number | undefined;
+    includedItem: string | undefined;
     includedItemWeight: number;
     includedItemValue: number;
 
@@ -9946,7 +10416,7 @@ export interface IPawnItem {
     weight: number;
     length: number;
     brand: string | undefined;
-    includedItem: number | undefined;
+    includedItem: string | undefined;
     includedItemWeight: number;
     includedItemValue: number;
 }
@@ -9974,6 +10444,7 @@ export class PawnTicket implements IPawnTicket {
     slotNumber: string | undefined;
     generalSetup: number | undefined;
     generalSetupFk: GeneralSetup;
+    amountPerGram: number;
 
     constructor(data?: IPawnTicket) {
         if (data) {
@@ -10008,6 +10479,7 @@ export class PawnTicket implements IPawnTicket {
             this.slotNumber = _data["slotNumber"];
             this.generalSetup = _data["generalSetup"];
             this.generalSetupFk = _data["generalSetupFk"] ? GeneralSetup.fromJS(_data["generalSetupFk"]) : <any>undefined;
+            this.amountPerGram = _data["amountPerGram"];
         }
     }
 
@@ -10042,6 +10514,7 @@ export class PawnTicket implements IPawnTicket {
         data["slotNumber"] = this.slotNumber;
         data["generalSetup"] = this.generalSetup;
         data["generalSetupFk"] = this.generalSetupFk ? this.generalSetupFk.toJSON() : <any>undefined;
+        data["amountPerGram"] = this.amountPerGram;
         return data;
     }
 
@@ -10076,6 +10549,7 @@ export interface IPawnTicket {
     slotNumber: string | undefined;
     generalSetup: number | undefined;
     generalSetupFk: GeneralSetup;
+    amountPerGram: number;
 }
 
 export class PawnTicketDocument implements IPawnTicketDocument {
@@ -10191,6 +10665,7 @@ export class PawnTicketDto implements IPawnTicketDto {
     serviceCharge: number;
     slotNumber: string | undefined;
     generalSetup: number | undefined;
+    amountPerGram: number;
 
     constructor(data?: IPawnTicketDto) {
         if (data) {
@@ -10216,6 +10691,7 @@ export class PawnTicketDto implements IPawnTicketDto {
             this.serviceCharge = _data["serviceCharge"];
             this.slotNumber = _data["slotNumber"];
             this.generalSetup = _data["generalSetup"];
+            this.amountPerGram = _data["amountPerGram"];
         }
     }
 
@@ -10241,6 +10717,7 @@ export class PawnTicketDto implements IPawnTicketDto {
         data["serviceCharge"] = this.serviceCharge;
         data["slotNumber"] = this.slotNumber;
         data["generalSetup"] = this.generalSetup;
+        data["amountPerGram"] = this.amountPerGram;
         return data;
     }
 
@@ -10266,6 +10743,7 @@ export interface IPawnTicketDto {
     serviceCharge: number;
     slotNumber: string | undefined;
     generalSetup: number | undefined;
+    amountPerGram: number;
 }
 
 export class PawnTicketDtoPagedResultDto implements IPawnTicketDtoPagedResultDto {
@@ -11178,6 +11656,53 @@ export class RoleListDtoListResultDto implements IRoleListDtoListResultDto {
 
 export interface IRoleListDtoListResultDto {
     items: RoleListDto[] | undefined;
+}
+
+export class SearchCDDDto implements ISearchCDDDto {
+    customerName: string | undefined;
+    createOrEditCustomerCDDDto: CreateOrEditCustomerCDDDto;
+
+    constructor(data?: ISearchCDDDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.customerName = _data["customerName"];
+            this.createOrEditCustomerCDDDto = _data["createOrEditCustomerCDDDto"] ? CreateOrEditCustomerCDDDto.fromJS(_data["createOrEditCustomerCDDDto"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): SearchCDDDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new SearchCDDDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["customerName"] = this.customerName;
+        data["createOrEditCustomerCDDDto"] = this.createOrEditCustomerCDDDto ? this.createOrEditCustomerCDDDto.toJSON() : <any>undefined;
+        return data;
+    }
+
+    clone(): SearchCDDDto {
+        const json = this.toJSON();
+        let result = new SearchCDDDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ISearchCDDDto {
+    customerName: string | undefined;
+    createOrEditCustomerCDDDto: CreateOrEditCustomerCDDDto;
 }
 
 export class StatusDto implements IStatusDto {

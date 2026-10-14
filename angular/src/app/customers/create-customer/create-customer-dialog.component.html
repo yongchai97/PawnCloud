@@ -3,6 +3,8 @@
     <div class="modal-body">
         <abp-validation-summary [control]="customerForm"></abp-validation-summary>
 
+        <tabset>
+            <tab heading="Customer Details">
         <h6 class="mb-3 text-muted">{{ 'CustomerDetails' | localize }}</h6>
 
         <div class="row g-3">
@@ -13,7 +15,7 @@
 
             <div class="col-md-6 form-group">
                 <label for="FullName">{{ 'FullName' | localize }} <span class="text-danger" aria-hidden="true">*</span></label>
-                <input pInputText class="w-100" id="FullName" name="fullName" [(ngModel)]="customer.fullName" required />
+                <input pInputText class="w-100" id="FullName" name="fullName" [(ngModel)]="customer.fullName" (blur)="checkCustomerCDD()" required />
             </div>
 
             <div class="col-md-4 form-group"><label for="Nric">{{ 'NRIC' | localize }}</label><input pInputText class="w-100" id="Nric" name="nric" [(ngModel)]="customer.nric" (ngModelChange)="readBirthDateFromNric()" /></div>
@@ -257,6 +259,135 @@
                 <p-inputNumber inputId="MonthlyIncome" name="monthlyIncome" styleClass="w-100" [(ngModel)]="customer.monthlyIncome" required></p-inputNumber>
             </div>
         </div>
+            </tab>
+
+            <tab heading="Customer Risk Profiling (CDD)">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0 text-muted">Customer Risk Profiling</h6>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted small" [hidden]="!checkingCDD">Checking customer name...</span>
+                        <button type="button" class="btn btn-sm btn-outline-primary" (click)="recheckCustomerCDD()" [disabled]="checkingCDD || !customer.fullName?.trim()">
+                            <i class="fas fa-sync-alt me-1"></i>Re-Check Name
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6 form-group">
+                        <label for="BusinessSize">Business size</label>
+                        <select class="form-select w-100" id="BusinessSize" name="businessSize" [(ngModel)]="customerCDD.businessSize">
+                            <option value="">Select</option>
+                            <option value="small">Small</option>
+                            <option value="medium">Medium</option>
+                            <option value="large">Large</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label for="BusinessType">Business risk type</label>
+                        <select class="form-select w-100" id="BusinessType" name="businessType" [(ngModel)]="customerCDD.businessType">
+                            <option value="">Select</option>
+                            <option value="lower risk">Lower risk</option>
+                            <option value="medium risk">Medium risk</option>
+                            <option value="high risk">High risk</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 form-group">
+                        <label for="PaymentMode">Payment mode</label>
+                        <p-dropdown appendTo="body" inputId="PaymentMode" name="paymentMode" [(ngModel)]="customerCDD.paymentMode" [options]="paymentModeOptions" optionLabel="displayName" optionValue="id" [showClear]="true" [placeholder]="'Select' | localize" styleClass="w-100"></p-dropdown>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label for="DeliveryChannel">Delivery channel</label>
+                        <p-dropdown appendTo="body" inputId="DeliveryChannel" name="deliveryChannel" [(ngModel)]="customerCDD.deliveryChannel" [options]="deliveryChannelOptions" optionLabel="displayName" optionValue="id" [showClear]="true" [placeholder]="'Select' | localize" styleClass="w-100"></p-dropdown>
+                    </div>
+
+                    <div class="col-12 form-group">
+                        <label for="ResearchDescription">Research description</label>
+                        <textarea pInputText class="w-100" id="ResearchDescription" name="researchDescription" [(ngModel)]="customerCDD.researchDescription" rows="3"></textarea>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="HighNetWorth" name="highNetWorth" [(ngModel)]="customerCDD.highNetWorth" />
+                            <label class="form-check-label" for="HighNetWorth">High net worth</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="PublicResearchCompany" name="publicResearchCompany" [(ngModel)]="customerCDD.publicResearchCompany" />
+                            <label class="form-check-label" for="PublicResearchCompany">Public research company</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="AllowAnomaly" name="allowAnomaly" [(ngModel)]="customerCDD.allowAnomaly" />
+                            <label class="form-check-label" for="AllowAnomaly">Allow anomaly</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="MeasureCustomer" name="measureCustomer" [(ngModel)]="customerCDD.measureCustomer" />
+                            <label class="form-check-label" for="MeasureCustomer">Measure customer</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="OfferUnusualTransaction" name="offerUnusualTransaction" [(ngModel)]="customerCDD.offerUnusualTransaction" />
+                            <label class="form-check-label" for="OfferUnusualTransaction">Offer unusual transaction</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="NomineeService" name="nomineeService" [(ngModel)]="customerCDD.nomineeService" />
+                            <label class="form-check-label" for="NomineeService">Nominee service</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="NomineeCustomer" name="nomineeCustomer" [(ngModel)]="customerCDD.nomineeCustomer" />
+                            <label class="form-check-label" for="NomineeCustomer">Nominee customer</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="CrossBorderCustomer" name="crossBorderCustomer" [(ngModel)]="customerCDD.crossBorderCustomer" />
+                            <label class="form-check-label" for="CrossBorderCustomer">Cross-border customer</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="UNSCRMatching" name="unscrMatching" [(ngModel)]="customerCDD.unscrMatching" />
+                            <label class="form-check-label" for="UNSCRMatching">UNSCR match</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="MOHAMatching" name="mohaMatching" [(ngModel)]="customerCDD.mohaMatching" />
+                            <label class="form-check-label" for="MOHAMatching">MOHA match</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="OtherMatching" name="otherMatching" [(ngModel)]="customerCDD.otherMatching" />
+                            <label class="form-check-label" for="OtherMatching">Other match</label>
+                        </div>
+                    </div>
+
+                    <div class="col-12 form-group">
+                        <label for="MatchingID">Matching ID</label>
+                        <input pInputText class="w-100" id="MatchingID" name="matchingID" [(ngModel)]="customerCDD.matchingID" readonly />
+                    </div>
+
+                    <div class="col-12 form-group">
+                        <label for="MatchingDescription">Matching description</label>
+                        <textarea pInputText class="w-100" id="MatchingDescription" name="matchingDescription" [(ngModel)]="customerCDD.matchingDescription" rows="3" readonly></textarea>
+                    </div>
+
+                    <div class="col-12 border-top pt-3 mt-2">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="Approval" name="approval" [(ngModel)]="customerCDD.approval" />
+                                    <label class="form-check-label" for="Approval">Approved</label>
+                                </div>
+                            </div>
+                            <div class="col-md-8 form-group mb-0">
+                                <label for="ApprovedBy">Approved by</label>
+                                <input pInputText class="w-100" id="ApprovedBy" name="approvedBy" [ngModel]="appSession.userId" readonly />
+                                <small class="text-muted">{{ appSession.user?.userName || 'Current user' }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </tab>
+        </tabset>
     </div>
-    <abp-modal-footer [saveDisabled]="saving || customerForm.invalid || isUnderage()" [cancelDisabled]="saving" (onCancelClick)="bsModalRef.hide()"></abp-modal-footer>
+    <abp-modal-footer [saveDisabled]="saving || checkingCDD || customerForm.invalid || isUnderage()" [cancelDisabled]="saving || checkingCDD" (onCancelClick)="bsModalRef.hide()"></abp-modal-footer>
 </form>

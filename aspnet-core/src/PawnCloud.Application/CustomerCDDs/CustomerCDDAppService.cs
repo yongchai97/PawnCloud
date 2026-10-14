@@ -75,6 +75,12 @@ namespace PawnCloud.CustomerCDDs
                 }
             }
             //based on the found folder, start the 5 xml checks
+            //temporary clear off any existing matches, if any
+            createOrEditCustomerCDDDto.matchingID = "";
+            createOrEditCustomerCDDDto.matchingDescription = "";
+            createOrEditCustomerCDDDto.MOHAMatching = false;
+            createOrEditCustomerCDDDto.UNSCRMatching = false;
+            createOrEditCustomerCDDDto.otherMatching = false;
             createOrEditCustomerCDDDto = CheckSENARAIKdnAsync(folderPath, input.customerName, createOrEditCustomerCDDDto);
             createOrEditCustomerCDDDto = CheckConsolidatedLegacyAsync(folderPath, input.customerName, createOrEditCustomerCDDDto);
             createOrEditCustomerCDDDto = Check1988SanctionAsync(folderPath, input.customerName, createOrEditCustomerCDDDto);

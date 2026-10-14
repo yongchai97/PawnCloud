@@ -1,12 +1,13 @@
 import { Component, Injector, ChangeDetectorRef, EventEmitter, output, OnInit } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
+import { TabsModule } from 'ngx-bootstrap/tabs';
 import { AppComponentBase } from '@shared/app-component-base';
 import { FormsModule } from '@angular/forms';
 import { AbpModalHeaderComponent } from '../../../shared/components/modal/abp-modal-header.component';
 import { AbpValidationSummaryComponent } from '../../../shared/components/validation/abp-validation.summary.component';
 import { AbpModalFooterComponent } from '../../../shared/components/modal/abp-modal-footer.component';
 import { LocalizePipe } from '@shared/pipes/localize.pipe';
-import { CustomerServiceProxy, CreateOrEditCustomerDto, GetCustomerForEditOutput, BasicCodeServiceProxy, BasicCodeLookupDto, Country, CountryServiceProxy, MiscMasterConfigServiceProxy, MiscMasterConfigLookupDto, CustomerPicture, CustomerOutletDto, CreateOrEditCustomerOutletDto, GeneralSetup } from '@shared/service-proxies/service-proxies';
+import { CustomerServiceProxy, CustomerCDDServiceProxy, CreateOrEditCustomerDto, CreateOrEditCustomerCDDDto, SearchCDDDto, CustomerCDD, GetCustomerForEditOutput, BasicCodeServiceProxy, BasicCodeLookupDto, Country, CountryServiceProxy, MiscMasterConfigServiceProxy, MiscMasterConfigLookupDto, CustomerPicture, CustomerOutletDto, CreateOrEditCustomerOutletDto, GeneralSetup } from '@shared/service-proxies/service-proxies';
 import { LookupServiceProxy } from '@shared/service-proxies/lookup-service-proxy';
 import { CustomerPictureServiceProxy } from '@shared/service-proxies/customer-picture-service-proxy';
 import { OutletServiceProxy } from '@shared/service-proxies/outlet-service-proxy';
@@ -21,11 +22,14 @@ import moment from 'moment';
 @Component({
     templateUrl: './edit-customer-dialog.component.html',
     standalone: true,
-    imports: [FormsModule, AbpModalHeaderComponent, AbpValidationSummaryComponent, AbpModalFooterComponent, LocalizePipe, InputTextModule, InputNumberModule, ButtonModule, TableModule, NgIf, NgFor, DropdownModule],
+    imports: [FormsModule, AbpModalHeaderComponent, AbpValidationSummaryComponent, AbpModalFooterComponent, LocalizePipe, InputTextModule, InputNumberModule, ButtonModule, TableModule, NgIf, NgFor, DropdownModule, TabsModule],
 })
 export class EditCustomerDialogComponent extends AppComponentBase implements OnInit {
     saving = false;
     customer = new CreateOrEditCustomerDto();
+    customerCDD = new CreateOrEditCustomerCDDDto();
+    checkingCDD = false;
+    private lastCheckedCustomerName = '';
     id?: number;
 
     // BasicCode dropdowns
@@ -35,6 +39,8 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
     nationalityOptions: { label: string; value: number }[] = [];
     businessNatureOptions: BasicCodeLookupDto[] = [];
     maritalStatusOptions: BasicCodeLookupDto[] = [];
+    paymentModeOptions: BasicCodeLookupDto[] = [];
+    deliveryChannelOptions: BasicCodeLookupDto[] = [];
     customerPictures: CustomerPicture[] = [];
     pictureUrls = new Map<number, string>();
     uploadingPicture = false;
@@ -47,6 +53,7 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
     constructor(
         injector: Injector,
         private _customerService: CustomerServiceProxy,
+        private _customerCDDService: CustomerCDDServiceProxy,
         private _lookupService: LookupServiceProxy,
         private _basicCodeService: BasicCodeServiceProxy,
         private _countryService: CountryServiceProxy,
@@ -64,6 +71,7 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
         this.loadCountries();
         this.loadBasicCodeDropdowns();
         this.loadOutlets();
+        this.customerCDD.approvedBy = this.appSession.userId;
         if (this.id) {
             this._customerService.getViaIdForEdit(this.id).subscribe((result: GetCustomerForEditOutput) => {
                 this.customer = result.customer;
@@ -72,6 +80,7 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
                 }
                 this.readBirthDateFromNric();
                 this.updateAge();
+                this.loadCustomerCDD();
                 this.loadCustomerOutlets();
                 this.loadCustomerPictures();
                 this.cd.detectChanges();
@@ -93,6 +102,14 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
         if (!this.id) return;
         this._customerService.getCustomerOutletViaCustomerId(this.id).subscribe((result) => {
             this.customerOutlets = result || [];
+            this.cd.detectChanges();
+        });
+    }
+
+    private loadCustomerCDD(): void {
+        if (!this.id) return;
+        this._customerCDDService.getViaCustomerId(this.id).subscribe((result: CustomerCDD) => {
+            this.customerCDD = result ? new CreateOrEditCustomerCDDDto(result as any) : new CreateOrEditCustomerCDDDto({ customer: this.id } as any);
             this.cd.detectChanges();
         });
     }
@@ -138,6 +155,8 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
                 'gender': configMap.get('gender'),
                 'businessnature': configMap.get('business nature') || configMap.get('businessnature'),
                 'maritalstatus': configMap.get('marital status') || configMap.get('maritalstatus'),
+                'paymentmethod': configMap.get('payment method') || configMap.get('paymentmode'),
+                'deliverychannel': configMap.get('delivery channel') || configMap.get('deliverychannel'),
             };
 
             // Load BasicCodes for each category
@@ -162,6 +181,18 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
             if (categoryMap['maritalstatus']) {
                 this._lookupService.getBasicCodesByCategory(categoryMap['maritalstatus']).subscribe((result) => {
                     this.maritalStatusOptions = result.items || [];
+                    this.cd.detectChanges();
+                });
+            }
+            if (categoryMap['paymentmethod']) {
+                this._lookupService.getBasicCodesByCategory(categoryMap['paymentmethod']).subscribe((result) => {
+                    this.paymentModeOptions = result.items || [];
+                    this.cd.detectChanges();
+                });
+            }
+            if (categoryMap['deliverychannel']) {
+                this._lookupService.getBasicCodesByCategory(categoryMap['deliverychannel']).subscribe((result) => {
+                    this.deliveryChannelOptions = result.items || [];
                     this.cd.detectChanges();
                 });
             }
@@ -207,6 +238,36 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
         this.cd.detectChanges();
     }
 
+    checkCustomerCDD(): void {
+        const customerName = (this.customer.fullName || '').trim();
+        if (!customerName || this.checkingCDD || customerName === this.lastCheckedCustomerName) {
+            return;
+        }
+
+        this.checkingCDD = true;
+        this._customerCDDService
+            .checkCustomerCDD(new SearchCDDDto({ customerName, createOrEditCustomerCDDDto: this.customerCDD }))
+            .subscribe({
+                next: (result) => {
+                    if (result) {
+                        this.customerCDD = result;
+                    }
+                    this.lastCheckedCustomerName = customerName;
+                    this.cd.detectChanges();
+                },
+                error: (error) => {
+                    this.checkingCDD = false;
+                    const message = error?.error?.error?.message || error?.error?.message || error?.message || 'Unable to check customer risk profile.';
+                    this.notify.error(message);
+                    this.cd.detectChanges();
+                },
+                complete: () => {
+                    this.checkingCDD = false;
+                    this.cd.detectChanges();
+                },
+            });
+    }
+
     loadCustomerPictures(): void {
         if (!this.id) return;
         this._customerPictureService.getList(this.id).subscribe((pictures) => {
@@ -221,6 +282,11 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
             });
             this.cd.detectChanges();
         });
+    }
+
+    recheckCustomerCDD(): void {
+        this.lastCheckedCustomerName = '';
+        this.checkCustomerCDD();
     }
 
     uploadPicture(event: Event): void {
@@ -277,15 +343,36 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
             return;
         }
 
+        const customerName = (this.customer.fullName || '').trim();
+        if (this.checkingCDD) {
+            return;
+        }
+        if (customerName && customerName !== this.lastCheckedCustomerName) {
+            this.checkCustomerCDD();
+            return;
+        }
+
         this.saving = true;
+        this.customerCDD.approvedBy = this.appSession.userId;
         const birthDate = this.customer.birthDate as any;
         this.customer.birthDate = birthDate ? (moment.isMoment(birthDate) ? birthDate : moment(birthDate)) : (undefined as any);
         this.customer.id = this.id;
         this._customerService.createOrEdit(this.customer).subscribe(
-            () => {
-                this.notify.info(this.l('SavedSuccessfully'));
-                this.bsModalRef.hide();
-                this.onSave.emit(null);
+            (customerId) => {
+                this.customerCDD.customer = customerId;
+                this._customerCDDService.createOrEdit(this.customerCDD).subscribe(
+                    () => {
+                        this.notify.info(this.l('SavedSuccessfully'));
+                        this.bsModalRef.hide();
+                        this.onSave.emit(null);
+                    },
+                    (error) => {
+                        this.saving = false;
+                        const message = error?.error?.error?.message || error?.error?.message || error?.message || 'Unable to save customer risk profile.';
+                        this.notify.error(message);
+                        this.cd.detectChanges();
+                    }
+                );
             },
             () => {
                 this.saving = false;
