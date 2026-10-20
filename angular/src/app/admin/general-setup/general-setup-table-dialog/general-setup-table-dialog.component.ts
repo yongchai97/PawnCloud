@@ -10,6 +10,11 @@ import { AbpModalHeaderComponent } from '../../../../shared/components/modal/abp
 
 @Component({
     templateUrl: './general-setup-table-dialog.component.html',
+    styles: [`
+        .mandatory-label::after { content: ' *'; color: #c2413b; font-weight: 600; }
+        .mandatory-control { background-color: #fffaf0; border-color: #d8bd72; }
+        .mandatory-control:focus { background-color: #fffdf7; border-color: #b8943f; box-shadow: 0 0 0 0.2rem rgba(184, 148, 63, 0.15); }
+    `],
     standalone: true,
     imports: [CommonModule, FormsModule, AbpModalHeaderComponent, AbpModalFooterComponent],
 })
@@ -49,6 +54,10 @@ export class GeneralSetupTableDialogComponent extends AppComponentBase implement
     }
 
     save(): void {
+        if (!this.setupTable.generalSetup || !this.setupTable.effectiveDate?.isValid()) {
+            this.notify.warn('A valid outlet and effective date are required.');
+            return;
+        }
         this.saving = true;
         this.setupService.createOrEditGeneralSetupTable(this.setupTable).subscribe(
             () => {

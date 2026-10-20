@@ -2,7 +2,7 @@
     <section class="content-header">
         <div class="container-fluid d-flex justify-content-between align-items-center">
             <h1>{{ 'PawnTickets' | localize }}</h1>
-            <p-button label="{{ 'New' | localize }}" icon="pi pi-plus" (onClick)="openCreate()" [disabled]="pageLoading"></p-button>
+            <p-button label="{{ 'New' | localize }}" icon="pi pi-plus" (onClick)="openCreate()" [disabled]="pageLoading || ticketsLoading"></p-button>
         </div>
     </section>
 
@@ -12,18 +12,22 @@
                 <i class="fas fa-spinner fa-spin fa-2x text-primary" aria-hidden="true"></i>
                 <div class="mt-2 text-muted">Loading Pawn Tickets...</div>
             </div>
-            <div class="card" *ngIf="!pageLoading">
+            <div class="card position-relative" *ngIf="!pageLoading">
                 <div class="card-body table-responsive p-0">
                     <table class="table table-hover text-nowrap">
                         <thead><tr><th>{{ 'TicketNo' | localize }}</th><th>{{ 'Customer' | localize }}</th><th>{{ 'Weight' | localize }}</th><th>{{ 'Value' | localize }}</th><th>{{ 'ExpiryDate' | localize }}</th><th>{{ 'Actions' | localize }}</th></tr></thead>
                         <tbody>
                             <tr *ngFor="let row of tickets">
                                 <td>{{ row.ticketNo }}</td><td>{{ row.customer }}</td><td>{{ row.weight }}</td><td>{{ row.value }}</td><td>{{ row.expiryDate | date }}</td>
-                                <td><button type="button" class="btn btn-sm btn-outline-primary" (click)="openEdit(row)" aria-label="Edit"><i class="fas fa-edit"></i></button></td>
+                                <td><button type="button" class="btn btn-sm btn-outline-primary me-2" (click)="openEdit(row)" [disabled]="ticketsLoading" aria-label="Edit"><i class="fas fa-edit"></i></button><button type="button" class="btn btn-sm btn-outline-danger" (click)="deleteTicket(row)" [disabled]="ticketsLoading" aria-label="Delete"><i class="fas fa-trash"></i></button></td>
                             </tr>
                             <tr *ngIf="tickets.length === 0"><td colspan="6" class="text-center p-4">{{ 'NoData' | localize }}</td></tr>
                         </tbody>
                     </table>
+                </div>
+                <div *ngIf="ticketsLoading" class="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center bg-white bg-opacity-75" style="z-index: 10" role="status" aria-live="polite">
+                    <i class="fas fa-spinner fa-spin fa-2x text-primary" aria-hidden="true"></i>
+                    <div class="mt-2 text-muted">Refreshing Pawn Tickets...</div>
                 </div>
             </div>
         </div>
@@ -37,6 +41,8 @@
     </div>
     <form #ticketForm="ngForm" (ngSubmit)="save()">
         <div class="modal-body">
+            <tabset>
+                <tab heading="Pawn Ticket">
             <div class="row g-3">
                 <div class="col-md-6" *ngIf="ticket.id">
                     <label>{{ 'TicketNo' | localize }}</label>
@@ -51,23 +57,23 @@
                     <label>{{ 'Outlet' | localize }}</label>
                     <p-dropdown appendTo="body" name="generalSetup" [(ngModel)]="ticket.generalSetup" [options]="outlets" optionLabel="outletName" optionValue="id" [showClear]="true" [placeholder]="'Select' | localize" styleClass="w-100" required></p-dropdown>
                 </div>
-                <div class="col-md-4"><label>{{ 'SlotNumber' | localize }}</label><input pInputText class="form-control" name="slotNumber" [(ngModel)]="ticket.slotNumber" /></div>
                 <div class="col-12" *ngIf="selectedCustomer">
                     <div class="border rounded p-3 bg-light"><div class="row g-2"><div class="col-md-4"><strong>{{ 'NRIC' | localize }}/{{ 'PassportNo' | localize }}:</strong> {{ customerIdentity() }}</div><div class="col-md-8"><strong>{{ 'Address' | localize }}:</strong> {{ selectedCustomer.address }}, {{ selectedCustomer.city }}, {{ selectedCustomer.state }}, {{ countryName(selectedCustomer.country) }}</div><div class="col-12"><strong>{{ 'MailingAddress' | localize }}:</strong> {{ selectedCustomer.mailingAddress }}, {{ selectedCustomer.mailingCity }}, {{ selectedCustomer.mailingState }}, {{ countryName(selectedCustomer.mailingCountry) }}</div></div></div>
                 </div>
-                <div class="col-md-4"><label>{{ 'PledgedDate' | localize }}</label><input class="form-control" type="date" name="pledgedDate" [ngModel]="ticket.pledgedDate | date:'yyyy-MM-dd'" (ngModelChange)="ticket.pledgedDate = $event" required /></div>
+                <div class="col-md-4"><label>{{ 'PledgedDate' | localize }}</label><input class="form-control" type="date" name="pledgedDate" [ngModel]="ticket.pledgedDate | date:'yyyy-MM-dd'" (ngModelChange)="updatePledgedDate($event)" required /></div>
                 <div class="col-md-4"><label>{{ 'ExpiryDate' | localize }}</label><input class="form-control" type="date" name="expiryDate" [ngModel]="ticket.expiryDate | date:'yyyy-MM-dd'" (ngModelChange)="ticket.expiryDate = $event" /></div>
             </div>
 
             <hr />
             <div class="d-flex justify-content-between align-items-center"><h5>{{ 'PawnItems' | localize }}</h5><p-button type="button" label="{{ 'AddItem' | localize }}" icon="pi pi-plus" (onClick)="addItem()"></p-button></div>
-            <div class="table-responsive"><table class="table table-sm pawn-items-table"><thead><tr><th>{{ 'ItemListing' | localize }}</th><th>{{ 'ItemStatus' | localize }}</th><th>{{ 'GoldType' | localize }}</th><th>{{ 'IncludedItem' | localize }}</th><th class="numeric-column">{{ 'Weight' | localize }}</th><th class="numeric-column">{{ 'IncludedItemWeight' | localize }}</th><th class="numeric-column">{{ 'IncludedItemValue' | localize }}</th><th class="numeric-column">{{ 'Quantity' | localize }}</th><th>{{ 'Description' | localize }}</th><th></th></tr></thead><tbody>
+            <div class="table-responsive"><table class="table table-sm pawn-items-table"><thead><tr><th>{{ 'ItemListing' | localize }}</th><th>{{ 'ItemStatus' | localize }}</th><th>{{ 'GoldType' | localize }}</th><th>{{ 'IncludedItem' | localize }}</th><th class="numeric-column">{{ 'Weight' | localize }}</th><th class="numeric-column">Length (CM)</th><th class="numeric-column">{{ 'IncludedItemWeight' | localize }}</th><th class="numeric-column">{{ 'IncludedItemValue' | localize }}</th><th class="numeric-column">{{ 'Quantity' | localize }}</th><th>{{ 'Description' | localize }}</th><th></th></tr></thead><tbody>
                 <tr *ngFor="let item of items; let i = index">
                     <td><p-dropdown appendTo="body" [name]="'listing' + i" [(ngModel)]="item.itemListing" [options]="itemListingOptions" optionLabel="label" optionValue="id" (onChange)="updateItemDescription(item)" styleClass="w-100"></p-dropdown></td>
                     <td><p-dropdown appendTo="body" [name]="'status' + i" [(ngModel)]="item.itemStatus" [options]="itemStatusOptions" optionLabel="label" optionValue="id" (onChange)="updateItemDescription(item)" styleClass="w-100"></p-dropdown></td>
                     <td><p-dropdown appendTo="body" [name]="'gold' + i" [(ngModel)]="item.goldType" [options]="goldTypeOptions" optionLabel="label" optionValue="id" (onChange)="calculate()" styleClass="w-100"></p-dropdown></td>
-                    <td><p-dropdown appendTo="body" [name]="'includedItem' + i" [(ngModel)]="item.includedItem" [options]="includedItems" optionLabel="displayName" optionValue="id" [showClear]="true" [placeholder]="'Select' | localize" styleClass="w-100"></p-dropdown></td>
+                    <td><p-multiSelect appendTo="body" [name]="'includedItem' + i" [(ngModel)]="includedItemSelections[i]" [options]="includedItems" optionLabel="displayName" optionValue="id" [filter]="true" display="chip" [placeholder]="'Select' | localize" (onChange)="updateIncludedItems(item, i)" styleClass="w-100"></p-multiSelect></td>
                     <td class="numeric-column"><input pInputText class="form-control" type="number" [name]="'weight' + i" [(ngModel)]="item.weight" (ngModelChange)="calculate()" min="0" /></td>
+                    <td class="numeric-column"><input pInputText class="form-control" type="number" [name]="'length' + i" [(ngModel)]="item.length" min="0" step="0.01" /></td>
                     <td class="numeric-column"><input pInputText class="form-control" type="number" [name]="'includedItemWeight' + i" [(ngModel)]="item.includedItemWeight" min="0" step="0.01" /></td>
                     <td class="numeric-column"><input pInputText class="form-control" type="number" [name]="'includedItemValue' + i" [(ngModel)]="item.includedItemValue" min="0" step="0.01" /></td>
                     <td class="numeric-column"><input pInputText class="form-control" type="number" [name]="'quantity' + i" [(ngModel)]="item.quantity" min="1" /></td>
@@ -82,7 +88,8 @@
                 <div class="col-md-3"><label>{{ 'ExpiryDate' | localize }}</label><input class="form-control" type="date" name="summaryExpiryDate" [ngModel]="ticket.expiryDate | date:'yyyy-MM-dd'" (ngModelChange)="ticket.expiryDate = $event" /></div>
             </div>
             <div class="row g-2 mt-2 ticket-summary-fields">
-                <div class="col-md-3"><label>{{ 'Amount' | localize }}</label><input pInputText class="form-control" type="number" name="amount" [(ngModel)]="ticket.amount" min="0.01" step="0.01" required /></div>
+                <div class="col-md-3"><label>{{ 'Amount' | localize }}</label><input pInputText class="form-control" type="number" name="amount" [(ngModel)]="ticket.amount" (ngModelChange)="calculate(true)" min="0" step="0.01" required /></div>
+                <div class="col-md-3"><label>Amount Per Gram</label><input pInputText class="form-control" type="number" name="amountPerGram" [ngModel]="ticket.amountPerGram" readonly /></div>
                 <div class="col-md-3"><label>{{ 'MonthlyCustody' | localize }}</label><input pInputText class="form-control" type="number" name="monthlyCustody" [(ngModel)]="ticket.monthlyCustody" min="0" step="0.01" /></div>
             </div>
 
@@ -102,7 +109,156 @@
                 <div class="table-responsive" *ngIf="payments.length; else noPawnTicketPayments"><table class="table table-sm"><thead><tr><th>{{ 'PaymentMethod' | localize }}</th><th>{{ 'Amount' | localize }}</th><th></th></tr></thead><tbody><tr *ngFor="let payment of payments"><td>{{ paymentMethodName(payment.paymentMethod) }}</td><td>{{ payment.amount | number:'1.2-2' }}</td><td><p-button type="button" icon="pi pi-trash" severity="danger" [text]="true" (onClick)="deletePayment(payment)" ariaLabel="Delete"></p-button></td></tr></tbody></table></div>
                 <ng-template #noPawnTicketPayments><p class="text-muted small">No pawn ticket payments recorded.</p></ng-template>
             </div>
+
+                </tab>
+
+                <tab heading="Customer Information">
+                    <div *ngIf="selectedCustomer; else noSelectedCustomer" class="row g-3">
+                        <div class="col-md-4">
+                            <label class="text-muted small">Customer number</label>
+                            <div class="form-control bg-light">{{ selectedCustomer.customerNo || '-' }}</div>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="text-muted small">Full name</label>
+                            <div class="form-control bg-light">{{ selectedCustomer.fullName || '-' }}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="text-muted small">NRIC</label>
+                            <div class="form-control bg-light">{{ selectedCustomer.nric || '-' }}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="text-muted small">Passport number</label>
+                            <div class="form-control bg-light">{{ selectedCustomer.passportNo || '-' }}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="text-muted small">Old IC</label>
+                            <div class="form-control bg-light">{{ selectedCustomer.oldIC || '-' }}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="text-muted small">Phone number</label>
+                            <div class="form-control bg-light">{{ selectedCustomer.phoneNo || '-' }}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="text-muted small">Telephone number</label>
+                            <div class="form-control bg-light">{{ selectedCustomer.telephoneNumber || '-' }}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="text-muted small">Email</label>
+                            <div class="form-control bg-light">{{ selectedCustomer.email || '-' }}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="text-muted small">Birth date</label>
+                            <div class="form-control bg-light">{{ selectedCustomer.birthDate | date:'yyyy-MM-dd' }}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="text-muted small">Age</label>
+                            <div class="form-control bg-light">{{ selectedCustomer.age || '-' }}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="text-muted small">Occupation</label>
+                            <div class="form-control bg-light">{{ selectedCustomer.occupation || '-' }}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="text-muted small">Employer</label>
+                            <div class="form-control bg-light">{{ selectedCustomer.employer || '-' }}</div>
+                        </div>
+                        <div class="col-12">
+                            <label class="text-muted small">Residential address</label>
+                            <div class="form-control bg-light">{{ selectedCustomer.address || '-' }}{{ selectedCustomer.city ? ', ' + selectedCustomer.city : '' }}{{ selectedCustomer.state ? ', ' + selectedCustomer.state : '' }}{{ selectedCustomer.postcode ? ' ' + selectedCustomer.postcode : '' }}{{ selectedCustomer.country ? ', ' + countryName(selectedCustomer.country) : '' }}</div>
+                        </div>
+                        <div class="col-12">
+                            <label class="text-muted small">Mailing address</label>
+                            <div class="form-control bg-light">{{ selectedCustomer.mailingAddress || '-' }}{{ selectedCustomer.mailingCity ? ', ' + selectedCustomer.mailingCity : '' }}{{ selectedCustomer.mailingState ? ', ' + selectedCustomer.mailingState : '' }}{{ selectedCustomer.mailingPostcode ? ' ' + selectedCustomer.mailingPostcode : '' }}{{ selectedCustomer.mailingCountry ? ', ' + countryName(selectedCustomer.mailingCountry) : '' }}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="text-muted small">Remark</label>
+                            <div class="form-control bg-light">{{ selectedCustomer.remark || '-' }}</div>
+                        </div>
+                    </div>
+                    <ng-template #noSelectedCustomer>
+                        <p class="text-muted mb-0">Select a customer in the Pawn Ticket tab to view customer information.</p>
+                    </ng-template>
+                </tab>
+
+                <tab heading="Customer Risk Profiling (CDD)">
+                    <div *ngIf="ticket.customer; else noCDDCustomer">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">Customer Risk Profiling</h5>
+                            <span class="text-muted small" *ngIf="loadingCustomerCDD">Loading customer risk profile...</span>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6 form-group">
+                                <label for="TicketCDD_BusinessSize">Business size</label>
+                                <select class="form-select w-100" id="TicketCDD_BusinessSize" name="ticketCddBusinessSize" [(ngModel)]="customerCDD.businessSize">
+                                    <option value="">Select</option>
+                                    <option value="small">Small</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="large">Large</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="TicketCDD_BusinessType">Business risk type</label>
+                                <select class="form-select w-100" id="TicketCDD_BusinessType" name="ticketCddBusinessType" [(ngModel)]="customerCDD.businessType">
+                                    <option value="">Select</option>
+                                    <option value="lower risk">Lower risk</option>
+                                    <option value="medium risk">Medium risk</option>
+                                    <option value="high risk">High risk</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="TicketCDD_PaymentMode">Payment mode</label>
+                                <p-dropdown appendTo="body" inputId="TicketCDD_PaymentMode" name="ticketCddPaymentMode" [(ngModel)]="customerCDD.paymentMode" [options]="paymentModeOptions" optionLabel="displayName" optionValue="id" [showClear]="true" [placeholder]="'Select' | localize" styleClass="w-100"></p-dropdown>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="TicketCDD_DeliveryChannel">Delivery channel</label>
+                                <p-dropdown appendTo="body" inputId="TicketCDD_DeliveryChannel" name="ticketCddDeliveryChannel" [(ngModel)]="customerCDD.deliveryChannel" [options]="deliveryChannelOptions" optionLabel="displayName" optionValue="id" [showClear]="true" [placeholder]="'Select' | localize" styleClass="w-100"></p-dropdown>
+                            </div>
+                            <div class="col-12 form-group">
+                                <label for="TicketCDD_ResearchDescription">Research description</label>
+                                <textarea pInputText class="w-100" id="TicketCDD_ResearchDescription" name="ticketCddResearchDescription" [(ngModel)]="customerCDD.researchDescription" rows="3"></textarea>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-check"><input class="form-check-input" type="checkbox" id="TicketCDD_HighNetWorth" name="ticketCddHighNetWorth" [(ngModel)]="customerCDD.highNetWorth" /><label class="form-check-label" for="TicketCDD_HighNetWorth">High net worth</label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" id="TicketCDD_PublicResearchCompany" name="ticketCddPublicResearchCompany" [(ngModel)]="customerCDD.publicResearchCompany" /><label class="form-check-label" for="TicketCDD_PublicResearchCompany">Public research company</label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" id="TicketCDD_AllowAnomaly" name="ticketCddAllowAnomaly" [(ngModel)]="customerCDD.allowAnomaly" /><label class="form-check-label" for="TicketCDD_AllowAnomaly">Allow anomaly</label></div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check"><input class="form-check-input" type="checkbox" id="TicketCDD_MeasureCustomer" name="ticketCddMeasureCustomer" [(ngModel)]="customerCDD.measureCustomer" /><label class="form-check-label" for="TicketCDD_MeasureCustomer">Measure customer</label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" id="TicketCDD_OfferUnusualTransaction" name="ticketCddOfferUnusualTransaction" [(ngModel)]="customerCDD.offerUnusualTransaction" /><label class="form-check-label" for="TicketCDD_OfferUnusualTransaction">Offer unusual transaction</label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" id="TicketCDD_NomineeService" name="ticketCddNomineeService" [(ngModel)]="customerCDD.nomineeService" /><label class="form-check-label" for="TicketCDD_NomineeService">Nominee service</label></div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check"><input class="form-check-input" type="checkbox" id="TicketCDD_NomineeCustomer" name="ticketCddNomineeCustomer" [(ngModel)]="customerCDD.nomineeCustomer" /><label class="form-check-label" for="TicketCDD_NomineeCustomer">Nominee customer</label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" id="TicketCDD_CrossBorderCustomer" name="ticketCddCrossBorderCustomer" [(ngModel)]="customerCDD.crossBorderCustomer" /><label class="form-check-label" for="TicketCDD_CrossBorderCustomer">Cross-border customer</label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" id="TicketCDD_Approval" name="ticketCddApproval" [(ngModel)]="customerCDD.approval" /><label class="form-check-label" for="TicketCDD_Approval">Approved</label></div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-check"><input class="form-check-input" type="checkbox" id="TicketCDD_UNSCRMatching" name="ticketCddUnscrMatching" [(ngModel)]="customerCDD.unscrMatching" /><label class="form-check-label" for="TicketCDD_UNSCRMatching">UNSCR match</label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" id="TicketCDD_MOHAMatching" name="ticketCddMohaMatching" [(ngModel)]="customerCDD.mohaMatching" /><label class="form-check-label" for="TicketCDD_MOHAMatching">MOHA match</label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" id="TicketCDD_OtherMatching" name="ticketCddOtherMatching" [(ngModel)]="customerCDD.otherMatching" /><label class="form-check-label" for="TicketCDD_OtherMatching">Other match</label></div>
+                            </div>
+                            <div class="col-md-8 form-group">
+                                <label for="TicketCDD_ApprovedBy">Approved by</label>
+                                <input pInputText class="w-100" id="TicketCDD_ApprovedBy" name="ticketCddApprovedBy" [ngModel]="appSession.user?.userName || 'Current user'" readonly />
+                            </div>
+                            <div class="col-12 form-group">
+                                <label for="TicketCDD_MatchingID">Matching ID</label>
+                                <input pInputText class="w-100" id="TicketCDD_MatchingID" name="ticketCddMatchingId" [(ngModel)]="customerCDD.matchingID" readonly />
+                            </div>
+                            <div class="col-12 form-group">
+                                <label for="TicketCDD_MatchingDescription">Matching description</label>
+                                <textarea pInputText class="w-100" id="TicketCDD_MatchingDescription" name="ticketCddMatchingDescription" [(ngModel)]="customerCDD.matchingDescription" rows="3" readonly></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <ng-template #noCDDCustomer>
+                        <p class="text-muted mb-0">Select a customer in the Pawn Ticket tab to view or create a CDD profile.</p>
+                    </ng-template>
+                </tab>
+            </tabset>
         </div>
-        <div class="modal-footer"><p-button type="button" label="{{ 'Cancel' | localize }}" severity="secondary" (onClick)="modal.hide()"></p-button><p-button type="submit" label="{{ 'Save' | localize }}" icon="pi pi-save" [loading]="saving" [disabled]="saving"></p-button></div>
+        <div class="modal-footer"><p-button type="button" label="{{ 'Cancel' | localize }}" severity="secondary" (onClick)="modal.hide()" [disabled]="saving || checkingCustomerRisk"></p-button><p-button type="submit" label="{{ 'Save' | localize }}" icon="pi pi-save" [loading]="saving" [disabled]="saving || checkingCustomerRisk || loadingCustomerCDD"></p-button></div>
     </form>
 </ng-template>

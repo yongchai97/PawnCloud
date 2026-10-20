@@ -35,7 +35,7 @@ namespace PawnCloud.GeneralSetups
 
         public async Task CreateOrEdit(GeneralSetup input)
         {
-            if (input.Id != null)
+            if (input.Id > 0)
             {
                 await Update(input);
             }
@@ -142,13 +142,13 @@ namespace PawnCloud.GeneralSetups
         }
         public async Task CreateOrEditGeneralSetupTable(GeneralSetupTable input)
         {
-            if(input.Id == null)
+            if (input.Id > 0)
             {
-                await CreateGeneralSetupTable(input);
+                await UpdateGeneralSetupTable(input);
             }
             else
             {
-                await UpdateGeneralSetupTable(input);
+                await CreateGeneralSetupTable(input);
             }
         }
         private async Task CreateGeneralSetupTable(GeneralSetupTable input)

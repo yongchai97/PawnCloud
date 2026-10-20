@@ -13,6 +13,12 @@ import { GeneralSetupTableDialogComponent } from '../general-setup-table-dialog/
 
 @Component({
     templateUrl: './general-setup-dialog.component.html',
+    styles: [`
+        .mandatory-label::after { content: ' *'; color: #c2413b; font-weight: 600; }
+        .mandatory-control { background-color: #fffaf0; border-color: #d8bd72; }
+        .mandatory-control:focus { background-color: #fffdf7; border-color: #b8943f; box-shadow: 0 0 0 0.2rem rgba(184, 148, 63, 0.15); }
+        :host ::ng-deep .mandatory-control .p-dropdown-label { background-color: #fffaf0; }
+    `],
     standalone: true,
     imports: [CommonModule, FormsModule, DropdownModule, LocalizePipe, AbpModalHeaderComponent, AbpModalFooterComponent],
 })
@@ -66,6 +72,10 @@ export class GeneralSetupDialogComponent extends AppComponentBase implements OnI
     }
 
     newSetupTable(): void {
+        if (!this.setup.id) {
+            this.notify.warn('Save the outlet before adding a rate table.');
+            return;
+        }
         const setupTable = new GeneralSetupTable();
         setupTable.generalSetup = this.setup.id;
         setupTable.effectiveDate = moment();
@@ -103,9 +113,24 @@ export class GeneralSetupDialogComponent extends AppComponentBase implements OnI
         this.saving = true;
         this.setupService.createOrEdit(this.setup).subscribe(
             () => {
-                this.notify.info(this.l('SavedSuccessfully'));
-                this.bsModalRef.hide();
-                this.onSave.emit(this.setup);
+                if (this.setup.id) {
+                    this.finishSave();
+                    return;
+                }
+
+                this.setupService.getAll().subscribe(
+                    (setups) => {
+                        const savedSetup = (setups || []).find((setup) =>
+                            setup.outletName === this.setup.outletName &&
+                            setup.outletRegistrationNumber === this.setup.outletRegistrationNumber
+                        );
+                        if (savedSetup) {
+                            this.setup = GeneralSetup.fromJS(savedSetup);
+                        }
+                        this.finishSave();
+                    },
+                    () => this.finishSave()
+                );
             },
             (error) => {
                 this.saving = false;
@@ -113,6 +138,14 @@ export class GeneralSetupDialogComponent extends AppComponentBase implements OnI
                 this.cd.detectChanges();
             }
         );
+    }
+
+    private finishSave(): void {
+        this.saving = false;
+        this.notify.info(this.l('SavedSuccessfully'));
+        this.loadSetupTables();
+        this.onSave.emit(this.setup);
+        this.cd.detectChanges();
     }
 
     dateValue(value: moment.Moment | undefined): string {

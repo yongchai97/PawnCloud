@@ -430,8 +430,7 @@
                             </div>
                             <div class="col-md-8 form-group mb-0">
                                 <label for="ApprovedBy">Approved by</label>
-                                <input pInputText class="w-100" id="ApprovedBy" name="approvedBy" [ngModel]="appSession.userId" readonly />
-                                <small class="text-muted">{{ appSession.user?.userName || 'Current user' }}</small>
+                                <input pInputText class="w-100" id="ApprovedBy" name="approvedBy" [ngModel]="appSession.user?.userName || 'Current user'" readonly />
                             </div>
                         </div>
                     </div>

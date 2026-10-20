@@ -6,11 +6,13 @@ using Abp.Linq.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using PawnCloud.Authorization;
+using PawnCloud.CustomerCDDs;
 using PawnCloud.Customers;
 using PawnCloud.DailyGoldPrices;
 using PawnCloud.GeneralSetups;
 using PawnCloud.GoldTypes;
 using PawnCloud.PawnItems;
+using PawnCloud.PawnTicketPayments;
 using PawnCloud.PawnTickets.Dto;
 using PawnCloud.SharedFunctions;
 using System.Collections.Generic;
@@ -29,6 +31,9 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
     private readonly IRepository<DailyGoldPrice> _DailyGoldPrice;
     private SharedFunction sharedFunction;
     private readonly IRepository<GeneralSetupTable> _GeneralSetupTable;
+    private readonly IRepository<CustomerCDD> _CustomerCDD;
+    private readonly IRepository<PawnTicketPayment> _PawnTicketPayment;
+    private readonly IRepository<PawnTicketDocument> _PawnTicketDocument;
 
     public PawnTicketAppService(
         IRepository<PawnTicket, int> repository,
@@ -37,7 +42,10 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
         IRepository<GoldType> goldTypeRepository,
         IRepository<DailyGoldPrice> dailyGoldPriceRepository,
         SharedFunction sharedFunction,
-        IRepository<GeneralSetupTable> generalSetupTable)
+        IRepository<GeneralSetupTable> generalSetupTable,
+        IRepository<CustomerCDD> customerCDDRepository,
+        IRepository<PawnTicketPayment> pawnTicketPaymentRepository,
+        IRepository<PawnTicketDocument> pawnTicketDocumentRepository)
     {
         _repository = repository;
         _PawnItem = pawnItemRepository;
@@ -46,6 +54,9 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
         this.sharedFunction = sharedFunction;
         _DailyGoldPrice = dailyGoldPriceRepository;
         _GeneralSetupTable = generalSetupTable;
+        _CustomerCDD = customerCDDRepository;
+        _PawnTicketPayment = pawnTicketPaymentRepository;
+        _PawnTicketDocument = pawnTicketDocumentRepository;
     }
 
     public async Task<PagedResultDto<PawnTicketDto>> GetAll(PagedPawnTicketResultRequestDto input)
@@ -78,9 +89,30 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
         }
         return new GetPawnTicketForEditOutput { PawnTicket = dto };
     }
-
+    public async Task<bool> IsHighRiskCustomer(int? Customer)
+    {
+        var customerCDD = await _CustomerCDD.FirstOrDefaultAsync(x => x.Customer == Customer);
+        if (customerCDD != null)
+        {
+            if((customerCDD.MOHAMatching == true || customerCDD.UNSCRMatching == true || customerCDD.otherMatching == true)
+                && customerCDD.approval == false)
+            {
+                return true;
+            }
+            else if(customerCDD.approval == true)
+            {
+                return false;
+            }
+        }
+        return false;
+    }
     public async Task<int> CreateOrEdit(CreateOrEditPawnTicketDto input)
     {
+        bool isHighRisk = await IsHighRiskCustomer(input.Customer);
+        if(isHighRisk)
+        {
+            return 0;
+        }
         if (input.Id > 0)
         {
             //await PermissionChecker.AuthorizeAsync(PermissionNames.Pages_PawnTickets_Edit);
@@ -119,6 +151,8 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
     public async Task Delete(EntityDto<int> input)
     {
         //await PermissionChecker.AuthorizeAsync(PermissionNames.Pages_PawnTickets_Delete);
+        await _PawnTicketDocument.DeleteAsync(x => x.PawnTicket == input.Id);
+        await _PawnTicketPayment.DeleteAsync(x => x.PawnTicket == input.Id);
         await _PawnItem.DeleteAsync(x=>x.PawnTicket == input.Id);
         await _repository.DeleteAsync(input.Id);
     }
@@ -145,6 +179,11 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
             return "";
         }
         if(input.Ticket.GeneralSetup == null)
+        {
+            return "";
+        }
+        bool isHighRisk = await IsHighRiskCustomer(input.Ticket.Customer);
+        if (isHighRisk)
         {
             return "";
         }

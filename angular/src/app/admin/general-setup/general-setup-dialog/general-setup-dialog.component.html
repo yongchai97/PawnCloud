@@ -4,36 +4,36 @@
     <div class="modal-body">
         <div class="row g-3">
             <div class="col-md-6">
-                <label for="outletName">{{ 'OutletName' | localize }}</label>
-                <input class="form-control" id="outletName" name="outletName" [(ngModel)]="setup.outletName" required />
+                <label class="mandatory-label" for="outletName">{{ 'OutletName' | localize }}</label>
+                <input class="form-control mandatory-control" id="outletName" name="outletName" [(ngModel)]="setup.outletName" required />
             </div>
             <div class="col-md-6">
                 <label for="outletRegistrationNumber">{{ 'OutletRegistrationNumber' | localize }}</label>
-                <input class="form-control" id="outletRegistrationNumber" name="outletRegistrationNumber" [(ngModel)]="setup.outletRegistrationNumber" required />
+                <input class="form-control" id="outletRegistrationNumber" name="outletRegistrationNumber" [(ngModel)]="setup.outletRegistrationNumber" />
             </div>
             <div class="col-md-4">
-                <label for="serviceCharge">{{ 'ServiceCharge' | localize }}</label>
-                <input type="number" min="0" step="0.01" class="form-control" id="serviceCharge" name="serviceCharge" [(ngModel)]="setup.serviceCharge" required />
+                <label class="mandatory-label" for="serviceCharge">{{ 'ServiceCharge' | localize }}</label>
+                <input type="number" min="0" step="0.01" class="form-control mandatory-control" id="serviceCharge" name="serviceCharge" [(ngModel)]="setup.serviceCharge" required />
             </div>
             <div class="col-md-4">
-                <label for="maximumAllowedPercentage">{{ 'MaximumAllowedPercentage' | localize }}</label>
-                <input type="number" min="0" step="0.01" class="form-control" id="maximumAllowedPercentage" name="maximumAllowedPercentage" [(ngModel)]="setup.maximumAllowedPercentage" required />
+                <label class="mandatory-label" for="maximumAllowedPercentage">{{ 'MaximumAllowedPercentage' | localize }}</label>
+                <input type="number" min="0" step="0.01" class="form-control mandatory-control" id="maximumAllowedPercentage" name="maximumAllowedPercentage" [(ngModel)]="setup.maximumAllowedPercentage" required />
             </div>
             <div class="col-md-4">
-                <label for="monthsBetweenPledgeAndExpiry">{{ 'MonthsBetweenPledgeAndExpiry' | localize }}</label>
-                <input type="number" min="1" step="1" class="form-control" id="monthsBetweenPledgeAndExpiry" name="monthsBetweenPledgeAndExpiry" [(ngModel)]="setup.monthsBetweenPledgeAndExpiry" required />
+                <label class="mandatory-label" for="monthsBetweenPledgeAndExpiry">{{ 'MonthsBetweenPledgeAndExpiry' | localize }}</label>
+                <input type="number" min="1" step="1" class="form-control mandatory-control" id="monthsBetweenPledgeAndExpiry" name="monthsBetweenPledgeAndExpiry" [(ngModel)]="setup.monthsBetweenPledgeAndExpiry" required />
             </div>
             <div class="col-md-6">
                 <label for="ticketIdMethod">{{ 'TicketIdMethod' | localize }}</label>
-                <p-dropdown inputId="ticketIdMethod" name="ticketIdMethod" [(ngModel)]="setup.ticketIdMethod" [options]="idMethods" optionLabel="label" optionValue="value" [showClear]="true" [placeholder]="'Select' | localize" required styleClass="w-100"></p-dropdown>
+                <p-dropdown inputId="ticketIdMethod" name="ticketIdMethod" [(ngModel)]="setup.ticketIdMethod" [options]="idMethods" optionLabel="label" optionValue="value" [showClear]="true" [placeholder]="'Select' | localize" styleClass="w-100"></p-dropdown>
             </div>
             <div class="col-md-6">
                 <label for="appendedString">{{ 'AppendedString' | localize }}</label>
-                <input class="form-control" id="appendedString" name="appendedString" [(ngModel)]="setup.appendedString" required />
+                <input class="form-control" id="appendedString" name="appendedString" [(ngModel)]="setup.appendedString" />
             </div>
             <div class="col-md-6">
                 <label for="appendedStringBackMethod">{{ 'AppendedStringBackMethod' | localize }}</label>
-                <p-dropdown inputId="appendedStringBackMethod" name="appendedStringBackMethod" [(ngModel)]="setup.appendedStringBackMethod" [options]="idMethods" optionLabel="label" optionValue="value" [showClear]="true" [placeholder]="'Select' | localize" required styleClass="w-100"></p-dropdown>
+                <p-dropdown inputId="appendedStringBackMethod" name="appendedStringBackMethod" [(ngModel)]="setup.appendedStringBackMethod" [options]="idMethods" optionLabel="label" optionValue="value" [showClear]="true" [placeholder]="'Select' | localize" styleClass="w-100"></p-dropdown>
             </div>
             <div class="col-md-6 d-flex align-items-center">
                 <div class="form-check mt-3">
@@ -46,28 +46,28 @@
         <h6 class="mt-4 mb-3 text-muted">Licences and insurance</h6>
         <div class="row g-3">
             <div class="col-md-4">
-                <label for="bandarayaLicenseExpiryDate">Bandaraya licence expiry</label>
-                <input type="date" class="form-control" id="bandarayaLicenseExpiryDate" name="bandarayaLicenseExpiryDate" [ngModel]="dateValue(setup.bandarayaLicenseExpiryDate)" (ngModelChange)="setDate('bandarayaLicenseExpiryDate', $event)" required />
+                <label class="mandatory-label" for="bandarayaLicenseExpiryDate">Bandaraya licence expiry</label>
+                <input type="date" class="form-control mandatory-control" id="bandarayaLicenseExpiryDate" name="bandarayaLicenseExpiryDate" [ngModel]="dateValue(setup.bandarayaLicenseExpiryDate)" (ngModelChange)="setDate('bandarayaLicenseExpiryDate', $event)" required />
             </div>
             <div class="col-md-4">
-                <label for="kpktLicenseExpiryDate">KPKT licence expiry</label>
-                <input type="date" class="form-control" id="kpktLicenseExpiryDate" name="kpktLicenseExpiryDate" [ngModel]="dateValue(setup.kpktLicenseExpiryDate)" (ngModelChange)="setDate('kpktLicenseExpiryDate', $event)" required />
+                <label class="mandatory-label" for="kpktLicenseExpiryDate">KPKT licence expiry</label>
+                <input type="date" class="form-control mandatory-control" id="kpktLicenseExpiryDate" name="kpktLicenseExpiryDate" [ngModel]="dateValue(setup.kpktLicenseExpiryDate)" (ngModelChange)="setDate('kpktLicenseExpiryDate', $event)" required />
             </div>
             <div class="col-md-4">
-                <label for="kpktPermitIklanExpiryDate">KPKT permit iklan expiry</label>
-                <input type="date" class="form-control" id="kpktPermitIklanExpiryDate" name="kpktPermitIklanExpiryDate" [ngModel]="dateValue(setup.kpktPermitIklanExpiryDate)" (ngModelChange)="setDate('kpktPermitIklanExpiryDate', $event)" required />
+                <label class="mandatory-label" for="kpktPermitIklanExpiryDate">KPKT permit iklan expiry</label>
+                <input type="date" class="form-control mandatory-control" id="kpktPermitIklanExpiryDate" name="kpktPermitIklanExpiryDate" [ngModel]="dateValue(setup.kpktPermitIklanExpiryDate)" (ngModelChange)="setDate('kpktPermitIklanExpiryDate', $event)" required />
             </div>
             <div class="col-md-6">
-                <label for="insuranceExpiryDate">Insurance expiry</label>
-                <input type="date" class="form-control" id="insuranceExpiryDate" name="insuranceExpiryDate" [ngModel]="dateValue(setup.insuranceExpiryDate)" (ngModelChange)="setDate('insuranceExpiryDate', $event)" required />
+                <label class="mandatory-label" for="insuranceExpiryDate">Insurance expiry</label>
+                <input type="date" class="form-control mandatory-control" id="insuranceExpiryDate" name="insuranceExpiryDate" [ngModel]="dateValue(setup.insuranceExpiryDate)" (ngModelChange)="setDate('insuranceExpiryDate', $event)" required />
             </div>
             <div class="col-md-6">
-                <label for="pdpaExpiryDate">PDPA expiry</label>
-                <input type="date" class="form-control" id="pdpaExpiryDate" name="pdpaExpiryDate" [ngModel]="dateValue(setup.pdpaExpiryDate)" (ngModelChange)="setDate('pdpaExpiryDate', $event)" required />
+                <label class="mandatory-label" for="pdpaExpiryDate">PDPA expiry</label>
+                <input type="date" class="form-control mandatory-control" id="pdpaExpiryDate" name="pdpaExpiryDate" [ngModel]="dateValue(setup.pdpaExpiryDate)" (ngModelChange)="setDate('pdpaExpiryDate', $event)" required />
             </div>
             <div class="col-md-6">
                 <label for="insurancePolicyNumber">{{ 'InsurancePolicyNumber' | localize }}</label>
-                <input class="form-control" id="insurancePolicyNumber" name="insurancePolicyNumber" [(ngModel)]="setup.insurancePolicyNumber" required />
+                <input class="form-control" id="insurancePolicyNumber" name="insurancePolicyNumber" [(ngModel)]="setup.insurancePolicyNumber" />
             </div>
         </div>
 
@@ -75,23 +75,23 @@
         <div class="row g-3">
             <div class="col-12">
                 <label for="outletAddress">{{ 'Address' | localize }}</label>
-                <input class="form-control" id="outletAddress" name="outletAddress" [(ngModel)]="setup.outletAddress" required />
+                <input class="form-control" id="outletAddress" name="outletAddress" [(ngModel)]="setup.outletAddress" />
             </div>
             <div class="col-md-4">
                 <label for="outletCity">{{ 'City' | localize }}</label>
-                <input class="form-control" id="outletCity" name="outletCity" [(ngModel)]="setup.outletCity" required />
+                <input class="form-control" id="outletCity" name="outletCity" [(ngModel)]="setup.outletCity" />
             </div>
             <div class="col-md-4">
                 <label for="outletState">{{ 'State' | localize }}</label>
-                <input class="form-control" id="outletState" name="outletState" [(ngModel)]="setup.outletState" required />
+                <input class="form-control" id="outletState" name="outletState" [(ngModel)]="setup.outletState" />
             </div>
             <div class="col-md-4">
                 <label for="outletPostcode">{{ 'Postcode' | localize }}</label>
-                <input class="form-control" id="outletPostcode" name="outletPostcode" [(ngModel)]="setup.outletPostcode" required />
+                <input class="form-control" id="outletPostcode" name="outletPostcode" [(ngModel)]="setup.outletPostcode" />
             </div>
             <div class="col-md-6">
                 <label for="outletCountry">{{ 'Country' | localize }}</label>
-                <p-dropdown inputId="outletCountry" name="outletCountry" [(ngModel)]="setup.outletCountry" [options]="countryOptions" optionLabel="label" optionValue="value" [filter]="true" [showClear]="true" [placeholder]="'Select' | localize" required styleClass="w-100"></p-dropdown>
+                <p-dropdown inputId="outletCountry" name="outletCountry" [(ngModel)]="setup.outletCountry" [options]="countryOptions" optionLabel="label" optionValue="value" [filter]="true" [showClear]="true" [placeholder]="'Select' | localize" styleClass="w-100"></p-dropdown>
             </div>
         </div>
 

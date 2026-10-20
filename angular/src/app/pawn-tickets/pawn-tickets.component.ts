@@ -9,23 +9,25 @@ import { LocalizePipe } from '@shared/pipes/localize.pipe';
 import { LookupServiceProxy, CustomerLookupDto, PawnTicketLookupDto } from '@shared/service-proxies/lookup-service-proxy';
 import { OutletServiceProxy } from '@shared/service-proxies/outlet-service-proxy';
 import {
-    BasicCodeLookupDto, Country, CountryServiceProxy, CreateOrEditCustomerDto, CreateOrEditPawnItemDto, CreateOrEditPawnTicketDto,
+    BasicCodeLookupDto, Country, CountryServiceProxy, CreateOrEditCustomerDto, CreateOrEditCustomerCDDDto, CreateOrEditPawnItemDto, CreateOrEditPawnTicketDto,
     FileParameter, GeneralSetup, PawnTicketDocument, PawnTicketDocumentServiceProxy, PawnTicketPayment, PawnTicketPaymentDto,
     CustomerServiceProxy,
     CreatePawnTicketWithItemsDto,
     GoldType, GoldTypeServiceProxy, ItemListing, ItemListingServiceProxy, ItemStatus,
-    ItemStatusServiceProxy, PawnItemServiceProxy, PawnTicketDto, PawnTicketPaymentServiceProxy, PawnTicketServiceProxy,
+    ItemStatusServiceProxy, PawnItemServiceProxy, PawnTicketDto, PawnTicketPaymentServiceProxy, PawnTicketServiceProxy, CustomerCDDServiceProxy,
 } from '@shared/service-proxies/service-proxies';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DropdownModule } from 'primeng/dropdown';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { TabsModule } from 'ngx-bootstrap/tabs';
 
 @Component({
     templateUrl: './pawn-tickets.component.html',
     animations: [appModuleAnimation()],
     standalone: true,
-    imports: [CommonModule, FormsModule, LocalizePipe, ButtonModule, InputTextModule, InputNumberModule, DropdownModule],
+    imports: [CommonModule, FormsModule, LocalizePipe, ButtonModule, InputTextModule, InputNumberModule, DropdownModule, MultiSelectModule, TabsModule],
 })
 export class PawnTicketsComponent extends AppComponentBase {
     tickets: PawnTicketDto[] = [];
@@ -39,10 +41,14 @@ export class PawnTicketsComponent extends AppComponentBase {
     uploadingDocument = false;
     payments: PawnTicketPayment[] = [];
     paymentMethods: { id: number; label: string }[] = [];
+    paymentModeOptions: BasicCodeLookupDto[] = [];
+    deliveryChannelOptions: BasicCodeLookupDto[] = [];
     newPaymentAmount = 0;
     newPaymentMethod?: number;
     customers: CustomerLookupDto[] = [];
     selectedCustomer?: CreateOrEditCustomerDto;
+    customerCDD = new CreateOrEditCustomerCDDDto();
+    loadingCustomerCDD = false;
     countryNames = new Map<number, string>();
     ticketOptions: PawnTicketLookupDto[] = [];
     itemListings: ItemListing[] = [];
@@ -56,16 +62,22 @@ export class PawnTicketsComponent extends AppComponentBase {
     selectedTicketId?: number;
     ticket = new CreateOrEditPawnTicketDto();
     items: CreateOrEditPawnItemDto[] = [];
+    includedItemSelections: number[][] = [];
     saving = false;
+    checkingCustomerRisk = false;
     calculating = false;
     pageLoading = true;
+    ticketsLoading = false;
     private pendingInitialLoads = 9;
+    private customerRiskRequestId = 0;
+    private readonly highRiskCustomerMessage = 'High risk profile customer without approval or customer with missing CDD detected, operation cancelled';
     @ViewChild('editor') editor!: TemplateRef<any>;
 
     constructor(
         injector: Injector,
         private lookup: LookupServiceProxy,
         private customerService: CustomerServiceProxy,
+        private customerCDDService: CustomerCDDServiceProxy,
         private countryService: CountryServiceProxy,
         private ticketService: PawnTicketServiceProxy,
         private listingService: ItemListingServiceProxy,
@@ -121,7 +133,15 @@ export class PawnTicketsComponent extends AppComponentBase {
             const paymentCategory = (result.items || []).find((category) => category.displayName?.toUpperCase().includes('PAYMENT METHOD'));
             if (paymentCategory) {
                 this.lookup.getBasicCodesByCategory(paymentCategory.id).subscribe((codes) => {
-                    this.paymentMethods = (codes.items || []).map((code) => ({ id: code.id, label: code.displayName || '' }));
+                    this.paymentModeOptions = codes.items || [];
+                    this.paymentMethods = this.paymentModeOptions.map((code) => ({ id: code.id, label: code.displayName || '' }));
+                    this.cd.detectChanges();
+                });
+            }
+            const deliveryChannelCategory = (result.items || []).find((category) => category.displayName?.toUpperCase() === 'DELIVERY CHANNEL');
+            if (deliveryChannelCategory) {
+                this.lookup.getBasicCodesByCategory(deliveryChannelCategory.id).subscribe((codes) => {
+                    this.deliveryChannelOptions = codes.items || [];
                     this.cd.detectChanges();
                 });
             }
@@ -138,23 +158,125 @@ export class PawnTicketsComponent extends AppComponentBase {
     }
 
     loadTickets(): void {
-        this.lookup.getPawnTicketsForLookup().pipe(finalize(() => this.completeInitialLoad())).subscribe((result) => (this.ticketOptions = result.items || []));
-        this.ticketService.getAll('', 'CreationTime DESC', 0, 1000).pipe(finalize(() => this.completeInitialLoad())).subscribe((result) => (this.tickets = result.items || []));
+        this.ticketsLoading = true;
+        let pendingTicketRequests = 2;
+        const completeTicketRefresh = () => {
+            pendingTicketRequests -= 1;
+            if (pendingTicketRequests <= 0) {
+                this.ticketsLoading = false;
+                this.cd.detectChanges();
+            }
+        };
+        this.lookup.getPawnTicketsForLookup().pipe(finalize(() => {
+            this.completeInitialLoad();
+            completeTicketRefresh();
+        })).subscribe((result) => (this.ticketOptions = result.items || []));
+        this.ticketService.getAll('', 'CreationTime DESC', 0, 1000).pipe(finalize(() => {
+            this.completeInitialLoad();
+            completeTicketRefresh();
+        })).subscribe((result) => (this.tickets = result.items || []));
     }
 
     loadCustomers(): void {
         this.lookup.getCustomersForLookup(this.customerFilter).pipe(finalize(() => this.completeInitialLoad())).subscribe((result) => (this.customers = result.items || []));
     }
 
-    selectCustomer(): void {
-        if (!this.ticket.customer) {
+    selectCustomer(onAllowed?: () => void): void {
+        const customerId = this.ticket.customer;
+        this.selectedCustomer = undefined;
+        this.customerCDD = new CreateOrEditCustomerCDDDto();
+        this.loadingCustomerCDD = false;
+        if (!customerId) {
+            this.customerRiskRequestId += 1;
+            this.checkingCustomerRisk = false;
             this.selectedCustomer = undefined;
             return;
         }
-        this.customerService.getViaIdForEdit(this.ticket.customer).subscribe((result) => {
-            this.selectedCustomer = result.customer;
-            this.cd.detectChanges();
+
+        const requestId = ++this.customerRiskRequestId;
+        this.checkingCustomerRisk = true;
+        this.ticketService.isHighRiskCustomer(customerId).subscribe({
+            next: (isHighRisk) => {
+                if (requestId !== this.customerRiskRequestId || this.ticket.customer !== customerId) {
+                    return;
+                }
+                if (isHighRisk) {
+                    this.rejectHighRiskCustomer();
+                    return;
+                }
+
+                this.checkingCustomerRisk = false;
+                this.customerService.getViaIdForEdit(customerId).subscribe((result) => {
+                    if (requestId !== this.customerRiskRequestId || this.ticket.customer !== customerId) {
+                        return;
+                    }
+                    this.selectedCustomer = result.customer;
+                    this.loadCustomerCDD(customerId, onAllowed);
+                });
+            },
+            error: () => {
+                if (requestId !== this.customerRiskRequestId) {
+                    return;
+                }
+                this.checkingCustomerRisk = false;
+                this.notify.error('Unable to verify the customer risk profile.');
+                this.cd.detectChanges();
+            },
+            complete: () => {
+                if (requestId === this.customerRiskRequestId && !this.ticket.customer) {
+                    this.checkingCustomerRisk = false;
+                }
+            },
         });
+    }
+
+    private loadCustomerCDD(customerId: number, onLoaded?: () => void): void {
+        const requestId = this.customerRiskRequestId;
+        this.loadingCustomerCDD = true;
+        this.customerCDDService.getViaCustomerId(customerId).subscribe(
+            (result) => {
+                if (requestId !== this.customerRiskRequestId || this.ticket.customer !== customerId) {
+                    return;
+                }
+                this.customerCDD = result ? new CreateOrEditCustomerCDDDto(result as any) : new CreateOrEditCustomerCDDDto({ customer: customerId } as any);
+                if (!this.customerCDD.approvedBy) {
+                    this.customerCDD.approvedBy = this.appSession.userId;
+                }
+                this.loadingCustomerCDD = false;
+                this.cd.detectChanges();
+                onLoaded?.();
+            },
+            () => {
+                if (requestId !== this.customerRiskRequestId || this.ticket.customer !== customerId) {
+                    return;
+                }
+                this.customerCDD = new CreateOrEditCustomerCDDDto({ customer: customerId, approvedBy: this.appSession.userId } as any);
+                this.loadingCustomerCDD = false;
+                this.notify.error('Unable to load the customer risk profile.');
+                this.cd.detectChanges();
+                onLoaded?.();
+            }
+        );
+    }
+
+    private rejectHighRiskCustomer(): void {
+        this.checkingCustomerRisk = false;
+        Promise.resolve(abp.message.warn(this.highRiskCustomerMessage)).then(() => this.modal.hide());
+    }
+
+    private saveTicketAndItems(payload: CreatePawnTicketWithItemsDto): void {
+        this.ticketService.createTicketAndPawnItem(payload).pipe(finalize(() => (this.saving = false))).subscribe(
+            (result) => {
+                if (!result || result.startsWith('Error:')) {
+                    this.notify.error(result || 'Unable to save pawn ticket and items.');
+                    return;
+                }
+                this.notify.info(this.l('SavedSuccessfully'));
+                this.modal.hide();
+                this.loadTickets();
+            },
+            () => this.notify.error('Unable to save pawn ticket and items.')
+        );
     }
 
     customerIdentity(): string {
@@ -165,6 +287,12 @@ export class PawnTicketsComponent extends AppComponentBase {
         return id ? this.countryNames.get(id) || '' : '';
     }
 
+    updatePledgedDate(value: string): void {
+        this.ticket.pledgedDate = value as any;
+        const moment = (window as any).moment;
+        this.ticket.expiryDate = value && moment ? moment(value).add(6, 'months') : undefined;
+    }
+
     updateItemDescription(item: CreateOrEditPawnItemDto): void {
         const listing = this.itemListings.find((option) => option.id === item.itemListing);
         const status = this.itemStatuses.find((option) => option.id === item.itemStatus);
@@ -173,25 +301,41 @@ export class PawnTicketsComponent extends AppComponentBase {
     }
 
     openCreate(): void {
+        if (this.pageLoading || this.ticketsLoading) return;
         this.resetForm();
         this.modal.show(this.editor, { class: 'modal-xl pawn-ticket-modal' });
     }
 
     openEdit(ticket: PawnTicketDto): void {
+        if (this.pageLoading || this.ticketsLoading) return;
         this.resetForm();
         this.ticket.id = ticket.id;
         this.ticketService.getViaIdForEdit(ticket.id).subscribe((result) => {
             this.ticket = result.pawnTicket || this.ticket;
-            this.selectCustomer();
-            this.pawnItemService.getAllViaPawnTicketId(ticket.id).subscribe((items) => {
-                this.items = (items || []).map((item) => new CreateOrEditPawnItemDto({ ...item, id: undefined }));
-                if (this.items.length === 0) this.addItem();
-                this.loadDocuments();
-                this.loadPayments();
-                this.modal.show(this.editor, { class: 'modal-xl pawn-ticket-modal' });
-                this.cd.detectChanges();
+            this.selectCustomer(() => {
+                this.pawnItemService.getAllViaPawnTicketId(ticket.id).subscribe((items) => {
+                    this.items = (items || []).map((item) => new CreateOrEditPawnItemDto({ ...item, id: undefined }));
+                    this.hydrateIncludedItemSelections();
+                    if (this.items.length === 0) this.addItem();
+                    this.loadDocuments();
+                    this.loadPayments();
+                    this.modal.show(this.editor, { class: 'modal-xl pawn-ticket-modal' });
+                    this.cd.detectChanges();
+                });
             });
         });
+    }
+
+    deleteTicket(ticket: PawnTicketDto): void {
+        if (this.pageLoading || this.ticketsLoading || !ticket.id || !confirm(`Delete pawn ticket ${ticket.ticketNo || ticket.id}?`)) return;
+
+        this.ticketService.delete(ticket.id).subscribe(
+            () => {
+                this.notify.info('Pawn ticket deleted.');
+                this.loadTickets();
+            },
+            () => this.notify.error('Unable to delete pawn ticket.')
+        );
     }
 
     loadDocuments(): void {
@@ -307,6 +451,7 @@ export class PawnTicketsComponent extends AppComponentBase {
                 this.selectCustomer();
                 this.pawnItemService.getAllViaPawnTicketId(selected.id).subscribe((items) => {
                     this.items = (items || []).map((item) => new CreateOrEditPawnItemDto({ ...item, id: undefined }));
+                    this.hydrateIncludedItemSelections();
                     this.items.forEach((item) => this.updateItemDescription(item));
                     if (this.items.length === 0) this.addItem();
                 });
@@ -325,16 +470,35 @@ export class PawnTicketsComponent extends AppComponentBase {
         item.includedItemWeight = 0;
         item.includedItemValue = 0;
         this.items.push(item);
+        this.includedItemSelections.push([]);
     }
 
     removeItem(index: number): void {
         this.items.splice(index, 1);
+        this.includedItemSelections.splice(index, 1);
         this.calculate();
     }
 
-    calculate(): void {
+    updateIncludedItems(item: CreateOrEditPawnItemDto, index: number): void {
+        item.includedItem = (this.includedItemSelections[index] || []).join(',');
+    }
+
+    private hydrateIncludedItemSelections(): void {
+        this.includedItemSelections = this.items.map((item) =>
+            (item.includedItem || '')
+                .split(',')
+                .map((value) => Number(value.trim()))
+                .filter((value) => Number.isInteger(value) && value > 0)
+        );
+    }
+
+    private serializeIncludedItemSelections(): void {
+        this.items.forEach((item, index) => this.updateIncludedItems(item, index));
+    }
+
+    calculate(force = false): void {
         const changed = this.items.some((item) => item.weight > 0 && item.goldType);
-        if (!changed || this.calculating) return;
+        if ((!changed && !force) || this.calculating) return;
         this.calculating = true;
         const payload = new CreatePawnTicketWithItemsDto({ ticket: this.ticket, items: this.items });
         this.ticketService.dynamicCalculate(payload).pipe(finalize(() => (this.calculating = false))).subscribe((result) => {
@@ -356,22 +520,36 @@ export class PawnTicketsComponent extends AppComponentBase {
             this.notify.warn('Please select a pledged date.');
             return;
         }
-        if (!this.ticket.amount || this.ticket.amount <= 0) {
-            this.notify.warn('Please enter an amount greater than zero.');
+        if (this.ticket.amount === undefined || this.ticket.amount === null || this.ticket.amount < 0) {
+            this.notify.warn('Please enter an amount of zero or greater.');
             return;
         }
         if (this.items.length === 0) {
             this.notify.warn('Please add at least one pawn item.');
             return;
         }
+        if (this.checkingCustomerRisk) {
+            return;
+        }
+        if (this.loadingCustomerCDD) {
+            return;
+        }
+        if (!this.ticket.customer) {
+            return;
+        }
         this.saving = true;
+        this.serializeIncludedItemSelections();
         this.items.forEach((item) => (item.pawnTicket = this.ticket.id || undefined));
         const payload = new CreatePawnTicketWithItemsDto({ ticket: this.ticket, items: this.items });
-        this.ticketService.createTicketAndPawnItem(payload).pipe(finalize(() => (this.saving = false))).subscribe(() => {
-            this.notify.info(this.l('SavedSuccessfully'));
-            this.modal.hide();
-            this.loadTickets();
-        });
+        this.customerCDD.customer = this.ticket.customer;
+        this.customerCDDService.createOrEdit(this.customerCDD).subscribe(
+            () => this.saveTicketAndItems(payload),
+            () => {
+                this.saving = false;
+                this.notify.error('Unable to save customer risk profile.');
+                this.cd.detectChanges();
+            }
+        );
     }
 
     resetForm(): void {
@@ -382,12 +560,18 @@ export class PawnTicketsComponent extends AppComponentBase {
         this.ticket.monthlyCustody = 0;
         this.ticket.serviceCharge = 0;
         this.ticket.pledgedDate = (window as any).moment();
+        this.ticket.expiryDate = (window as any).moment(this.ticket.pledgedDate).add(6, 'months');
         this.items = [];
+        this.includedItemSelections = [];
         this.payments = [];
         this.newPaymentAmount = 0;
         this.newPaymentMethod = undefined;
         this.selectedTicketId = undefined;
         this.selectedCustomer = undefined;
+        this.customerCDD = new CreateOrEditCustomerCDDDto();
+        this.loadingCustomerCDD = false;
+        this.checkingCustomerRisk = false;
+        this.customerRiskRequestId += 1;
         this.addItem();
     }
 }
