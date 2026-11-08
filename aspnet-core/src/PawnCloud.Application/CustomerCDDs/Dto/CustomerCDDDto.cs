@@ -31,6 +31,16 @@ namespace PawnCloud.CustomerCDDs.Dto
         public bool approval { get; set; }
         public virtual int? approvedBy { get; set; } //getting data from user table
         public string matchingDescription { get; set; } // Description of the matching process to AMLA list
+        public bool mediumRiskCountry { get; set; }
+        public bool highRiskCountry { get; set; }
+        public bool appearInPrivateBlackList { get; set; }
+        public bool appearInPublicBlackList { get; set; }
+        public bool noSourceOfFund { get; set; }
+        public bool missingTransactionPurpose { get; set; }
+        public bool PEPStatus { get; set; }
+        public string partyName { get; set; }
+        public string roleInParty { get; set; }
+        public string transactionPurpose { get; set; }
 
     }
 }

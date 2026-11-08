@@ -2430,6 +2430,576 @@ export class GeneralSetupServiceProxy {
 }
 
 @Injectable()
+export class GlobalBlackListServiceProxy {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @return OK
+     */
+    getAll(): Observable<GlobalBlackList[]> {
+        let url_ = this.baseUrl + "/api/services/app/GlobalBlackList/GetAll";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetAll(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetAll(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<GlobalBlackList[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<GlobalBlackList[]>;
+        }));
+    }
+
+    protected processGetAll(response: HttpResponseBase): Observable<GlobalBlackList[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200.push(GlobalBlackList.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param id (optional) 
+     * @return OK
+     */
+    getById(id: number | undefined): Observable<GlobalBlackList> {
+        let url_ = this.baseUrl + "/api/services/app/GlobalBlackList/GetById?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetById(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetById(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<GlobalBlackList>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<GlobalBlackList>;
+        }));
+    }
+
+    protected processGetById(response: HttpResponseBase): Observable<GlobalBlackList> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = GlobalBlackList.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    createOrEdit(body: CreateOrEditGlobalBlackListDto | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/GlobalBlackList/CreateOrEdit";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreateOrEdit(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreateOrEdit(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processCreateOrEdit(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    getAllRequestFromAllTenant(): Observable<GlobalBlackListRequest[]> {
+        let url_ = this.baseUrl + "/api/services/app/GlobalBlackList/GetAllRequestFromAllTenant";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetAllRequestFromAllTenant(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetAllRequestFromAllTenant(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<GlobalBlackListRequest[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<GlobalBlackListRequest[]>;
+        }));
+    }
+
+    protected processGetAllRequestFromAllTenant(response: HttpResponseBase): Observable<GlobalBlackListRequest[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200.push(GlobalBlackListRequest.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    convertTenantRequestToGlobalBlackList(body: CreateOrEditGlobalBlackListRequestDto | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/GlobalBlackList/ConvertTenantRequestToGlobalBlackList";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processConvertTenantRequestToGlobalBlackList(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processConvertTenantRequestToGlobalBlackList(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processConvertTenantRequestToGlobalBlackList(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param id (optional) 
+     * @return OK
+     */
+    delete(id: number | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/GlobalBlackList/Delete?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "Id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+            })
+        };
+
+        return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processDelete(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processDelete(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processDelete(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
+@Injectable()
+export class GlobalBlackListRequestServiceProxy {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @return OK
+     */
+    getAll(): Observable<GlobalBlackListRequest[]> {
+        let url_ = this.baseUrl + "/api/services/app/GlobalBlackListRequest/GetAll";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetAll(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetAll(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<GlobalBlackListRequest[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<GlobalBlackListRequest[]>;
+        }));
+    }
+
+    protected processGetAll(response: HttpResponseBase): Observable<GlobalBlackListRequest[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200.push(GlobalBlackListRequest.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param id (optional) 
+     * @return OK
+     */
+    getById(id: number | undefined): Observable<GlobalBlackListRequest> {
+        let url_ = this.baseUrl + "/api/services/app/GlobalBlackListRequest/GetById?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetById(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetById(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<GlobalBlackListRequest>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<GlobalBlackListRequest>;
+        }));
+    }
+
+    protected processGetById(response: HttpResponseBase): Observable<GlobalBlackListRequest> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = GlobalBlackListRequest.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    createOrEdit(body: CreateOrEditGlobalBlackListRequestDto | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/GlobalBlackListRequest/CreateOrEdit";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreateOrEdit(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreateOrEdit(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processCreateOrEdit(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param id (optional) 
+     * @return OK
+     */
+    delete(id: number | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/GlobalBlackListRequest/Delete?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "Id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+            })
+        };
+
+        return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processDelete(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processDelete(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processDelete(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
+@Injectable()
 export class GoldTypeServiceProxy {
     private http: HttpClient;
     private baseUrl: string;
@@ -4800,6 +5370,236 @@ export class PawnTicketPaymentServiceProxy {
 }
 
 @Injectable()
+export class PrivateBlackListServiceProxy {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @return OK
+     */
+    getAll(): Observable<PrivateBlackList[]> {
+        let url_ = this.baseUrl + "/api/services/app/PrivateBlackList/GetAll";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetAll(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetAll(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<PrivateBlackList[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<PrivateBlackList[]>;
+        }));
+    }
+
+    protected processGetAll(response: HttpResponseBase): Observable<PrivateBlackList[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200.push(PrivateBlackList.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param id (optional) 
+     * @return OK
+     */
+    getById(id: number | undefined): Observable<PrivateBlackList> {
+        let url_ = this.baseUrl + "/api/services/app/PrivateBlackList/GetById?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetById(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetById(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<PrivateBlackList>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<PrivateBlackList>;
+        }));
+    }
+
+    protected processGetById(response: HttpResponseBase): Observable<PrivateBlackList> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = PrivateBlackList.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    createOrEdit(body: CreateOrEditPrivateBlackListDto | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/PrivateBlackList/CreateOrEdit";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreateOrEdit(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreateOrEdit(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processCreateOrEdit(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param id (optional) 
+     * @return OK
+     */
+    delete(id: number | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/PrivateBlackList/Delete?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "Id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+            })
+        };
+
+        return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processDelete(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processDelete(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processDelete(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
+@Injectable()
 export class RoleServiceProxy {
     private http: HttpClient;
     private baseUrl: string;
@@ -7036,6 +7836,16 @@ export class CreateOrEditCustomerCDDDto implements ICreateOrEditCustomerCDDDto {
     approval: boolean;
     approvedBy: number | undefined;
     matchingDescription: string | undefined;
+    mediumRiskCountry: boolean;
+    highRiskCountry: boolean;
+    appearInPrivateBlackList: boolean;
+    appearInPublicBlackList: boolean;
+    noSourceOfFund: boolean;
+    missingTransactionPurpose: boolean;
+    pepStatus: boolean;
+    partyName: string | undefined;
+    roleInParty: string | undefined;
+    transactionPurpose: string | undefined;
 
     constructor(data?: ICreateOrEditCustomerCDDDto) {
         if (data) {
@@ -7070,6 +7880,16 @@ export class CreateOrEditCustomerCDDDto implements ICreateOrEditCustomerCDDDto {
             this.approval = _data["approval"];
             this.approvedBy = _data["approvedBy"];
             this.matchingDescription = _data["matchingDescription"];
+            this.mediumRiskCountry = _data["mediumRiskCountry"];
+            this.highRiskCountry = _data["highRiskCountry"];
+            this.appearInPrivateBlackList = _data["appearInPrivateBlackList"];
+            this.appearInPublicBlackList = _data["appearInPublicBlackList"];
+            this.noSourceOfFund = _data["noSourceOfFund"];
+            this.missingTransactionPurpose = _data["missingTransactionPurpose"];
+            this.pepStatus = _data["pepStatus"];
+            this.partyName = _data["partyName"];
+            this.roleInParty = _data["roleInParty"];
+            this.transactionPurpose = _data["transactionPurpose"];
         }
     }
 
@@ -7104,6 +7924,16 @@ export class CreateOrEditCustomerCDDDto implements ICreateOrEditCustomerCDDDto {
         data["approval"] = this.approval;
         data["approvedBy"] = this.approvedBy;
         data["matchingDescription"] = this.matchingDescription;
+        data["mediumRiskCountry"] = this.mediumRiskCountry;
+        data["highRiskCountry"] = this.highRiskCountry;
+        data["appearInPrivateBlackList"] = this.appearInPrivateBlackList;
+        data["appearInPublicBlackList"] = this.appearInPublicBlackList;
+        data["noSourceOfFund"] = this.noSourceOfFund;
+        data["missingTransactionPurpose"] = this.missingTransactionPurpose;
+        data["pepStatus"] = this.pepStatus;
+        data["partyName"] = this.partyName;
+        data["roleInParty"] = this.roleInParty;
+        data["transactionPurpose"] = this.transactionPurpose;
         return data;
     }
 
@@ -7138,6 +7968,16 @@ export interface ICreateOrEditCustomerCDDDto {
     approval: boolean;
     approvedBy: number | undefined;
     matchingDescription: string | undefined;
+    mediumRiskCountry: boolean;
+    highRiskCountry: boolean;
+    appearInPrivateBlackList: boolean;
+    appearInPublicBlackList: boolean;
+    noSourceOfFund: boolean;
+    missingTransactionPurpose: boolean;
+    pepStatus: boolean;
+    partyName: string | undefined;
+    roleInParty: string | undefined;
+    transactionPurpose: string | undefined;
 }
 
 export class CreateOrEditCustomerDto implements ICreateOrEditCustomerDto {
@@ -7172,7 +8012,7 @@ export class CreateOrEditCustomerDto implements ICreateOrEditCustomerDto {
     blacklisted: boolean;
     occupation: string | undefined;
     employer: string | undefined;
-    businessNature: number | undefined;
+    businessNature: string | undefined;
     maritalStatus: number | undefined;
     monthlyIncome: number | undefined;
 
@@ -7310,7 +8150,7 @@ export interface ICreateOrEditCustomerDto {
     blacklisted: boolean;
     occupation: string | undefined;
     employer: string | undefined;
-    businessNature: number | undefined;
+    businessNature: string | undefined;
     maritalStatus: number | undefined;
     monthlyIncome: number | undefined;
 }
@@ -7364,6 +8204,112 @@ export interface ICreateOrEditCustomerOutletDto {
     id: number | undefined;
     customer: number | undefined;
     generalSetup: number | undefined;
+}
+
+export class CreateOrEditGlobalBlackListDto implements ICreateOrEditGlobalBlackListDto {
+    id: number | undefined;
+    fullName: string | undefined;
+    banReason: string | undefined;
+
+    constructor(data?: ICreateOrEditGlobalBlackListDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.fullName = _data["fullName"];
+            this.banReason = _data["banReason"];
+        }
+    }
+
+    static fromJS(data: any): CreateOrEditGlobalBlackListDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateOrEditGlobalBlackListDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["fullName"] = this.fullName;
+        data["banReason"] = this.banReason;
+        return data;
+    }
+
+    clone(): CreateOrEditGlobalBlackListDto {
+        const json = this.toJSON();
+        let result = new CreateOrEditGlobalBlackListDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ICreateOrEditGlobalBlackListDto {
+    id: number | undefined;
+    fullName: string | undefined;
+    banReason: string | undefined;
+}
+
+export class CreateOrEditGlobalBlackListRequestDto implements ICreateOrEditGlobalBlackListRequestDto {
+    id: number | undefined;
+    fullName: string | undefined;
+    banReason: string | undefined;
+    status: string | undefined;
+
+    constructor(data?: ICreateOrEditGlobalBlackListRequestDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.fullName = _data["fullName"];
+            this.banReason = _data["banReason"];
+            this.status = _data["status"];
+        }
+    }
+
+    static fromJS(data: any): CreateOrEditGlobalBlackListRequestDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateOrEditGlobalBlackListRequestDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["fullName"] = this.fullName;
+        data["banReason"] = this.banReason;
+        data["status"] = this.status;
+        return data;
+    }
+
+    clone(): CreateOrEditGlobalBlackListRequestDto {
+        const json = this.toJSON();
+        let result = new CreateOrEditGlobalBlackListRequestDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ICreateOrEditGlobalBlackListRequestDto {
+    id: number | undefined;
+    fullName: string | undefined;
+    banReason: string | undefined;
+    status: string | undefined;
 }
 
 export class CreateOrEditGoldType implements ICreateOrEditGoldType {
@@ -7749,6 +8695,57 @@ export interface ICreateOrEditPawnTicketDto {
     amountPerGram: number;
 }
 
+export class CreateOrEditPrivateBlackListDto implements ICreateOrEditPrivateBlackListDto {
+    id: number | undefined;
+    fullName: string | undefined;
+    banReason: string | undefined;
+
+    constructor(data?: ICreateOrEditPrivateBlackListDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.fullName = _data["fullName"];
+            this.banReason = _data["banReason"];
+        }
+    }
+
+    static fromJS(data: any): CreateOrEditPrivateBlackListDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateOrEditPrivateBlackListDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["fullName"] = this.fullName;
+        data["banReason"] = this.banReason;
+        return data;
+    }
+
+    clone(): CreateOrEditPrivateBlackListDto {
+        const json = this.toJSON();
+        let result = new CreateOrEditPrivateBlackListDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ICreateOrEditPrivateBlackListDto {
+    id: number | undefined;
+    fullName: string | undefined;
+    banReason: string | undefined;
+}
+
 export class CreatePawnTicketWithItemsDto implements ICreatePawnTicketWithItemsDto {
     ticket: CreateOrEditPawnTicketDto;
     items: CreateOrEditPawnItemDto[] | undefined;
@@ -8045,7 +9042,7 @@ export class Customer implements ICustomer {
     blacklisted: boolean;
     occupation: string | undefined;
     employer: string | undefined;
-    businessNature: number | undefined;
+    businessNature: string | undefined;
     maritalStatus: number | undefined;
     monthlyIncome: number | undefined;
 
@@ -8207,7 +9204,7 @@ export interface ICustomer {
     blacklisted: boolean;
     occupation: string | undefined;
     employer: string | undefined;
-    businessNature: number | undefined;
+    businessNature: string | undefined;
     maritalStatus: number | undefined;
     monthlyIncome: number | undefined;
 }
@@ -8244,6 +9241,16 @@ export class CustomerCDD implements ICustomerCDD {
     approval: boolean;
     approvedBy: number | undefined;
     matchingDescription: string | undefined;
+    mediumRiskCountry: boolean;
+    highRiskCountry: boolean;
+    appearInPrivateBlackList: boolean;
+    appearInPublicBlackList: boolean;
+    noSourceOfFund: boolean;
+    missingTransactionPurpose: boolean;
+    pepStatus: boolean;
+    partyName: string | undefined;
+    roleInParty: string | undefined;
+    transactionPurpose: string | undefined;
 
     constructor(data?: ICustomerCDD) {
         if (data) {
@@ -8287,6 +9294,16 @@ export class CustomerCDD implements ICustomerCDD {
             this.approval = _data["approval"];
             this.approvedBy = _data["approvedBy"];
             this.matchingDescription = _data["matchingDescription"];
+            this.mediumRiskCountry = _data["mediumRiskCountry"];
+            this.highRiskCountry = _data["highRiskCountry"];
+            this.appearInPrivateBlackList = _data["appearInPrivateBlackList"];
+            this.appearInPublicBlackList = _data["appearInPublicBlackList"];
+            this.noSourceOfFund = _data["noSourceOfFund"];
+            this.missingTransactionPurpose = _data["missingTransactionPurpose"];
+            this.pepStatus = _data["pepStatus"];
+            this.partyName = _data["partyName"];
+            this.roleInParty = _data["roleInParty"];
+            this.transactionPurpose = _data["transactionPurpose"];
         }
     }
 
@@ -8330,6 +9347,16 @@ export class CustomerCDD implements ICustomerCDD {
         data["approval"] = this.approval;
         data["approvedBy"] = this.approvedBy;
         data["matchingDescription"] = this.matchingDescription;
+        data["mediumRiskCountry"] = this.mediumRiskCountry;
+        data["highRiskCountry"] = this.highRiskCountry;
+        data["appearInPrivateBlackList"] = this.appearInPrivateBlackList;
+        data["appearInPublicBlackList"] = this.appearInPublicBlackList;
+        data["noSourceOfFund"] = this.noSourceOfFund;
+        data["missingTransactionPurpose"] = this.missingTransactionPurpose;
+        data["pepStatus"] = this.pepStatus;
+        data["partyName"] = this.partyName;
+        data["roleInParty"] = this.roleInParty;
+        data["transactionPurpose"] = this.transactionPurpose;
         return data;
     }
 
@@ -8373,6 +9400,16 @@ export interface ICustomerCDD {
     approval: boolean;
     approvedBy: number | undefined;
     matchingDescription: string | undefined;
+    mediumRiskCountry: boolean;
+    highRiskCountry: boolean;
+    appearInPrivateBlackList: boolean;
+    appearInPublicBlackList: boolean;
+    noSourceOfFund: boolean;
+    missingTransactionPurpose: boolean;
+    pepStatus: boolean;
+    partyName: string | undefined;
+    roleInParty: string | undefined;
+    transactionPurpose: string | undefined;
 }
 
 export class CustomerDto implements ICustomerDto {
@@ -8408,7 +9445,7 @@ export class CustomerDto implements ICustomerDto {
     blacklisted: boolean;
     occupation: string | undefined;
     employer: string | undefined;
-    businessNature: number | undefined;
+    businessNature: string | undefined;
     maritalStatus: number | undefined;
     monthlyIncome: number | undefined;
 
@@ -8549,7 +9586,7 @@ export interface ICustomerDto {
     blacklisted: boolean;
     occupation: string | undefined;
     employer: string | undefined;
-    businessNature: number | undefined;
+    businessNature: string | undefined;
     maritalStatus: number | undefined;
     monthlyIncome: number | undefined;
 }
@@ -9644,6 +10681,176 @@ export interface IGetRoleForEditOutput {
     role: RoleEditDto;
     permissions: FlatPermissionDto[] | undefined;
     grantedPermissionNames: string[] | undefined;
+}
+
+export class GlobalBlackList implements IGlobalBlackList {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    tenantId: number | undefined;
+    fullName: string | undefined;
+    banReason: string | undefined;
+
+    constructor(data?: IGlobalBlackList) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.creationTime = _data["creationTime"] ? moment(_data["creationTime"].toString()) : <any>undefined;
+            this.creatorUserId = _data["creatorUserId"];
+            this.lastModificationTime = _data["lastModificationTime"] ? moment(_data["lastModificationTime"].toString()) : <any>undefined;
+            this.lastModifierUserId = _data["lastModifierUserId"];
+            this.isDeleted = _data["isDeleted"];
+            this.deleterUserId = _data["deleterUserId"];
+            this.deletionTime = _data["deletionTime"] ? moment(_data["deletionTime"].toString()) : <any>undefined;
+            this.tenantId = _data["tenantId"];
+            this.fullName = _data["fullName"];
+            this.banReason = _data["banReason"];
+        }
+    }
+
+    static fromJS(data: any): GlobalBlackList {
+        data = typeof data === 'object' ? data : {};
+        let result = new GlobalBlackList();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["creationTime"] = this.creationTime ? this.creationTime.toISOString() : <any>undefined;
+        data["creatorUserId"] = this.creatorUserId;
+        data["lastModificationTime"] = this.lastModificationTime ? this.lastModificationTime.toISOString() : <any>undefined;
+        data["lastModifierUserId"] = this.lastModifierUserId;
+        data["isDeleted"] = this.isDeleted;
+        data["deleterUserId"] = this.deleterUserId;
+        data["deletionTime"] = this.deletionTime ? this.deletionTime.toISOString() : <any>undefined;
+        data["tenantId"] = this.tenantId;
+        data["fullName"] = this.fullName;
+        data["banReason"] = this.banReason;
+        return data;
+    }
+
+    clone(): GlobalBlackList {
+        const json = this.toJSON();
+        let result = new GlobalBlackList();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IGlobalBlackList {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    tenantId: number | undefined;
+    fullName: string | undefined;
+    banReason: string | undefined;
+}
+
+export class GlobalBlackListRequest implements IGlobalBlackListRequest {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    tenantId: number | undefined;
+    fullName: string | undefined;
+    banReason: string | undefined;
+    status: string | undefined;
+
+    constructor(data?: IGlobalBlackListRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.creationTime = _data["creationTime"] ? moment(_data["creationTime"].toString()) : <any>undefined;
+            this.creatorUserId = _data["creatorUserId"];
+            this.lastModificationTime = _data["lastModificationTime"] ? moment(_data["lastModificationTime"].toString()) : <any>undefined;
+            this.lastModifierUserId = _data["lastModifierUserId"];
+            this.isDeleted = _data["isDeleted"];
+            this.deleterUserId = _data["deleterUserId"];
+            this.deletionTime = _data["deletionTime"] ? moment(_data["deletionTime"].toString()) : <any>undefined;
+            this.tenantId = _data["tenantId"];
+            this.fullName = _data["fullName"];
+            this.banReason = _data["banReason"];
+            this.status = _data["status"];
+        }
+    }
+
+    static fromJS(data: any): GlobalBlackListRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new GlobalBlackListRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["creationTime"] = this.creationTime ? this.creationTime.toISOString() : <any>undefined;
+        data["creatorUserId"] = this.creatorUserId;
+        data["lastModificationTime"] = this.lastModificationTime ? this.lastModificationTime.toISOString() : <any>undefined;
+        data["lastModifierUserId"] = this.lastModifierUserId;
+        data["isDeleted"] = this.isDeleted;
+        data["deleterUserId"] = this.deleterUserId;
+        data["deletionTime"] = this.deletionTime ? this.deletionTime.toISOString() : <any>undefined;
+        data["tenantId"] = this.tenantId;
+        data["fullName"] = this.fullName;
+        data["banReason"] = this.banReason;
+        data["status"] = this.status;
+        return data;
+    }
+
+    clone(): GlobalBlackListRequest {
+        const json = this.toJSON();
+        let result = new GlobalBlackListRequest();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IGlobalBlackListRequest {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    tenantId: number | undefined;
+    fullName: string | undefined;
+    banReason: string | undefined;
+    status: string | undefined;
 }
 
 export class GoldType implements IGoldType {
@@ -11206,6 +12413,89 @@ export class PermissionDtoListResultDto implements IPermissionDtoListResultDto {
 
 export interface IPermissionDtoListResultDto {
     items: PermissionDto[] | undefined;
+}
+
+export class PrivateBlackList implements IPrivateBlackList {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    tenantId: number | undefined;
+    fullName: string | undefined;
+    banReason: string | undefined;
+
+    constructor(data?: IPrivateBlackList) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.creationTime = _data["creationTime"] ? moment(_data["creationTime"].toString()) : <any>undefined;
+            this.creatorUserId = _data["creatorUserId"];
+            this.lastModificationTime = _data["lastModificationTime"] ? moment(_data["lastModificationTime"].toString()) : <any>undefined;
+            this.lastModifierUserId = _data["lastModifierUserId"];
+            this.isDeleted = _data["isDeleted"];
+            this.deleterUserId = _data["deleterUserId"];
+            this.deletionTime = _data["deletionTime"] ? moment(_data["deletionTime"].toString()) : <any>undefined;
+            this.tenantId = _data["tenantId"];
+            this.fullName = _data["fullName"];
+            this.banReason = _data["banReason"];
+        }
+    }
+
+    static fromJS(data: any): PrivateBlackList {
+        data = typeof data === 'object' ? data : {};
+        let result = new PrivateBlackList();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["creationTime"] = this.creationTime ? this.creationTime.toISOString() : <any>undefined;
+        data["creatorUserId"] = this.creatorUserId;
+        data["lastModificationTime"] = this.lastModificationTime ? this.lastModificationTime.toISOString() : <any>undefined;
+        data["lastModifierUserId"] = this.lastModifierUserId;
+        data["isDeleted"] = this.isDeleted;
+        data["deleterUserId"] = this.deleterUserId;
+        data["deletionTime"] = this.deletionTime ? this.deletionTime.toISOString() : <any>undefined;
+        data["tenantId"] = this.tenantId;
+        data["fullName"] = this.fullName;
+        data["banReason"] = this.banReason;
+        return data;
+    }
+
+    clone(): PrivateBlackList {
+        const json = this.toJSON();
+        let result = new PrivateBlackList();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IPrivateBlackList {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    tenantId: number | undefined;
+    fullName: string | undefined;
+    banReason: string | undefined;
 }
 
 export class RegisterInput implements IRegisterInput {

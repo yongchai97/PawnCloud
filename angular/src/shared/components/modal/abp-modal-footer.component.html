@@ -2,7 +2,12 @@
     <button type="button" class="btn btn-default" [disabled]="cancelDisabled()" (click)="onCancelClick.emit($event)">
         {{ cancelLabel() }}
     </button>
-    <button type="submit" class="btn btn-primary" [disabled]="saveDisabled()">
-        {{ saveLabel() }}
-    </button>
+    <div class="d-flex align-items-center justify-content-end gap-2 flex-wrap">
+        @if (saveMessage()) {
+            <span class="text-danger small text-end" role="alert">{{ saveMessage() }}</span>
+        }
+        <button type="submit" class="btn btn-primary" [disabled]="saveDisabled()">
+            {{ saveLabel() }}
+        </button>
+    </div>
 </div>

@@ -1,0 +1,171 @@
+<div class="container-fluid py-3">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="mb-1">{{ (pageType === 'private' ? 'PrivateBlacklist' : pageType === 'requests' ? 'GlobalBlacklistRequest' : 'GlobalBlacklist') | localize }}</h2>
+            <p class="text-muted mb-0">{{ 'Manage blacklist records' | localize }}</p>
+        </div>
+        <button pButton type="button" icon="pi pi-refresh" class="p-button-text" (click)="refresh()" [attr.aria-label]="'Refresh' | localize"></button>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-12" *ngIf="pageType === 'private'">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <strong>{{ 'PrivateBlacklist' | localize }}</strong>
+                    <button *ngIf="privateEditing" pButton type="button" icon="pi pi-times" class="p-button-text p-button-sm" (click)="resetPrivateForm()" [attr.aria-label]="'Cancel' | localize"></button>
+                </div>
+                <div class="card-body">
+                    <form #privateFormRef="ngForm" (ngSubmit)="savePrivate()">
+                        <div class="mb-3">
+                            <label class="form-label">{{ 'Customer' | localize }}</label>
+                            <p-dropdown
+                                [options]="customers"
+                                optionLabel="displayName"
+                                optionValue="fullName"
+                                [filter]="true"
+                                filterBy="displayName,fullName,customerNo,nric"
+                                [showClear]="true"
+                                [placeholder]="'SelectCustomer' | localize"
+                                [(ngModel)]="privateForm.fullName"
+                                name="privateCustomer"
+                                styleClass="w-100">
+                            </p-dropdown>
+                            <input pInputText class="form-control mt-2" [(ngModel)]="privateForm.fullName" name="privateFullName" required [placeholder]="'Or enter full name' | localize" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">{{ 'BanReason' | localize }}</label>
+                            <textarea class="form-control" rows="3" [(ngModel)]="privateForm.banReason" name="privateBanReason" required></textarea>
+                        </div>
+                        <button pButton type="submit" icon="pi pi-save" [label]="(privateEditing ? 'Update' : 'Add') | localize" [disabled]="savingPrivate || privateFormRef.invalid"></button>
+                    </form>
+
+                    <div class="table-responsive mt-4">
+                        <table class="table table-sm align-middle">
+                            <thead>
+                                <tr><th>{{ 'FullName' | localize }}</th><th>{{ 'BanReason' | localize }}</th><th></th></tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let record of privateBlackLists">
+                                    <td>{{ record.fullName }}</td>
+                                    <td>{{ record.banReason }}</td>
+                                    <td class="text-end text-nowrap">
+                                        <button pButton type="button" icon="pi pi-pencil" class="p-button-text p-button-sm" (click)="editPrivate(record)" [attr.aria-label]="'Edit' | localize"></button>
+                                        <button *ngIf="permission.isGranted('Pages.PrivateBlackLists.Delete')" pButton type="button" icon="pi pi-trash" class="p-button-text p-button-sm p-button-danger" (click)="deletePrivate(record)" [disabled]="deletingPrivateId === record.id" [attr.aria-label]="'Delete' | localize"></button>
+                                    </td>
+                                </tr>
+                                <tr *ngIf="!privateBlackLists.length"><td colspan="3" class="text-muted">{{ 'NoRecordsFound' | localize }}</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12" *ngIf="pageType === 'requests'">
+            <div class="card h-100">
+                <div class="card-header"><strong>{{ 'GlobalBlacklistRequest' | localize }}</strong></div>
+                <div class="card-body">
+                    <form #requestFormRef="ngForm" (ngSubmit)="saveRequest()" *ngIf="!isHost">
+                        <div class="mb-3">
+                            <label class="form-label">{{ 'Customer' | localize }}</label>
+                            <p-dropdown
+                                [options]="customers"
+                                optionLabel="displayName"
+                                optionValue="fullName"
+                                [filter]="true"
+                                filterBy="displayName,fullName,customerNo,nric"
+                                [showClear]="true"
+                                [placeholder]="'SelectCustomer' | localize"
+                                [(ngModel)]="requestForm.fullName"
+                                name="requestCustomer"
+                                styleClass="w-100">
+                            </p-dropdown>
+                            <input pInputText class="form-control mt-2" [(ngModel)]="requestForm.fullName" name="requestFullName" required [placeholder]="'Or enter full name' | localize" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">{{ 'BanReason' | localize }}</label>
+                            <textarea class="form-control" rows="3" [(ngModel)]="requestForm.banReason" name="requestBanReason" required></textarea>
+                        </div>
+                        <button pButton type="submit" icon="pi pi-send" [label]="'SubmitRequest' | localize" [disabled]="savingRequest || requestFormRef.invalid"></button>
+                    </form>
+
+                    <div class="table-responsive" [class.mt-4]="!isHost">
+                        <table class="table table-sm align-middle">
+                            <thead>
+                                <tr><th>{{ 'FullName' | localize }}</th><th>{{ 'BanReason' | localize }}</th><th>{{ 'Status' | localize }}</th><th *ngIf="isHost || permission.isGranted('Pages.GlobalBlackListRequests.Delete')"></th></tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let request of globalRequests">
+                                    <ng-container *ngIf="isHost && editingRequestId === request.id; else requestRow">
+                                        <td><input pInputText class="form-control form-control-sm" [(ngModel)]="request.fullName" [name]="'requestName' + request.id" /></td>
+                                        <td><input pInputText class="form-control form-control-sm" [(ngModel)]="request.banReason" [name]="'requestReason' + request.id" /></td>
+                                        <td>
+                                            <select class="form-select form-select-sm" [(ngModel)]="request.status" [name]="'requestStatus' + request.id">
+                                                <option value="pending">{{ 'Pending' | localize }}</option>
+                                                <option value="approved">{{ 'Approved' | localize }}</option>
+                                                <option value="rejected">{{ 'Rejected' | localize }}</option>
+                                            </select>
+                                        </td>
+                                        <td class="text-end text-nowrap">
+                                            <button pButton type="button" icon="pi pi-check" class="p-button-text p-button-sm" (click)="saveRequestDecision(request)" [disabled]="savingRequestId === request.id" [attr.aria-label]="'Save' | localize"></button>
+                                            <button pButton type="button" icon="pi pi-times" class="p-button-text p-button-sm" (click)="cancelRequestEdit()" [attr.aria-label]="'Cancel' | localize"></button>
+                                        </td>
+                                    </ng-container>
+                                    <ng-template #requestRow>
+                                        <td>{{ request.fullName }}</td>
+                                        <td>{{ request.banReason }}</td>
+                                        <td><span class="badge text-bg-secondary">{{ request.status | titlecase }}</span></td>
+                                        <td *ngIf="isHost || permission.isGranted('Pages.GlobalBlackListRequests.Delete')" class="text-end text-nowrap">
+                                            <button *ngIf="isHost" pButton type="button" icon="pi pi-pencil" class="p-button-text p-button-sm" (click)="startRequestEdit(request)" [attr.aria-label]="'Edit' | localize"></button>
+                                            <button *ngIf="permission.isGranted('Pages.GlobalBlackListRequests.Delete')" pButton type="button" icon="pi pi-trash" class="p-button-text p-button-sm p-button-danger" (click)="deleteRequest(request)" [disabled]="deletingRequestId === request.id" [attr.aria-label]="'Delete' | localize"></button>
+                                        </td>
+                                    </ng-template>
+                                </tr>
+                                <tr *ngIf="!globalRequests.length"><td [attr.colspan]="isHost || permission.isGranted('Pages.GlobalBlackListRequests.Delete') ? 4 : 3" class="text-muted">{{ 'NoRecordsFound' | localize }}</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12" *ngIf="pageType === 'global'">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <strong>{{ 'GlobalBlacklist' | localize }}</strong>
+                    <button *ngIf="globalEditing" pButton type="button" icon="pi pi-times" class="p-button-text p-button-sm" (click)="resetGlobalForm()" [attr.aria-label]="'Cancel' | localize"></button>
+                </div>
+                <div class="card-body">
+                    <form #globalFormRef="ngForm" (ngSubmit)="saveGlobal()">
+                        <div class="mb-3">
+                            <label class="form-label">{{ 'FullName' | localize }}</label>
+                            <input pInputText class="form-control" [(ngModel)]="globalForm.fullName" name="globalFullName" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">{{ 'BanReason' | localize }}</label>
+                            <textarea class="form-control" rows="3" [(ngModel)]="globalForm.banReason" name="globalBanReason" required></textarea>
+                        </div>
+                        <button pButton type="submit" icon="pi pi-save" [label]="(globalEditing ? 'Update' : 'Add') | localize" [disabled]="savingGlobal || globalFormRef.invalid"></button>
+                    </form>
+
+                    <div class="table-responsive mt-4">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead><tr><th>{{ 'FullName' | localize }}</th><th>{{ 'BanReason' | localize }}</th><th></th></tr></thead>
+                        <tbody>
+                            <tr *ngFor="let record of globalBlackLists">
+                                <td>{{ record.fullName }}</td>
+                                <td>{{ record.banReason }}</td>
+                                <td class="text-end text-nowrap">
+                                    <button pButton type="button" icon="pi pi-pencil" class="p-button-text p-button-sm" (click)="editGlobal(record)" [attr.aria-label]="'Edit' | localize"></button>
+                                    <button pButton type="button" icon="pi pi-trash" class="p-button-text p-button-sm p-button-danger" (click)="deleteGlobal(record)" [disabled]="deletingGlobalId === record.id" [attr.aria-label]="'Delete' | localize"></button>
+                                </td>
+                            </tr>
+                            <tr *ngIf="!globalBlackLists.length"><td colspan="3" class="text-muted">{{ 'NoRecordsFound' | localize }}</td></tr>
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

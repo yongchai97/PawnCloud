@@ -34,5 +34,20 @@ public static class PermissionNames
     public const string Pages_BasicCodes_Edit = "Pages.BasicCodes.Edit";
     public const string Pages_BasicCodes_Delete = "Pages.BasicCodes.Delete";
 
+    public const string Pages_GlobalBlackLists = "Pages.GlobalBlackLists";
+    public const string Pages_GlobalBlackLists_Create = "Pages.GlobalBlackLists.Create";
+    public const string Pages_GlobalBlackLists_Delete = "Pages.GlobalBlackLists.Delete";
+
+    public const string Pages_GlobalBlackListRequests = "Pages.GlobalBlackListRequests";
+    public const string Pages_GlobalBlackListRequests_Create = "Pages.GlobalBlackListRequests.Create";
+    public const string Pages_GlobalBlackListRequests_Edit = "Pages.GlobalBlackListRequests.Edit";
+    public const string Pages_GlobalBlackListRequests_Delete = "Pages.GlobalBlackListRequests.Delete";
+
+    public const string Pages_PrivateBlackLists = "Pages.PrivateBlackLists";
+    public const string Pages_PrivateBlackLists_Create = "Pages.PrivateBlackLists.Create";
+    public const string Pages_PrivateBlackLists_Edit = "Pages.PrivateBlackLists.Edit";
+    public const string Pages_PrivateBlackLists_Delete = "Pages.PrivateBlackLists.Delete";
+
+
     public const string Pages_MiscFunctions = "Pages.MiscFunctions";
 }

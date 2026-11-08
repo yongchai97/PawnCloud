@@ -45,6 +45,7 @@ services:
     volumes:
       - ./Host-Logs:/app/App_Data/Logs
       - ./release/webhost:/app
+      - /opt/AMLA:/opt/AMLA:ro
     depends_on:
       - mssql
     restart: unless-stopped

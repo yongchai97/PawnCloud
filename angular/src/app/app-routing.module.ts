@@ -29,6 +29,24 @@ import { GeneralSetupComponent } from './admin/general-setup/general-setup.compo
                         canActivate: [AppRouteGuard],
                     },
                     {
+                        path: 'private-blacklists',
+                        loadComponent: () => import('./blacklists/blacklists.component').then((m) => m.BlacklistsComponent),
+                        data: { permission: 'Pages.PrivateBlackLists', blacklistType: 'private' },
+                        canActivate: [AppRouteGuard],
+                    },
+                    {
+                        path: 'global-blacklist-requests',
+                        loadComponent: () => import('./blacklists/blacklists.component').then((m) => m.BlacklistsComponent),
+                        data: { permission: 'Pages.GlobalBlackListRequests', blacklistType: 'requests' },
+                        canActivate: [AppRouteGuard],
+                    },
+                    {
+                        path: 'global-blacklists',
+                        loadComponent: () => import('./blacklists/blacklists.component').then((m) => m.BlacklistsComponent),
+                        data: { permission: 'Pages.GlobalBlackLists', blacklistType: 'global' },
+                        canActivate: [AppRouteGuard],
+                    },
+                    {
                         path: 'users',
                         loadChildren: () => import('./users/users.module').then((m) => m.UsersModule),
                         data: { permission: 'Pages.Users' },

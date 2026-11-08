@@ -94,7 +94,10 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
         var customerCDD = await _CustomerCDD.FirstOrDefaultAsync(x => x.Customer == Customer);
         if (customerCDD != null)
         {
-            if((customerCDD.MOHAMatching == true || customerCDD.UNSCRMatching == true || customerCDD.otherMatching == true)
+            if((customerCDD.MOHAMatching == true || customerCDD.UNSCRMatching == true || customerCDD.otherMatching == true
+                || customerCDD.noSourceOfFund == true || customerCDD.missingTransactionPurpose == true ||
+                customerCDD.mediumRiskCountry == true || customerCDD.highRiskCountry == true || customerCDD.appearInPrivateBlackList == true
+                || customerCDD.appearInPublicBlackList == true)
                 && customerCDD.approval == false)
             {
                 return true;

@@ -1730,6 +1730,9 @@ namespace PawnCloud.Migrations
                     b.Property<bool>("MOHAMatching")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("PEPStatus")
+                        .HasColumnType("bit");
+
                     b.Property<int?>("PaymentMode")
                         .HasColumnType("int");
 
@@ -1740,6 +1743,12 @@ namespace PawnCloud.Migrations
                         .HasColumnType("bit");
 
                     b.Property<bool>("allowAnomaly")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("appearInPrivateBlackList")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("appearInPublicBlackList")
                         .HasColumnType("bit");
 
                     b.Property<bool>("approval")
@@ -1760,6 +1769,9 @@ namespace PawnCloud.Migrations
                     b.Property<bool>("highNetWorth")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("highRiskCountry")
+                        .HasColumnType("bit");
+
                     b.Property<string>("matchingDescription")
                         .HasColumnType("nvarchar(max)");
 
@@ -1767,6 +1779,15 @@ namespace PawnCloud.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("measureCustomer")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("mediumRiskCountry")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("missingTransactionPurpose")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("noSourceOfFund")
                         .HasColumnType("bit");
 
                     b.Property<bool>("nomineeCustomer")
@@ -1781,10 +1802,19 @@ namespace PawnCloud.Migrations
                     b.Property<bool>("otherMatching")
                         .HasColumnType("bit");
 
+                    b.Property<string>("partyName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("publicResearchCompany")
                         .HasColumnType("bit");
 
                     b.Property<string>("researchDescription")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("roleInParty")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("transactionPurpose")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -1865,8 +1895,8 @@ namespace PawnCloud.Migrations
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("BusinessNature")
-                        .HasColumnType("int");
+                    b.Property<string>("BusinessNature")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("City")
                         .HasColumnType("nvarchar(max)");
@@ -2288,6 +2318,95 @@ namespace PawnCloud.Migrations
                     b.HasIndex("GeneralSetup");
 
                     b.ToTable("GeneralSetupTables");
+                });
+
+            modelBuilder.Entity("PawnCloud.GlobalBlackLists.GlobalBlackList", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("CreatorUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FullName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("LastModifierUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int?>("TenantId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("banReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("GlobalBlackLists");
+                });
+
+            modelBuilder.Entity("PawnCloud.GlobalBlackLists.GlobalBlackListRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("CreatorUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FullName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("LastModifierUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int?>("TenantId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("banReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("GlobalBlackListRequests");
                 });
 
             modelBuilder.Entity("PawnCloud.GoldTypes.GoldType", b =>
@@ -2871,6 +2990,49 @@ namespace PawnCloud.Migrations
                     b.HasIndex("PawnTicket");
 
                     b.ToTable("PawnTicketDocuments");
+                });
+
+            modelBuilder.Entity("PawnCloud.PrivateBlackLists.PrivateBlackList", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("CreatorUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FullName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("LastModifierUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int?>("TenantId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("banReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PrivateBlackLists");
                 });
 
             modelBuilder.Entity("Abp.Application.Features.EditionFeatureSetting", b =>

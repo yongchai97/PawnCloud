@@ -12,6 +12,7 @@ export class AbpModalFooterComponent extends AppComponentBase {
     cancelDisabled = input<boolean>();
     saveLabel = input(this.l('Save'));
     saveDisabled = input<boolean>();
+    saveMessage = input<string>();
 
     onCancelClick = output<EventEmitter<number>>();
 

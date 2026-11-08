@@ -52,8 +52,11 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
             new MenuItem(this.l('Outlet'), '/app/outlet', 'fas fa-store'),
             new MenuItem(this.l('Customers'), '/app/customers', 'fas fa-user-friends', 'Pages.Customers'),
             new MenuItem(this.l('PawnTickets'), '/app/pawn-tickets', 'fas fa-ticket-alt', 'Pages.PawnTickets'),
+            new MenuItem('Private Blacklist', '/app/private-blacklists', 'fas fa-user-slash', 'Pages.PrivateBlackLists'),
             new MenuItem(this.l('Admin'), '', 'fas fa-cog', null, [
                 new MenuItem(this.l('BasicCodes'), '/app/basic-codes', 'fas fa-list', 'Pages.BasicCodes'),
+                new MenuItem('Global Blacklist', '/app/global-blacklists', 'fas fa-ban', 'Pages.GlobalBlackLists'),
+                new MenuItem('Global Requests', '/app/global-blacklist-requests', 'fas fa-user-shield', 'Pages.GlobalBlackListRequests'),
                 new MenuItem(this.l('Countries'), '/app/admin/countries', 'fas fa-globe'),
                 new MenuItem('Gold Price Entry', '/app/admin/gold-price-entry', 'fas fa-coins'),
                 new MenuItem('Gold Type', '/app/admin/gold-types', 'fas fa-ring'),

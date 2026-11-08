@@ -1,5 +1,6 @@
 import { Component, Injector, ChangeDetectorRef, EventEmitter, output, OnInit } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
+import { BsModalService } from 'ngx-bootstrap/modal';
 import { TabsModule } from 'ngx-bootstrap/tabs';
 import { AppComponentBase } from '@shared/app-component-base';
 import { FormsModule } from '@angular/forms';
@@ -7,7 +8,7 @@ import { AbpModalHeaderComponent } from '../../../shared/components/modal/abp-mo
 import { AbpValidationSummaryComponent } from '../../../shared/components/validation/abp-validation.summary.component';
 import { AbpModalFooterComponent } from '../../../shared/components/modal/abp-modal-footer.component';
 import { LocalizePipe } from '@shared/pipes/localize.pipe';
-import { CreateOrEditCustomerDto, CreateOrEditCustomerCDDDto, SearchCDDDto, CustomerCDDServiceProxy, BasicCodeServiceProxy, BasicCodeLookupDto, Country, CountryServiceProxy, MiscMasterConfigServiceProxy, MiscMasterConfigLookupDto } from '@shared/service-proxies/service-proxies';
+import { CreateOrEditCustomerDto, CreateOrEditCustomerCDDDto, SearchCDDDto, CustomerCDDServiceProxy, BasicCodeServiceProxy, BasicCodeLookupDto, Country, CountryServiceProxy, MiscMasterConfigServiceProxy, MiscMasterConfigLookupDto, PawnTicketServiceProxy } from '@shared/service-proxies/service-proxies';
 import { LookupServiceProxy } from '@shared/service-proxies/lookup-service-proxy';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -15,6 +16,7 @@ import { ButtonModule } from 'primeng/button';
 import { DropdownModule } from 'primeng/dropdown';
 import { NgFor } from '@angular/common';
 import moment from 'moment';
+import { HighRiskCustomerWarningDialogComponent } from '../high-risk-customer-warning-dialog.component';
 
 @Component({
     templateUrl: './create-customer-dialog.component.html',
@@ -33,7 +35,6 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
     raceOptions: BasicCodeLookupDto[] = [];
     genderOptions: BasicCodeLookupDto[] = [];
     nationalityOptions: { label: string; value: number }[] = [];
-    businessNatureOptions: BasicCodeLookupDto[] = [];
     maritalStatusOptions: BasicCodeLookupDto[] = [];
     paymentModeOptions: BasicCodeLookupDto[] = [];
     deliveryChannelOptions: BasicCodeLookupDto[] = [];
@@ -47,17 +48,21 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
         private _countryService: CountryServiceProxy,
         private _miscMasterConfigService: MiscMasterConfigServiceProxy,
         private _customerCDDService: CustomerCDDServiceProxy,
+        private _pawnTicketService: PawnTicketServiceProxy,
+        private _modalService: BsModalService,
         public bsModalRef: BsModalRef,
         private cd: ChangeDetectorRef
     ) {
         super(injector);
         this.customer.age = 0;
+        this.customer.monthlyIncome = 0;
     }
 
     ngOnInit(): void {
         this.loadCountries();
         this.loadBasicCodeDropdowns();
         this.customerCDD.approvedBy = this.appSession.userId;
+        this.customerCDD.pepStatus = false;
     }
 
     private loadCountries(): void {
@@ -81,7 +86,6 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
             const categoryMap = {
                 'race': configMap.get('race'),
                 'gender': configMap.get('gender'),
-                'businessnature': configMap.get('business nature') || configMap.get('businessnature'),
                 'maritalstatus': configMap.get('marital status') || configMap.get('maritalstatus'),
                 'paymentmethod': configMap.get('payment method') || configMap.get('paymentmode'),
                 'deliverychannel': configMap.get('delivery channel') || configMap.get('deliverychannel'),
@@ -97,12 +101,6 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
             if (categoryMap['gender']) {
                 this._lookupService.getBasicCodesByCategory(categoryMap['gender']).subscribe((result) => {
                     this.genderOptions = result.items || [];
-                    this.cd.detectChanges();
-                });
-            }
-            if (categoryMap['businessnature']) {
-                this._lookupService.getBasicCodesByCategory(categoryMap['businessnature']).subscribe((result) => {
-                    this.businessNatureOptions = result.items || [];
                     this.cd.detectChanges();
                 });
             }
@@ -129,6 +127,18 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
 
     onDropdownChange(): void {
         this.cd.detectChanges();
+    }
+
+    onPepStatusChange(): void {
+        if (!this.customerCDD.pepStatus) {
+            this.customerCDD.partyName = undefined;
+            this.customerCDD.roleInParty = undefined;
+        }
+        this.cd.detectChanges();
+    }
+
+    updateMissingTransactionPurpose(): void {
+        this.customerCDD.missingTransactionPurpose = !(this.customerCDD.transactionPurpose || '').trim();
     }
 
     readBirthDateFromNric(): void {
@@ -166,7 +176,7 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
         this.cd.detectChanges();
     }
 
-    checkCustomerCDD(): void {
+    checkCustomerCDD(onCompleted?: () => void): void {
         const customerName = (this.customer.fullName || '').trim();
         if (!customerName || this.checkingCDD || customerName === this.lastCheckedCustomerName) {
             return;
@@ -191,6 +201,7 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
                 },
                 complete: () => {
                     this.checkingCDD = false;
+                    onCompleted?.();
                     this.cd.detectChanges();
                 },
             });
@@ -221,7 +232,7 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
             return;
         }
         if (customerName && customerName !== this.lastCheckedCustomerName) {
-            this.checkCustomerCDD();
+            this.checkCustomerCDD(() => this.save());
             return;
         }
 
@@ -238,6 +249,7 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
                         this.notify.info(this.l('SavedSuccessfully'));
                         this.bsModalRef.hide();
                         this.onSave.emit(null);
+                        this.warnIfHighRiskCustomer(newId);
                     },
                     (error) => {
                         this.saving = false;
@@ -254,5 +266,17 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
                 this.cd.detectChanges();
             }
         );
+    }
+
+    private warnIfHighRiskCustomer(customerId: number | undefined): void {
+        if (!customerId) return;
+        this._pawnTicketService.isHighRiskCustomer(customerId).subscribe({
+            next: (isHighRisk) => {
+                if (isHighRisk) {
+                    this._modalService.show(HighRiskCustomerWarningDialogComponent, { class: 'modal-md' });
+                }
+            },
+            error: () => undefined,
+        });
     }
 }

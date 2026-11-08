@@ -9,6 +9,7 @@ using PawnCloud.CustomerPictures;
 using PawnCloud.Customers;
 using PawnCloud.DailyGoldPrices;
 using PawnCloud.GeneralSetups;
+using PawnCloud.GlobalBlackLists;
 using PawnCloud.GoldTypes;
 using PawnCloud.ItemListings;
 using PawnCloud.ItemStatuses;
@@ -17,6 +18,7 @@ using PawnCloud.MultiTenancy;
 using PawnCloud.PawnItems;
 using PawnCloud.PawnTicketPayments;
 using PawnCloud.PawnTickets;
+using PawnCloud.PrivateBlackLists;
 
 namespace PawnCloud.EntityFrameworkCore;
 
@@ -41,6 +43,9 @@ public class PawnCloudDbContext : AbpZeroDbContext<Tenant, Role, User, PawnCloud
     public virtual DbSet<PawnTicketDocument> PawnTicketDocuments { get; set; }
     public virtual DbSet<GeneralSetupTable> GeneralSetupTables { get; set; }
     public virtual DbSet<CustomerCDD> CustomerCDDs { get; set; }
+    public virtual DbSet<PrivateBlackList> PrivateBlackLists { get; set; }
+    public virtual DbSet<GlobalBlackList> GlobalBlackLists { get; set; }
+    public virtual DbSet<GlobalBlackListRequest> GlobalBlackListRequests { get; set; }
 
     public PawnCloudDbContext(DbContextOptions<PawnCloudDbContext> options)
         : base(options)

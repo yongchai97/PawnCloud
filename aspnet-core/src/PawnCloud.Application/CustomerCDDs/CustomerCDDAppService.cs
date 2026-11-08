@@ -1,8 +1,14 @@
 ﻿using Abp.Application.Services;
 using Abp.Domain.Repositories;
+using Abp.Domain.Uow;
+using Castle.Core.Resource;
 using Microsoft.Extensions.Configuration;
+using PawnCloud.BasicCodes;
+using PawnCloud.Countries;
 using PawnCloud.CustomerCDDs.Dto;
 using PawnCloud.Customers;
+using PawnCloud.GlobalBlackLists;
+using PawnCloud.PrivateBlackLists;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,6 +26,9 @@ namespace PawnCloud.CustomerCDDs
         private readonly IRepository<Customer> _repository;
         private readonly IRepository<CustomerCDD> _customerCDDRepository;
         private readonly IConfiguration _configuration;
+        private readonly IRepository<Country> _countryRepository;
+        private readonly IRepository<PrivateBlackList> _privateBlackListRepository;
+        private readonly IRepository<GlobalBlackList> _globalBlackListRepository;
 
         private readonly string _1988list;
         private readonly string _1718sanctionlist;
@@ -27,12 +36,16 @@ namespace PawnCloud.CustomerCDDs
         private readonly string _unscrsanctionlist;
         private readonly string _ISILlist;
         public CustomerCDDAppService(IRepository<Customer> repository, IRepository<CustomerCDD> customerCDDRepository, 
-            IConfiguration configuration)
+            IConfiguration configuration, IRepository<Country> countryRepository, IRepository<PrivateBlackList> privateBlackListRepository,
+            IRepository<GlobalBlackList> globalBlackListRepository)
         {
             _repository = repository;
             _customerCDDRepository = customerCDDRepository;
             _configuration = configuration;
             _customerCDDRepository = customerCDDRepository;
+            _countryRepository = countryRepository;
+            _privateBlackListRepository = privateBlackListRepository;
+            _globalBlackListRepository = globalBlackListRepository;
             _1988list = "1988sanction.xml";
             _1718sanctionlist = "1718sanction.xml";
             _mohasanctionlist = "SENARAI_KDN.xml";
@@ -58,10 +71,9 @@ namespace PawnCloud.CustomerCDDs
                 for (int i = 0; i < 10; i++)
                 {
                     var checkDateBackTrack = DateTime.Now.AddDays(-i);
-                    var dateFolderBackTrack = checkDateBackTrack.ToString("yyMMdd");
+                    var dateFolderBackTrack = checkDateBackTrack.ToString("yyyyMMdd");
                     folderPath = Path.Combine(
                         rootPath,
-                        "AMLA",
                         dateFolderBackTrack);
                     if (Directory.Exists(folderPath))
                     {
@@ -74,6 +86,8 @@ namespace PawnCloud.CustomerCDDs
                     return createOrEditCustomerCDDDto;
                 }
             }
+            //check the customer
+            var customer = await _repository.FirstOrDefaultAsync(x=>x.FullName == input.customerName);
             //based on the found folder, start the 5 xml checks
             //temporary clear off any existing matches, if any
             createOrEditCustomerCDDDto.matchingID = "";
@@ -86,6 +100,34 @@ namespace PawnCloud.CustomerCDDs
             createOrEditCustomerCDDDto = Check1988SanctionAsync(folderPath, input.customerName, createOrEditCustomerCDDDto);
             createOrEditCustomerCDDDto = CheckISILSanctionAsync(folderPath, input.customerName, createOrEditCustomerCDDDto);
             createOrEditCustomerCDDDto = Check1718SanctionAsync(folderPath, input.customerName, createOrEditCustomerCDDDto);
+            //check country
+            if(customer != null)
+            {
+                var country = await _countryRepository.FirstOrDefaultAsync(x=>x.Id == customer.Country);
+                if(country != null)
+                {
+                    createOrEditCustomerCDDDto.mediumRiskCountry = country.riskLevel == "MEDIUM" ? true : false;
+                    createOrEditCustomerCDDDto.highRiskCountry = country.riskLevel == "HIGH" ? true : false;
+                }
+
+                if (customer.MonthlyIncome <= 0 || customer.Occupation == null)
+                {
+                    createOrEditCustomerCDDDto.noSourceOfFund = true;
+                }
+                else
+                {
+                    createOrEditCustomerCDDDto.noSourceOfFund = false;
+                }
+            }
+            var privateBlackLists = await _privateBlackListRepository.GetAllListAsync();
+            createOrEditCustomerCDDDto.appearInPrivateBlackList = privateBlackLists.Any(x =>
+                NormalizeName(x.FullName) == NormalizeName(input.customerName));
+            using (CurrentUnitOfWork.DisableFilter(AbpDataFilters.MayHaveTenant))
+            {
+                var hostGlobalBlackLists = await _globalBlackListRepository.GetAllListAsync(x => x.TenantId == null);
+                createOrEditCustomerCDDDto.appearInPublicBlackList = hostGlobalBlackLists.Any(x =>
+                    NormalizeName(x.FullName) == NormalizeName(input.customerName));
+            }
 
             return createOrEditCustomerCDDDto;
         }
@@ -111,7 +153,34 @@ namespace PawnCloud.CustomerCDDs
                 input.publicResearchCompany, input.researchDescription, input.allowAnomaly, input.measureCustomer, input.offerUnusualTransaction,
                 input.nomineeService, input.nomineeCustomer, input.crossBorderCustomer, input.PaymentMode, input.DeliveryChannel,
                 input.UNSCRMatching, input.MOHAMatching, input.otherMatching, input.matchingID, input.approval, input.approvedBy,
-                input.matchingDescription);
+                input.matchingDescription, input.mediumRiskCountry, input.highRiskCountry, input.appearInPrivateBlackList, input.appearInPublicBlackList,
+                input.noSourceOfFund, input.missingTransactionPurpose, input.PEPStatus, input.partyName, input.roleInParty, input.transactionPurpose);
+            if(string.IsNullOrEmpty(input.transactionPurpose))
+            {
+                customerCDD.missingTransactionPurpose = true;
+            }
+            else
+            {
+                customerCDD.missingTransactionPurpose = false;
+            }
+            var customerChecker = await _repository.FirstOrDefaultAsync(x=>x.Id == input.Customer);
+            if(customerChecker != null)
+            {
+                var country = await _countryRepository.FirstOrDefaultAsync(x => x.Id == customerChecker.Country);
+                if (country != null)
+                {
+                    customerCDD.mediumRiskCountry = country.riskLevel == "MEDIUM" ? true : false;
+                    customerCDD.highRiskCountry = country.riskLevel == "HIGH" ? true : false;
+                }
+                if(customerChecker.MonthlyIncome <= 0 || customerChecker.Occupation == null)
+                {
+                    customerCDD.noSourceOfFund = true;
+                }
+                else
+                {
+                    customerCDD.noSourceOfFund = false;
+                }
+            }
             customerCDD.TenantId = AbpSession.TenantId;
             await _customerCDDRepository.InsertAsync(customerCDD);
         }
@@ -141,6 +210,16 @@ namespace PawnCloud.CustomerCDDs
                 customerCDD.approval = input.approval;
                 customerCDD.approvedBy = input.approvedBy;
                 customerCDD.matchingDescription = input.matchingDescription;
+                customerCDD.mediumRiskCountry = input.mediumRiskCountry;
+                customerCDD.highRiskCountry = input.highRiskCountry;
+                customerCDD.appearInPrivateBlackList = input.appearInPrivateBlackList;
+                customerCDD.appearInPublicBlackList = input.appearInPublicBlackList;
+                customerCDD.noSourceOfFund = input.noSourceOfFund;
+                customerCDD.missingTransactionPurpose = input.missingTransactionPurpose;
+                customerCDD.PEPStatus = input.PEPStatus;
+                customerCDD.partyName = input.partyName;
+                customerCDD.roleInParty = input.roleInParty;
+                customerCDD.transactionPurpose = input.transactionPurpose;
                 await _customerCDDRepository.UpdateAsync(customerCDD);
             }
         }
@@ -781,13 +860,18 @@ namespace PawnCloud.CustomerCDDs
                 return string.Empty;
             }
             return string.Concat(
-                    value.Where(c => !char.IsWhiteSpace(c)))
+                    value.Where(char.IsLetterOrDigit))
                 .ToUpperInvariant();
         }
         private bool IsNameMatch(string xmlName, string searchName)
         {
             var normalizedXmlName = NormalizeName(xmlName);
             var normalizedSearchName = NormalizeName(searchName);
+
+            if (string.IsNullOrEmpty(normalizedXmlName) || string.IsNullOrEmpty(normalizedSearchName))
+            {
+                return false;
+            }
 
             return normalizedXmlName.Contains(normalizedSearchName);
                 //|| normalizedSearchName.Contains(normalizedXmlName);

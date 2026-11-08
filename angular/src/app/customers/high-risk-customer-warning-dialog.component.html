@@ -1,0 +1,10 @@
+<abp-modal-header title="High Risk Customer Warning" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+<div class="modal-body">
+    <div class="alert alert-warning mb-0" role="alert">
+        This customer has been detected and marked as <strong>High Risk</strong>.
+        Any further operations upon this customer will require approvals.
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="bsModalRef.hide()">Close</button>
+</div>

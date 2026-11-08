@@ -39,6 +39,21 @@ public class PawnCloudAuthorizationProvider : AuthorizationProvider
         basicCodes.CreateChildPermission(PermissionNames.Pages_BasicCodes_Delete, L("DeleteBasicCode"));
 
         context.CreatePermission(PermissionNames.Pages_MiscFunctions, L("MiscFunctions"));
+
+        context.CreatePermission(PermissionNames.Pages_GlobalBlackLists, L("GlobalBlackLists"), multiTenancySides: MultiTenancySides.Host);
+        context.CreatePermission(PermissionNames.Pages_GlobalBlackLists_Create, L("CreateGlobalBlackLists"), multiTenancySides: MultiTenancySides.Host);
+        context.CreatePermission(PermissionNames.Pages_GlobalBlackLists_Delete, L("DeleteGlobalBlackLists"), multiTenancySides: MultiTenancySides.Host);
+
+        context.CreatePermission(PermissionNames.Pages_GlobalBlackListRequests, L("GlobalBlackListRequests"));
+        context.CreatePermission(PermissionNames.Pages_GlobalBlackListRequests_Create, L("CreateGlobalBlackListRequests"));
+        context.CreatePermission(PermissionNames.Pages_GlobalBlackListRequests_Edit, L("EditGlobalBlackListRequests"));
+        context.CreatePermission(PermissionNames.Pages_GlobalBlackListRequests_Delete, L("DeleteGlobalBlackListRequests"));
+
+        context.CreatePermission(PermissionNames.Pages_PrivateBlackLists, L("PrivateBlackLists"));
+        context.CreatePermission(PermissionNames.Pages_PrivateBlackLists_Create, L("CreatePrivateBlackLists"));
+        context.CreatePermission(PermissionNames.Pages_PrivateBlackLists_Edit, L("EditPrivateBlackLists"));
+        context.CreatePermission(PermissionNames.Pages_PrivateBlackLists_Delete, L("DeletePrivateBlackLists"));
+
     }
 
     private static ILocalizableString L(string name)
