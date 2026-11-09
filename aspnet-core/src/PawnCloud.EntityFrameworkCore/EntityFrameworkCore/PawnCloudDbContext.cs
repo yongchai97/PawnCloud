@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using PawnCloud.Authorization.Roles;
 using PawnCloud.Authorization.Users;
+using PawnCloud.AuthorizedPeoples;
 using PawnCloud.BasicCodes;
 using PawnCloud.Countries;
 using PawnCloud.CustomerCDDs;
@@ -19,6 +20,9 @@ using PawnCloud.PawnItems;
 using PawnCloud.PawnTicketPayments;
 using PawnCloud.PawnTickets;
 using PawnCloud.PrivateBlackLists;
+using PawnCloud.RedeemRecords;
+using PawnCloud.RedeemRecordTickets;
+using PawnCloud.UserOutlets;
 
 namespace PawnCloud.EntityFrameworkCore;
 
@@ -46,6 +50,10 @@ public class PawnCloudDbContext : AbpZeroDbContext<Tenant, Role, User, PawnCloud
     public virtual DbSet<PrivateBlackList> PrivateBlackLists { get; set; }
     public virtual DbSet<GlobalBlackList> GlobalBlackLists { get; set; }
     public virtual DbSet<GlobalBlackListRequest> GlobalBlackListRequests { get; set; }
+    public virtual DbSet<UserOutlet> UserOutlets { get; set; }
+    public virtual DbSet<AuthorizedPeople> AuthorizedPeoples { get; set; }
+    public virtual DbSet<RedeemRecord> RedeemRecords { get; set; }
+    public virtual DbSet<RedeemRecordTicket> RedeemRecordTickets { get; set; }
 
     public PawnCloudDbContext(DbContextOptions<PawnCloudDbContext> options)
         : base(options)

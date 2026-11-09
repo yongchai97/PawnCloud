@@ -35,10 +35,11 @@ public class PawnTicket : FullAuditedEntity<int>, IMayHaveTenant
 
     public GeneralSetup GeneralSetupFk { get; set; }
     public decimal amountPerGram { get; set; }
+    public decimal discount { get; set; }
     public PawnTicket() { }
     public PawnTicket(string ticketNo, int? customer, decimal weight, decimal value, 
         DateTime pledgedDate, DateTime expiryDate, decimal amount, decimal monthlyCustody, 
-        decimal serviceCharge, string slotNumber, int? generalSetup, decimal amountPerGram)
+        decimal serviceCharge, string slotNumber, int? generalSetup, decimal amountPerGram, decimal discount)
     {
         TicketNo = ticketNo;
         Customer = customer;
@@ -52,5 +53,6 @@ public class PawnTicket : FullAuditedEntity<int>, IMayHaveTenant
         this.slotNumber = slotNumber;
         GeneralSetup = generalSetup;
         this.amountPerGram = amountPerGram;
+        this.discount = discount;
     }
 }

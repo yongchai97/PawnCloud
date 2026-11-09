@@ -61,6 +61,7 @@ namespace PawnCloud.PrivateBlackLists
                 return;
             }
             var listing = new PrivateBlackList(input.FullName, input.banReason);
+            listing.TenantId = AbpSession.TenantId;
             await _repository.InsertAsync(listing);
         }
         [AbpAuthorize(PermissionNames.Pages_PrivateBlackLists_Edit)]

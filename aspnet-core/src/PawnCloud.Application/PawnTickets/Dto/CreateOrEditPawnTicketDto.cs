@@ -17,11 +17,12 @@ public class CreateOrEditPawnTicketDto : EntityDto<int?>
     public string slotNumber { get; set; }
     public virtual int? GeneralSetup { get; set; }
     public decimal amountPerGram { get; set; }
+    public decimal discount { get; set; }
 
     public CreateOrEditPawnTicketDto() { }
     public CreateOrEditPawnTicketDto(int? id, string ticketNo, int? customer, decimal weight, decimal value,
         DateTime pledgedDate, DateTime expiryDate, decimal amount, decimal monthlyCustody,
-        decimal serviceCharge, string slotNumber, int? generalSetup, decimal amountPerGram)
+        decimal serviceCharge, string slotNumber, int? generalSetup, decimal amountPerGram, decimal discount)
     {
         Id = id;
         TicketNo = ticketNo;
@@ -36,5 +37,6 @@ public class CreateOrEditPawnTicketDto : EntityDto<int?>
         this.slotNumber = slotNumber;
         GeneralSetup = generalSetup;
         this.amountPerGram = amountPerGram;
+        this.discount = discount;
     }
 }

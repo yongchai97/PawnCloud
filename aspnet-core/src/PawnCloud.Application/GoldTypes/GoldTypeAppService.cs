@@ -62,6 +62,7 @@ namespace PawnCloud.GoldTypes
                 return;
             }
             var goldType = new GoldType(input.purity,input.description, input.defaultPercentage,true);
+            goldType.TenantId = AbpSession.TenantId;
             await _repository.InsertAsync(goldType);
         }
         private async Task Edit(CreateOrEditGoldType input)

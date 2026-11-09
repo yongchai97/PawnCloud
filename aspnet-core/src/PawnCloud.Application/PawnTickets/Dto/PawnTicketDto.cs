@@ -21,5 +21,6 @@ public class PawnTicketDto : EntityDto<int>
     public string slotNumber { get; set; }
     public virtual int? GeneralSetup { get; set; }
     public decimal amountPerGram { get; set; }
+    public decimal discount { get; set; }
 
 }

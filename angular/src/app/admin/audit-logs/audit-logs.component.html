@@ -1,0 +1,117 @@
+<div [@routerTransition]>
+    <section class="content-header audit-header">
+        <div class="container-fluid">
+            <div class="audit-heading">
+                <div>
+                    <span class="audit-eyebrow"><i class="fas fa-shield-alt"></i> Operations</span>
+                    <h1>{{ 'AuditLogs' | localize }}</h1>
+                    <p>Review activity across your workspace and keep an eye on unusual events.</p>
+                </div>
+                <div class="audit-heading-mark" aria-hidden="true">
+                    <i class="fas fa-wave-square"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="content audit-content px-2 pb-5">
+        <div class="container-fluid">
+            <div class="audit-stats">
+                <div class="audit-stat">
+                    <span class="audit-stat-icon audit-stat-icon-blue"><i class="fas fa-list-ul"></i></span>
+                    <div>
+                        <span class="audit-stat-label">Total events</span>
+                        <strong>{{ primengTableHelper.totalRecordsCount | number }}</strong>
+                    </div>
+                </div>
+                <div class="audit-stat">
+                    <span class="audit-stat-icon audit-stat-icon-green"><i class="fas fa-eye"></i></span>
+                    <div>
+                        <span class="audit-stat-label">On this page</span>
+                        <strong>{{ primengTableHelper.records.length | number }}</strong>
+                    </div>
+                </div>
+                <div class="audit-stat">
+                    <span class="audit-stat-icon audit-stat-icon-amber"><i class="fas fa-triangle-exclamation"></i></span>
+                    <div>
+                        <span class="audit-stat-label">Exceptions shown</span>
+                        <strong>{{ exceptionCount | number }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-0 audit-panel table-wrapper">
+                <div class="card-header audit-toolbar">
+                    <div>
+                        <h2>Activity stream</h2>
+                        <span>Search service calls, users, IP addresses, and exceptions.</span>
+                    </div>
+                    <div class="audit-search input-group">
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="filter"
+                            [placeholder]="'Search audit logs' | localize"
+                            [(ngModel)]="filter"
+                            (keyup.enter)="list()" />
+                        <button type="button" class="btn audit-search-button" (click)="list()" [attr.aria-label]="'Search' | localize">
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body audit-table-body">
+                    <div class="table-responsive">
+                        <div class="primeng-datatable-container table-striped table-bordered">
+                            <p-table
+                                #dataTable
+                                (onLazyLoad)="list($event)"
+                                [value]="primengTableHelper.records"
+                                [rows]="primengTableHelper.defaultRecordsCountPerPage"
+                                [paginator]="false"
+                                [lazy]="true"
+                                [loading]="primengTableHelper.isLoading">
+                                <ng-template pTemplate="header">
+                                    <tr>
+                                        <th class="audit-time-column">{{ 'ExecutionTime' | localize }}</th>
+                                        <th>Username</th>
+                                        <th>{{ 'Service' | localize }}</th>
+                                        <th>{{ 'Method' | localize }}</th>
+                                        <th>{{ 'Duration' | localize }}</th>
+                                        <th>{{ 'ClientIp' | localize }}</th>
+                                        <th>{{ 'Exception' | localize }}</th>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="body" let-record>
+                                    <tr>
+                                        <td class="text-nowrap audit-time-column">
+                                            <strong>{{ record.executionTime | date: 'MMM d, yyyy' }}</strong>
+                                            <small>{{ record.executionTime | date: 'HH:mm:ss' }}</small>
+                                        </td>
+                                        <td><span class="audit-id">{{ record.userName || 'System' }}</span></td>
+                                        <td class="audit-service">{{ record.serviceName || '-' }}</td>
+                                        <td class="audit-method">{{ record.methodName || '-' }}</td>
+                                        <td><span class="audit-duration">{{ record.executionDuration }} ms</span></td>
+                                        <td>{{ record.clientIpAddress || '-' }}</td>
+                                        <td [class.text-danger]="record.exceptionMessage" class="audit-exception">{{ record.exceptionMessage || 'None' }}</td>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="emptymessage">
+                                    <tr><td colspan="7" class="text-center audit-empty"><i class="fas fa-inbox"></i><span>{{ 'No audit logs found.' | localize }}</span></td></tr>
+                                </ng-template>
+                            </p-table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-5 m-auto">
+                    <p-paginator
+                        #paginator
+                        [rows]="primengTableHelper.defaultRecordsCountPerPage"
+                        [totalRecords]="primengTableHelper.totalRecordsCount"
+                        (onPageChange)="list($event)"></p-paginator>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

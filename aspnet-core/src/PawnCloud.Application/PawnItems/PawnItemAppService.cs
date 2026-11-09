@@ -45,6 +45,7 @@ namespace PawnCloud.PawnItems
             if (input.Id == null)
             {
                 var pawnItem = ObjectMapper.Map<PawnItem>(input);
+                pawnItem.TenantId = AbpSession.TenantId;
                 await _repository.InsertAsync(pawnItem);
             }
             else

@@ -1583,6 +1583,102 @@ namespace PawnCloud.Migrations
                     b.ToTable("AbpUsers");
                 });
 
+            modelBuilder.Entity("PawnCloud.AuthorizedPeoples.AuthorizedPeople", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("Country")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("CreatorUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int?>("Customer")
+                        .HasColumnType("int");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("Gender")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("LastModifierUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("NRIC")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Nationality")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Race")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TenantId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("age")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("birthDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("blacklisted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("fullName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("member")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("oldIC")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("postcode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("relationship")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("remark")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("state")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("telephoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("town")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Customer");
+
+                    b.ToTable("AuthorizedPeoples");
+                });
+
             modelBuilder.Entity("PawnCloud.BasicCodes.BasicCode", b =>
                 {
                     b.Property<int>("Id")
@@ -2902,6 +2998,9 @@ namespace PawnCloud.Migrations
                     b.Property<decimal>("amountPerGram")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<decimal>("discount")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<DateTime>("expiryDate")
                         .HasColumnType("datetime2");
 
@@ -3033,6 +3132,159 @@ namespace PawnCloud.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("PrivateBlackLists");
+                });
+
+            modelBuilder.Entity("PawnCloud.RedeemRecordTickets.RedeemRecordTicket", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("CreatorUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("LastModifierUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int?>("PawnTicket")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("RedeemRecord")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TenantId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PawnTicket");
+
+                    b.HasIndex("RedeemRecord");
+
+                    b.ToTable("RedeemRecordTickets");
+                });
+
+            modelBuilder.Entity("PawnCloud.RedeemRecords.RedeemRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("CreatorUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("LastModifierUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int?>("TenantId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("grandTotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("numberOfTickets")
+                        .HasColumnType("int");
+
+                    b.Property<string>("redeemedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("redeemedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("totalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("totalCustody")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("totalDiscount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("totalService")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RedeemRecords");
+                });
+
+            modelBuilder.Entity("PawnCloud.UserOutlets.UserOutlet", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("CreatorUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("GeneralSetup")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("LastModifierUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int?>("TenantId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("User")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GeneralSetup");
+
+                    b.ToTable("UserOutlets");
                 });
 
             modelBuilder.Entity("Abp.Application.Features.EditionFeatureSetting", b =>
@@ -3253,6 +3505,15 @@ namespace PawnCloud.Migrations
                     b.Navigation("LastModifierUser");
                 });
 
+            modelBuilder.Entity("PawnCloud.AuthorizedPeoples.AuthorizedPeople", b =>
+                {
+                    b.HasOne("PawnCloud.Customers.Customer", "CustomerFk")
+                        .WithMany()
+                        .HasForeignKey("Customer");
+
+                    b.Navigation("CustomerFk");
+                });
+
             modelBuilder.Entity("PawnCloud.BasicCodes.BasicCode", b =>
                 {
                     b.HasOne("PawnCloud.MiscMasterConfigs.MiscMasterConfig", "MiscMasterConfigFk")
@@ -3411,6 +3672,30 @@ namespace PawnCloud.Migrations
                         .HasForeignKey("PawnTicket");
 
                     b.Navigation("PawnTicketFk");
+                });
+
+            modelBuilder.Entity("PawnCloud.RedeemRecordTickets.RedeemRecordTicket", b =>
+                {
+                    b.HasOne("PawnCloud.PawnTickets.PawnTicket", "PawnTicketFk")
+                        .WithMany()
+                        .HasForeignKey("PawnTicket");
+
+                    b.HasOne("PawnCloud.RedeemRecords.RedeemRecord", "RedeemRecordFk")
+                        .WithMany()
+                        .HasForeignKey("RedeemRecord");
+
+                    b.Navigation("PawnTicketFk");
+
+                    b.Navigation("RedeemRecordFk");
+                });
+
+            modelBuilder.Entity("PawnCloud.UserOutlets.UserOutlet", b =>
+                {
+                    b.HasOne("PawnCloud.GeneralSetups.GeneralSetup", "GeneralSetupFk")
+                        .WithMany()
+                        .HasForeignKey("GeneralSetup");
+
+                    b.Navigation("GeneralSetupFk");
                 });
 
             modelBuilder.Entity("Abp.Application.Features.EditionFeatureSetting", b =>

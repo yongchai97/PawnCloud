@@ -4,6 +4,7 @@ import { CreateUserDialogComponent } from './create-user/create-user-dialog.comp
 import { EditUserDialogComponent } from './edit-user/edit-user-dialog.component';
 import { ResetPasswordDialogComponent } from './reset-password/reset-password.component';
 import { ChangePasswordComponent } from './change-password/change-password.component';
+import { UserOutletDialogComponent } from './user-outlet/user-outlet-dialog.component';
 import { UsersRoutingModule } from './users-routing.module';
 import { UsersComponent } from './users.component';
 import { CommonModule } from '@angular/common';
@@ -18,6 +19,7 @@ import { CommonModule } from '@angular/common';
         EditUserDialogComponent,
         CreateUserDialogComponent,
         ChangePasswordComponent,
+        UserOutletDialogComponent,
     ],
 })
 export class UsersModule {}

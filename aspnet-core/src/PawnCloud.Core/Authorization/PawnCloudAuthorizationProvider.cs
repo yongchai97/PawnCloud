@@ -39,6 +39,7 @@ public class PawnCloudAuthorizationProvider : AuthorizationProvider
         basicCodes.CreateChildPermission(PermissionNames.Pages_BasicCodes_Delete, L("DeleteBasicCode"));
 
         context.CreatePermission(PermissionNames.Pages_MiscFunctions, L("MiscFunctions"));
+        context.CreatePermission(PermissionNames.Pages_AuditLogs, L("AuditLogs"), multiTenancySides: MultiTenancySides.Host | MultiTenancySides.Tenant);
 
         context.CreatePermission(PermissionNames.Pages_GlobalBlackLists, L("GlobalBlackLists"), multiTenancySides: MultiTenancySides.Host);
         context.CreatePermission(PermissionNames.Pages_GlobalBlackLists_Create, L("CreateGlobalBlackLists"), multiTenancySides: MultiTenancySides.Host);

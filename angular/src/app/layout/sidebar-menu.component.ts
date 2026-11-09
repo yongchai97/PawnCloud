@@ -36,12 +36,6 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
             const primaryUrlSegmentGroup = this.router.parseUrl(currentUrl).root.children[PRIMARY_OUTLET];
             if (primaryUrlSegmentGroup) {
                 this.activateMenuItems('/' + primaryUrlSegmentGroup.toString());
-                // Auto-close all parent menus with children
-                this.menuItems.forEach(item => {
-                    if (item.children) {
-                        item.isCollapsed = true;
-                    }
-                });
             }
         });
     }
@@ -66,6 +60,7 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
                 new MenuItem(this.l('Tenants'), '/app/tenants', 'fas fa-building', 'Pages.Tenants'),
                 new MenuItem(this.l('Users'), '/app/users', 'fas fa-users', 'Pages.Users'),
                 new MenuItem(this.l('Seeder'), '/app/admin/seeder', 'fas fa-database', null),
+                new MenuItem('Audit Logs', '/app/admin/audit-logs', 'fas fa-history', 'Pages.AuditLogs'),
             ]),
         ];
     }
@@ -117,6 +112,9 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
 
     activateMenuItem(item: MenuItem): void {
         item.isActive = !!item.route;
+        if (item.children) {
+            item.isCollapsed = false;
+        }
         this.activatedMenuItems.push(item);
         if (item.parentId) {
             this.activateMenuItem(this.menuItemsMap[item.parentId]);

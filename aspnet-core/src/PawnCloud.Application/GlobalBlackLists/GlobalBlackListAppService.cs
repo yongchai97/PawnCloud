@@ -106,6 +106,7 @@ namespace PawnCloud.GlobalBlackLists
                 return;
             }
             var listing = new GlobalBlackList(input.FullName, input.banReason);
+            listing.TenantId = AbpSession.TenantId;
             await _repository.InsertAsync(listing);
         }
         private async Task Edit(CreateOrEditGlobalBlackListDto input)

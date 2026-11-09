@@ -124,6 +124,12 @@ import { GeneralSetupComponent } from './admin/general-setup/general-setup.compo
                                 loadChildren: () => import('./admin/seeder/seeder.module').then((m) => m.SeederModule),
                                 canActivate: [AppRouteGuard],
                             },
+                            {
+                                path: 'audit-logs',
+                                loadComponent: () => import('./admin/audit-logs/audit-logs.component').then((m) => m.AuditLogsComponent),
+                                data: { permission: 'Pages.AuditLogs' },
+                                canActivate: [AppRouteGuard],
+                            },
                         ],
                     },
                     {

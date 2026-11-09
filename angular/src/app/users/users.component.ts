@@ -7,6 +7,7 @@ import { UserServiceProxy, UserDto, UserDtoPagedResultDto } from '@shared/servic
 import { CreateUserDialogComponent } from './create-user/create-user-dialog.component';
 import { EditUserDialogComponent } from './edit-user/edit-user-dialog.component';
 import { ResetPasswordDialogComponent } from './reset-password/reset-password.component';
+import { UserOutletDialogComponent } from './user-outlet/user-outlet-dialog.component';
 import { Table, TableModule } from 'primeng/table';
 import { LazyLoadEvent, PrimeTemplate } from 'primeng/api';
 import { ActivatedRoute } from '@angular/router';
@@ -51,6 +52,16 @@ export class UsersComponent extends PagedListingComponentBase<UserDto> {
 
     public resetPassword(user: UserDto): void {
         this.showResetPasswordUserDialog(user.id);
+    }
+
+    public manageUserOutlets(user: UserDto): void {
+        this._modalService.show(UserOutletDialogComponent, {
+            class: 'modal-lg',
+            initialState: {
+                userId: user.id,
+                userName: user.userName,
+            },
+        });
     }
 
     clearFilters(): void {

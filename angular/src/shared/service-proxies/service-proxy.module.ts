@@ -6,6 +6,7 @@ import * as ApiServiceProxies from './service-proxies';
 import { LookupServiceProxy } from './lookup-service-proxy';
 import { CustomerPictureServiceProxy } from './customer-picture-service-proxy';
 import { OutletServiceProxy } from './outlet-service-proxy';
+import { AuditLogServiceProxy } from './audit-log-service-proxy';
 
 @NgModule({
     providers: [
@@ -34,6 +35,8 @@ import { OutletServiceProxy } from './outlet-service-proxy';
         ApiServiceProxies.GlobalBlackListServiceProxy,
         ApiServiceProxies.GlobalBlackListRequestServiceProxy,
         ApiServiceProxies.PrivateBlackListServiceProxy,
+        ApiServiceProxies.UserOutletServiceProxy,
+        AuditLogServiceProxy,
         OutletServiceProxy,
         LookupServiceProxy,
         CustomerPictureServiceProxy,

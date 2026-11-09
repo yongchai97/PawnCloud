@@ -61,6 +61,7 @@ namespace PawnCloud.ItemListings
                 return;
             }
             var listing = new ItemListing(input.code,input.description,input.category);
+            listing.TenantId = AbpSession.TenantId;
             await _repository.InsertAsync(listing);
         }
         private async Task Edit(CreateOrEditItemListingDto input)

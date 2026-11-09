@@ -15,6 +15,7 @@ using PawnCloud.PawnItems;
 using PawnCloud.PawnTicketPayments;
 using PawnCloud.PawnTickets.Dto;
 using PawnCloud.SharedFunctions;
+using PawnCloud.UserOutlets;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -34,6 +35,7 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
     private readonly IRepository<CustomerCDD> _CustomerCDD;
     private readonly IRepository<PawnTicketPayment> _PawnTicketPayment;
     private readonly IRepository<PawnTicketDocument> _PawnTicketDocument;
+    private readonly IRepository<UserOutlet> _UserOutlet;
 
     public PawnTicketAppService(
         IRepository<PawnTicket, int> repository,
@@ -45,7 +47,8 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
         IRepository<GeneralSetupTable> generalSetupTable,
         IRepository<CustomerCDD> customerCDDRepository,
         IRepository<PawnTicketPayment> pawnTicketPaymentRepository,
-        IRepository<PawnTicketDocument> pawnTicketDocumentRepository)
+        IRepository<PawnTicketDocument> pawnTicketDocumentRepository,
+        IRepository<UserOutlet> UserOutlet)
     {
         _repository = repository;
         _PawnItem = pawnItemRepository;
@@ -57,11 +60,13 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
         _CustomerCDD = customerCDDRepository;
         _PawnTicketPayment = pawnTicketPaymentRepository;
         _PawnTicketDocument = pawnTicketDocumentRepository;
+        _UserOutlet = UserOutlet;
     }
 
     public async Task<PagedResultDto<PawnTicketDto>> GetAll(PagedPawnTicketResultRequestDto input)
     {
-        //await PermissionChecker.AuthorizeAsync(PermissionNames.Pages_PawnTickets);
+        var userOutlet = await _UserOutlet.GetAll().Where(x => x.User == AbpSession.UserId).ToListAsync();
+        var outletList = userOutlet.Select(y => y.GeneralSetup).ToList();
 
         var query = _repository.GetAll()
             .WhereIf(!string.IsNullOrWhiteSpace(input.Filter),
@@ -70,7 +75,7 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
         var totalCount = await query.CountAsync();
 
         var entities = await query.OrderByDescending(p => p.CreationTime).PageBy(input).ToListAsync();
-
+        entities = entities.Where(x=> outletList.Contains(x.GeneralSetup)).ToList();
         var dtos = ObjectMapper.Map<List<PawnTicketDto>>(entities);
 
         return new PagedResultDto<PawnTicketDto>(totalCount, dtos);
@@ -78,14 +83,16 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
 
     public async Task<GetPawnTicketForEditOutput> GetViaIdForEdit(EntityDto<int> input)
     {
-        //await PermissionChecker.AuthorizeAsync(PermissionNames.Pages_PawnTickets);
+        var userOutlet = await _UserOutlet.GetAll().Where(x => x.User == AbpSession.UserId).ToListAsync();
+        var outletList = userOutlet.Select(y => y.GeneralSetup).ToList();
         var entity = await _repository.GetAsync(input.Id);
         CreateOrEditPawnTicketDto dto = new CreateOrEditPawnTicketDto();
-        if (entity != null) 
+
+        if (entity != null && outletList.Contains(entity.GeneralSetup)) 
         {
             dto = new CreateOrEditPawnTicketDto(entity.Id, entity.TicketNo, entity.Customer, entity.weight, entity.value,
     entity.pledgedDate, entity.expiryDate, entity.amount, entity.monthlyCustody, entity.serviceCharge,
-    entity.slotNumber, entity.GeneralSetup, entity.amountPerGram);
+    entity.slotNumber, entity.GeneralSetup, entity.amountPerGram, entity.discount);
         }
         return new GetPawnTicketForEditOutput { PawnTicket = dto };
     }
@@ -134,6 +141,7 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
                 entity.slotNumber = input.slotNumber;
                 entity.GeneralSetup = input.GeneralSetup;
                 entity.amountPerGram = input.amountPerGram;
+                entity.discount = input.discount;
 
                 await _repository.UpdateAsync(entity);
             }
@@ -144,7 +152,7 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
             //await PermissionChecker.AuthorizeAsync(PermissionNames.Pages_PawnTickets_Create);
             var entity = new PawnTicket(input.TicketNo, input.Customer, input.weight, input.value,
     input.pledgedDate, input.expiryDate, input.amount, input.monthlyCustody, input.serviceCharge,
-    input.slotNumber, input.GeneralSetup, input.amountPerGram);
+    input.slotNumber, input.GeneralSetup, input.amountPerGram, input.discount);
             entity.TenantId = AbpSession.TenantId;
             await _repository.InsertAndGetIdAsync(entity);
             return entity.Id;
@@ -162,9 +170,11 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
 
     public async Task<ListResultDto<PawnTicketLookupDto>> GetPawnTicketsForLookup()
     {
-        //await PermissionChecker.AuthorizeAsync(PermissionNames.Pages_PawnTickets);
+        var userOutlet = await _UserOutlet.GetAll().Where(x => x.User == AbpSession.UserId).ToListAsync();
+        var outletList = userOutlet.Select(y => y.GeneralSetup).ToList();
         var tickets = await _repository.GetAllListAsync();
         var lookup = tickets
+            .Where(x=> outletList.Contains(x.GeneralSetup))
             .OrderByDescending(p => p.CreationTime)
             .Select(p => new PawnTicketLookupDto
             {
@@ -231,6 +241,7 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
                 ticket.slotNumber = input.Ticket.slotNumber;
                 ticket.GeneralSetup = input.Ticket.GeneralSetup;
                 ticket.amountPerGram = input.Ticket.amountPerGram;
+                ticket.discount = input.Ticket.discount;
                 await _repository.UpdateAsync(ticket);
             }
         }
@@ -240,7 +251,7 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
             ticket = new PawnTicket(input.Ticket.TicketNo, input.Ticket.Customer, input.Ticket.weight, 
                 input.Ticket.value, input.Ticket.pledgedDate, input.Ticket.expiryDate, 
                 input.Ticket.amount, input.Ticket.monthlyCustody, input.Ticket.serviceCharge,
-                input.Ticket.slotNumber, input.Ticket.GeneralSetup, input.Ticket.amountPerGram);
+                input.Ticket.slotNumber, input.Ticket.GeneralSetup, input.Ticket.amountPerGram, input.Ticket.discount);
             ticket.TenantId = AbpSession.TenantId;
             input.Ticket.Id = await _repository.InsertAndGetIdAsync(ticket);
         }
@@ -262,6 +273,7 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
                 itemDto.ItemStatus,itemDto.description,itemDto.GoldType,itemDto.weight,itemDto.length,itemDto.brand,
                 itemDto.IncludedItem,itemDto.includedItemWeight,itemDto.includedItemValue);
             item.PawnTicket = ticket.Id;
+            item.TenantId = AbpSession.TenantId;
             await _PawnItem.InsertAsync(item);
         }
         return "Pawn Ticket and Items created successfully";

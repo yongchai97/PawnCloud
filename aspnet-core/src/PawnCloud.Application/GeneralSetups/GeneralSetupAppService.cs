@@ -1,13 +1,14 @@
 ﻿using Abp.Application.Services;
 using Abp.Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
+using PawnCloud.GeneralSetups.Dto;  // Add this
 using PawnCloud.ItemListings;
+using PawnCloud.UserOutlets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using PawnCloud.GeneralSetups.Dto;  // Add this
 
 namespace PawnCloud.GeneralSetups
 {
@@ -15,21 +16,28 @@ namespace PawnCloud.GeneralSetups
     {
         private readonly IRepository<GeneralSetup> _repository;
         private readonly IRepository<GeneralSetupTable> _repositoryTable;
+        private readonly IRepository<UserOutlet> _UserOutlet;
 
-        public GeneralSetupAppService(IRepository<GeneralSetup> repository, IRepository<GeneralSetupTable> repositoryTable)
+        public GeneralSetupAppService(IRepository<GeneralSetup> repository, IRepository<GeneralSetupTable> repositoryTable,
+            IRepository<UserOutlet> UserOutlet)
         {
             _repository = repository;
             _repositoryTable = repositoryTable;
+            _UserOutlet = UserOutlet;
         }
         public async Task<GeneralSetup> GetGeneralSetup()
         {
-            var list = await _repository.GetAllListAsync();
+            var userOutlet = await _UserOutlet.GetAll().Where(x => x.User == AbpSession.UserId).ToListAsync();
+            var outletList = userOutlet.Select(y => y.GeneralSetup).ToList();
+
+            var list = await _repository.GetAllListAsync(x=> outletList.Contains(x.Id));
             var setup = list.FirstOrDefault();
             return setup;
         }
-
+        //this must be equipped with high level control
         public async Task<List<GeneralSetup>> GetAll()
         {
+
             return await _repository.GetAll().OrderBy(x => x.outletName).ToListAsync();
         }
 
@@ -129,6 +137,11 @@ namespace PawnCloud.GeneralSetups
 
         public async Task<List<GeneralSetupTable>> GetGeneralSetupTable(int id)
         {
+            var userOutlet = await _UserOutlet.GetAll().Where(x => x.User == AbpSession.UserId && x.GeneralSetup == id).ToListAsync();
+            if(userOutlet == null)
+            {
+                return new List<GeneralSetupTable>();
+            }
             var setupTable = await _repositoryTable.GetAll().Where(x => x.GeneralSetup == id).ToListAsync();
             return setupTable;
         }

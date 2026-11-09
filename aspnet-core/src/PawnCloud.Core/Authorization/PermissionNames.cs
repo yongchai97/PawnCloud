@@ -50,4 +50,6 @@ public static class PermissionNames
 
 
     public const string Pages_MiscFunctions = "Pages.MiscFunctions";
+
+    public const string Pages_AuditLogs = "Pages.AuditLogs";
 }

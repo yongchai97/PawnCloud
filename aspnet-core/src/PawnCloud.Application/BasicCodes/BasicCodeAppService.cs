@@ -25,7 +25,6 @@ public class BasicCodeAppService : ApplicationService, IBasicCodeAppService
 
     public async Task<PagedResultDto<BasicCodeDto>> GetAll(PagedBasicCodeResultRequestDto input)
     {
-        await PermissionChecker.AuthorizeAsync(PermissionNames.Pages_BasicCodes);
 
         var query = _repository.GetAll()
             .WhereIf(!string.IsNullOrWhiteSpace(input.Filter),

@@ -8,6 +8,7 @@ using PawnCloud.Authorization;
 using PawnCloud.CustomerCDDs;
 using PawnCloud.CustomerPictures;
 using PawnCloud.Customers.Dto;
+using PawnCloud.UserOutlets;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -21,28 +22,34 @@ public class CustomerAppService : ApplicationService, ICustomerAppService
     private readonly IRepository<CustomerOutlet> _customerOutletRepository;
     private readonly IRepository<CustomerPicture> _CustomerPicture;
     private readonly IRepository<CustomerCDD> _CustomerCDD;
+    private readonly IRepository<UserOutlet> _UserOutlet;
 
     public CustomerAppService(IRepository<Customer, int> repository, IRepository<CustomerOutlet> customerOutletRepository,
-        IRepository<CustomerPicture> CustomerPicture, IRepository<CustomerCDD> CustomerCDD)
+        IRepository<CustomerPicture> CustomerPicture, IRepository<CustomerCDD> CustomerCDD, IRepository<UserOutlet> UserOutlet)
     {
         _repository = repository;
         _customerOutletRepository = customerOutletRepository;
         _CustomerPicture = CustomerPicture;
         _CustomerCDD = CustomerCDD;
+        _UserOutlet = UserOutlet;
     }
 
     public async Task<PagedResultDto<CustomerDto>> GetAll(PagedCustomerResultRequestDto input)
     {
-        await PermissionChecker.AuthorizeAsync(PermissionNames.Pages_Customers);
-
+        var userOutlet = await _UserOutlet.GetAll().Where(x=>x.User == AbpSession.UserId).ToListAsync();
+        var outletList = userOutlet.Select(y=>y.GeneralSetup).ToList();
+        var customerOutlets = await _customerOutletRepository.GetAll().Where(x=> outletList.Contains(x.GeneralSetup)).Select(y=>y.Customer).ToListAsync();
         var query = _repository.GetAll()
             .WhereIf(!string.IsNullOrWhiteSpace(input.Filter),
-                c => c.CustomerNo.Contains(input.Filter) || c.FullName.Contains(input.Filter) || (c.Email != null && c.Email.Contains(input.Filter)));
+                c => c.CustomerNo.Contains(input.Filter) 
+                || c.FullName.Contains(input.Filter) 
+                || (c.Email != null && c.Email.Contains(input.Filter))
+                );
 
         var totalCount = await query.CountAsync();
 
         var entities = await query.OrderByDescending(c => c.CreationTime).PageBy(input).ToListAsync();
-
+        entities = entities.Where(x=> customerOutlets.Contains(x.Id)).ToList();
         var dtos = ObjectMapper.Map<List<CustomerDto>>(entities);
 
         return new PagedResultDto<CustomerDto>(totalCount, dtos);
@@ -50,8 +57,16 @@ public class CustomerAppService : ApplicationService, ICustomerAppService
 
     public async Task<GetCustomerForEditOutput> GetViaIdForEdit(EntityDto<int> input)
     {
-        await PermissionChecker.AuthorizeAsync(PermissionNames.Pages_Customers);
+        var userOutlet = await _UserOutlet.GetAll().Where(x => x.User == AbpSession.UserId).ToListAsync();
+        var outletList = userOutlet.Select(y => y.GeneralSetup).ToList();
+        var customerOutlets = await _customerOutletRepository.GetAll().Where(x => outletList.Contains(x.GeneralSetup)
+        &&x.Customer == input.Id).Select(y => y.Customer).ToListAsync();
+        if(customerOutlets == null)
+        {
+            return new GetCustomerForEditOutput();
+        }
         var entity = await _repository.GetAsync(input.Id);
+
         var dto = ObjectMapper.Map<CreateOrEditCustomerDto>(entity);
         return new GetCustomerForEditOutput { Customer = dto };
     }
@@ -75,10 +90,9 @@ public class CustomerAppService : ApplicationService, ICustomerAppService
             return entity.Id;
         }
     }
-
+    [AbpAuthorize(PermissionNames.Pages_Customers_Delete)]
     public async Task Delete(EntityDto<int> input)
     {
-        await PermissionChecker.AuthorizeAsync(PermissionNames.Pages_Customers_Delete);
         await _CustomerPicture.DeleteAsync(p => p.Customer == input.Id);
         await _customerOutletRepository.DeleteAsync(co => co.Customer == input.Id);
         await _CustomerCDD.DeleteAsync(cdd => cdd.Customer == input.Id);
@@ -106,7 +120,11 @@ public class CustomerAppService : ApplicationService, ICustomerAppService
     }
     public async Task<List<CustomerOutletDto>> GetCustomerOutletViaCustomerId(EntityDto<int> input)
     {
-        var customerOutlets = await _customerOutletRepository.GetAllListAsync(co => co.Customer == input.Id);
+        var userOutlet = await _UserOutlet.GetAll().Where(x => x.User == AbpSession.UserId).ToListAsync();
+        var outletList = userOutlet.Select(y => y.GeneralSetup).ToList();
+        
+        var customerOutlets = await _customerOutletRepository.GetAllListAsync(co => co.Customer == input.Id
+        && outletList.Contains(co.GeneralSetup));
         List<CustomerOutletDto> listResultDto = new List<CustomerOutletDto>();
         foreach (var customer in customerOutlets) 
         {
@@ -140,6 +158,7 @@ public class CustomerAppService : ApplicationService, ICustomerAppService
             return entity.Id;
         }
     }
+    [AbpAuthorize(PermissionNames.Pages_Customers_Delete)]
     public async Task DeleteCustomerOutlet(int id)
     {
         await _customerOutletRepository.DeleteAsync(id);
