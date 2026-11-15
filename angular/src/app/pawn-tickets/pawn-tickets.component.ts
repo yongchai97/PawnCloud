@@ -71,6 +71,7 @@ export class PawnTicketsComponent extends AppComponentBase {
     private pendingInitialLoads = 9;
     private customerRiskRequestId = 0;
     private readonly highRiskCustomerMessage = 'High risk profile customer without approval or customer with missing CDD detected, operation cancelled';
+    private readonly ticketSaveSuccessMessage = 'Pawn Ticket and Items created successfully';
     @ViewChild('editor') editor!: TemplateRef<any>;
 
     constructor(
@@ -265,9 +266,12 @@ export class PawnTicketsComponent extends AppComponentBase {
     }
 
     private saveTicketAndItems(payload: CreatePawnTicketWithItemsDto): void {
-        this.ticketService.createTicketAndPawnItem(payload).pipe(finalize(() => (this.saving = false))).subscribe(
+        this.ticketService.createTicketAndPawnItem(payload).pipe(finalize(() => {
+            this.saving = false;
+            this.cd.detectChanges();
+        })).subscribe(
             (result) => {
-                if (!result || result.startsWith('Error:')) {
+                if (result !== this.ticketSaveSuccessMessage) {
                     this.notify.error(result || 'Unable to save pawn ticket and items.');
                     return;
                 }
@@ -275,7 +279,7 @@ export class PawnTicketsComponent extends AppComponentBase {
                 this.modal.hide();
                 this.loadTickets();
             },
-            () => this.notify.error('Unable to save pawn ticket and items.')
+            (error) => this.notify.error(error?.error?.error?.message || error?.error?.message || error?.message || 'Unable to save pawn ticket and items.')
         );
     }
 

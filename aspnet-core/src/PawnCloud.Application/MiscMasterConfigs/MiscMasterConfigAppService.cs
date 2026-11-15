@@ -1,5 +1,6 @@
 using Abp.Application.Services;
 using Abp.Application.Services.Dto;
+using Abp.Auditing;
 using Abp.Domain.Repositories;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +9,7 @@ using PawnCloud.MiscMasterConfigs.Dto;
 
 namespace PawnCloud.MiscMasterConfigs;
 
+[DisableAuditing]
 public class MiscMasterConfigAppService : ApplicationService, IMiscMasterConfigAppService
 {
     private readonly IRepository<MiscMasterConfig, int> _repository;

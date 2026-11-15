@@ -38,6 +38,11 @@ namespace PawnCloud.AuthorizedPeoples
             var listing = await _repository.FirstOrDefaultAsync(id);
             return listing;
         }
+        public async Task<AuthorizedPeople> GetByCustomerId(int customerId)
+        {
+            var listing = await _repository.FirstOrDefaultAsync(x => x.Customer == customerId);
+            return listing;
+        }
         public async Task CreateOrEdit(CreateOrEditAuthorizedPeopleDto input)
         {
 

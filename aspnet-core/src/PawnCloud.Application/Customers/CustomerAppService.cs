@@ -38,7 +38,9 @@ public class CustomerAppService : ApplicationService, ICustomerAppService
     {
         var userOutlet = await _UserOutlet.GetAll().Where(x=>x.User == AbpSession.UserId).ToListAsync();
         var outletList = userOutlet.Select(y=>y.GeneralSetup).ToList();
-        var customerOutlets = await _customerOutletRepository.GetAll().Where(x=> outletList.Contains(x.GeneralSetup)).Select(y=>y.Customer).ToListAsync();
+        var allCustomerOutlets = await _customerOutletRepository.GetAll().ToListAsync();
+        var customerId = allCustomerOutlets.Select(y => y.Customer).ToList() ;
+        var customerOutlets = allCustomerOutlets.Where(x=> outletList.Contains(x.GeneralSetup)).Select(y=>y.Customer).ToList();
         var query = _repository.GetAll()
             .WhereIf(!string.IsNullOrWhiteSpace(input.Filter),
                 c => c.CustomerNo.Contains(input.Filter) 
@@ -49,7 +51,8 @@ public class CustomerAppService : ApplicationService, ICustomerAppService
         var totalCount = await query.CountAsync();
 
         var entities = await query.OrderByDescending(c => c.CreationTime).PageBy(input).ToListAsync();
-        entities = entities.Where(x=> customerOutlets.Contains(x.Id)).ToList();
+        var customerIdOnly = entities.Select(x => x.Id).ToList();
+        entities = entities.Where(x=>!customerId.Contains(x.Id) ? true : customerOutlets.Contains(x.Id)).ToList();
         var dtos = ObjectMapper.Map<List<CustomerDto>>(entities);
 
         return new PagedResultDto<CustomerDto>(totalCount, dtos);
@@ -59,13 +62,16 @@ public class CustomerAppService : ApplicationService, ICustomerAppService
     {
         var userOutlet = await _UserOutlet.GetAll().Where(x => x.User == AbpSession.UserId).ToListAsync();
         var outletList = userOutlet.Select(y => y.GeneralSetup).ToList();
-        var customerOutlets = await _customerOutletRepository.GetAll().Where(x => outletList.Contains(x.GeneralSetup)
-        &&x.Customer == input.Id).Select(y => y.Customer).ToListAsync();
-        if(customerOutlets == null)
+        var allCustomerOutlets = await _customerOutletRepository.GetAll().ToListAsync();
+        var customerId = allCustomerOutlets.Select(y => y.Customer).ToList();
+
+        var customerOutlets = allCustomerOutlets.Where(x => outletList.Contains(x.GeneralSetup)
+        &&x.Customer == input.Id).Select(y => y.Customer).ToList();
+        var entity = await _repository.FirstOrDefaultAsync(x=>!customerId.Contains(input.Id)? input.Id == x.Id : (input.Id == x.Id && customerOutlets.Contains(input.Id)));
+        if (entity == null)
         {
             return new GetCustomerForEditOutput();
         }
-        var entity = await _repository.GetAsync(input.Id);
 
         var dto = ObjectMapper.Map<CreateOrEditCustomerDto>(entity);
         return new GetCustomerForEditOutput { Customer = dto };

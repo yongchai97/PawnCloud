@@ -8,8 +8,8 @@ public class PawnCloudAuthorizationProvider : AuthorizationProvider
 {
     public override void SetPermissions(IPermissionDefinitionContext context)
     {
-        context.CreatePermission(PermissionNames.Pages_Users, L("Users"));
-        context.CreatePermission(PermissionNames.Pages_Users_Activation, L("UsersActivation"));
+        var users = context.CreatePermission(PermissionNames.Pages_Users, L("Users"));
+        users.CreateChildPermission(PermissionNames.Pages_Users_Activation, L("UsersActivation"));
         context.CreatePermission(PermissionNames.Pages_Roles, L("Roles"));
         context.CreatePermission(PermissionNames.Pages_Tenants, L("Tenants"), multiTenancySides: MultiTenancySides.Host);
 
@@ -41,19 +41,19 @@ public class PawnCloudAuthorizationProvider : AuthorizationProvider
         context.CreatePermission(PermissionNames.Pages_MiscFunctions, L("MiscFunctions"));
         context.CreatePermission(PermissionNames.Pages_AuditLogs, L("AuditLogs"), multiTenancySides: MultiTenancySides.Host | MultiTenancySides.Tenant);
 
-        context.CreatePermission(PermissionNames.Pages_GlobalBlackLists, L("GlobalBlackLists"), multiTenancySides: MultiTenancySides.Host);
-        context.CreatePermission(PermissionNames.Pages_GlobalBlackLists_Create, L("CreateGlobalBlackLists"), multiTenancySides: MultiTenancySides.Host);
-        context.CreatePermission(PermissionNames.Pages_GlobalBlackLists_Delete, L("DeleteGlobalBlackLists"), multiTenancySides: MultiTenancySides.Host);
+        var globalBlackList = context.CreatePermission(PermissionNames.Pages_GlobalBlackLists, L("GlobalBlackLists"), multiTenancySides: MultiTenancySides.Host);
+        globalBlackList.CreateChildPermission(PermissionNames.Pages_GlobalBlackLists_Create, L("CreateGlobalBlackLists"), multiTenancySides: MultiTenancySides.Host);
+        globalBlackList.CreateChildPermission(PermissionNames.Pages_GlobalBlackLists_Delete, L("DeleteGlobalBlackLists"), multiTenancySides: MultiTenancySides.Host);
 
-        context.CreatePermission(PermissionNames.Pages_GlobalBlackListRequests, L("GlobalBlackListRequests"));
-        context.CreatePermission(PermissionNames.Pages_GlobalBlackListRequests_Create, L("CreateGlobalBlackListRequests"));
-        context.CreatePermission(PermissionNames.Pages_GlobalBlackListRequests_Edit, L("EditGlobalBlackListRequests"));
-        context.CreatePermission(PermissionNames.Pages_GlobalBlackListRequests_Delete, L("DeleteGlobalBlackListRequests"));
+        var globalBlackListRequests = context.CreatePermission(PermissionNames.Pages_GlobalBlackListRequests, L("GlobalBlackListRequests"));
+        globalBlackListRequests.CreateChildPermission(PermissionNames.Pages_GlobalBlackListRequests_Create, L("CreateGlobalBlackListRequests"));
+        globalBlackListRequests.CreateChildPermission(PermissionNames.Pages_GlobalBlackListRequests_Edit, L("EditGlobalBlackListRequests"));
+        globalBlackListRequests.CreateChildPermission(PermissionNames.Pages_GlobalBlackListRequests_Delete, L("DeleteGlobalBlackListRequests"));
 
-        context.CreatePermission(PermissionNames.Pages_PrivateBlackLists, L("PrivateBlackLists"));
-        context.CreatePermission(PermissionNames.Pages_PrivateBlackLists_Create, L("CreatePrivateBlackLists"));
-        context.CreatePermission(PermissionNames.Pages_PrivateBlackLists_Edit, L("EditPrivateBlackLists"));
-        context.CreatePermission(PermissionNames.Pages_PrivateBlackLists_Delete, L("DeletePrivateBlackLists"));
+        var privateBlackLists = context.CreatePermission(PermissionNames.Pages_PrivateBlackLists, L("PrivateBlackLists"));
+        privateBlackLists.CreateChildPermission(PermissionNames.Pages_PrivateBlackLists_Create, L("CreatePrivateBlackLists"));
+        privateBlackLists.CreateChildPermission(PermissionNames.Pages_PrivateBlackLists_Edit, L("EditPrivateBlackLists"));
+        privateBlackLists.CreateChildPermission(PermissionNames.Pages_PrivateBlackLists_Delete, L("DeletePrivateBlackLists"));
 
     }
 

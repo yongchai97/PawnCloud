@@ -45,16 +45,16 @@ namespace PawnCloud.RedeemRecords
             var listing = await _RedeemRecord.FirstOrDefaultAsync(id);
             return listing;
         }
-        public async Task CreateOrEdit(CreateOrEditRedeemRecordDto input)
+        public async Task<ReturnStringAndIdDto> CreateOrEdit(CreateOrEditRedeemRecordDto input)
         {
 
             if (input.Id == null)
             {
-                await Create(input);
+                return await Create(input);
             }
             else
             {
-                await Edit(input);
+                return await Edit(input);
             }
         }
         public async Task Delete(EntityDto input)
@@ -102,12 +102,12 @@ namespace PawnCloud.RedeemRecords
         */
         public async Task<CreateOrEditPawnTicketDto> GetTheRelatedPawnTicketViaTicketNumber(CheckIfAuthorized input)
         {
-            var authorizedPeople = await _AuthorizedPeople.GetAll().Where(x => x.NRIC == input.NRIC).Select(y => y.Customer).ToListAsync();
-            var anotherCustomerLists = await _Customer.GetAll().Where(x => x.NRIC == input.NRIC || authorizedPeople.Contains(x.Id)).Select(y => y.Id).ToListAsync();
+            //var authorizedPeople = await _AuthorizedPeople.GetAll().Where(x => x.NRIC == input.NRIC).Select(y => y.Customer).ToListAsync();
+            //var anotherCustomerLists = await _Customer.GetAll().Where(x => x.NRIC == input.NRIC || authorizedPeople.Contains(x.Id)).Select(y => y.Id).ToListAsync();
 
             CreateOrEditPawnTicketDto createOrEditPawnTicketDto = new CreateOrEditPawnTicketDto();
 
-            var pawnTicket = await _PawnTicket.FirstOrDefaultAsync(x=>x.TicketNo == input.ticketNumber && anotherCustomerLists.Contains((int)x.Customer));
+            var pawnTicket = await _PawnTicket.FirstOrDefaultAsync(x=>x.TicketNo == input.ticketNumber);
             if(pawnTicket != null)
             {
                 createOrEditPawnTicketDto = new CreateOrEditPawnTicketDto(pawnTicket.Id,
@@ -117,6 +117,35 @@ namespace PawnCloud.RedeemRecords
                     pawnTicket.GeneralSetup, pawnTicket.amountPerGram, pawnTicket.discount);
             }
             return createOrEditPawnTicketDto;
+        }
+        public async Task<bool> CheckIfPawnTicketValidByAuthorizedPeople(CheckIfAuthorized input)
+        {
+            var authorizedPeople = await _AuthorizedPeople.GetAll().Where(x => x.NRIC == input.NRIC).Select(y => y.Customer).ToListAsync();
+            var anotherCustomerLists = await _Customer.GetAll().Where(x => x.NRIC == input.NRIC || authorizedPeople.Contains(x.Id)).Select(y => y.Id).ToListAsync();
+
+            CreateOrEditPawnTicketDto createOrEditPawnTicketDto = new CreateOrEditPawnTicketDto();
+
+            var pawnTicket = await _PawnTicket.FirstOrDefaultAsync(x => x.TicketNo == input.ticketNumber && anotherCustomerLists.Contains((int)x.Customer));
+            if (pawnTicket != null)
+            {
+                return true;
+            }
+            return false;
+        }
+        public async Task<bool> CheckIfPawnTicketRedeemed(CheckIfAuthorized input)
+        {
+
+            var pawnTicket = await _PawnTicket.FirstOrDefaultAsync(x => x.TicketNo == input.ticketNumber);
+            if (pawnTicket != null)
+            {
+                var redeemRecordTicketChecker = await _RedeemRecordTicket.FirstOrDefaultAsync(x => x.PawnTicket == pawnTicket.Id);
+                if(redeemRecordTicketChecker == null)
+                {
+                    return false;
+                }
+                return true;
+            }
+            return false;
         }
         public async Task<RedeemRecordConsolidated> DynamicCalculateGrandTotal(RedeemRecordConsolidated input)
         {
@@ -141,15 +170,29 @@ namespace PawnCloud.RedeemRecords
             }
             return currentCalculation;
         }
-
-        private async Task Create(CreateOrEditRedeemRecordDto input)
+        public async Task<string> GetNameOfTheAuthorized(CheckIfAuthorized input)
+        {
+            var customer = await _Customer.FirstOrDefaultAsync(x=>x.NRIC == input.NRIC);
+            if(customer != null)
+            {
+                return customer.FullName;
+            }
+            var authorizedPeople = await _AuthorizedPeople.FirstOrDefaultAsync(x=>x.NRIC == input.NRIC);
+            if(authorizedPeople != null)
+            {
+                return authorizedPeople.fullName;
+            }
+            return "";
+        }
+        private async Task<ReturnStringAndIdDto> Create(CreateOrEditRedeemRecordDto input)
         {
             var listing = new RedeemRecord(input.redeemedBy,DateTime.Now,input.numberOfTickets,input.totalAmount,
                 input.totalCustody,input.totalService,input.grandTotal,input.totalDiscount);
             listing.TenantId = AbpSession.TenantId;
-            await _RedeemRecord.InsertAsync(listing);
+            var listingId = await _RedeemRecord.InsertAndGetIdAsync(listing);
+            return new ReturnStringAndIdDto { Id = listingId, message = "Redeem Record Created" };
         }
-        private async Task Edit(CreateOrEditRedeemRecordDto input)
+        private async Task<ReturnStringAndIdDto> Edit(CreateOrEditRedeemRecordDto input)
         {
             var listing = await _RedeemRecord.FirstOrDefaultAsync(x => x.Id == (int)input.Id);
             if (listing != null)
@@ -167,6 +210,7 @@ namespace PawnCloud.RedeemRecords
 
                 await _RedeemRecord.UpdateAsync(listing);
             }
+            return new ReturnStringAndIdDto { Id = listing.Id, message = "Redeem Record Updated" };
         }
     }
 }

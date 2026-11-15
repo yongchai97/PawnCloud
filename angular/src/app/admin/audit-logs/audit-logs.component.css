@@ -218,6 +218,20 @@
     white-space: nowrap;
 }
 
+.audit-parameters-content {
+    background: #f7f9fa;
+    border: 1px solid var(--audit-line);
+    border-radius: 0.4rem;
+    color: var(--audit-ink);
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 0.82rem;
+    max-height: 60vh;
+    overflow: auto;
+    padding: 1rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
 .audit-table-body ::ng-deep .p-datatable-tbody > tr:hover {
     background: #f7fbfd;
 }

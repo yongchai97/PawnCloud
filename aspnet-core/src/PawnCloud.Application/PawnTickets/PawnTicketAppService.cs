@@ -14,6 +14,9 @@ using PawnCloud.GoldTypes;
 using PawnCloud.PawnItems;
 using PawnCloud.PawnTicketPayments;
 using PawnCloud.PawnTickets.Dto;
+using PawnCloud.RedeemRecords;
+using PawnCloud.RedeemRecords.Dto;
+using PawnCloud.RedeemRecordTickets;
 using PawnCloud.SharedFunctions;
 using PawnCloud.UserOutlets;
 using System.Collections.Generic;
@@ -36,6 +39,8 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
     private readonly IRepository<PawnTicketPayment> _PawnTicketPayment;
     private readonly IRepository<PawnTicketDocument> _PawnTicketDocument;
     private readonly IRepository<UserOutlet> _UserOutlet;
+    private readonly IRepository<RedeemRecordTicket> _RedeemRecordTicket;
+    private readonly IRepository<RedeemRecord> _RedeemRecord;
 
     public PawnTicketAppService(
         IRepository<PawnTicket, int> repository,
@@ -48,7 +53,9 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
         IRepository<CustomerCDD> customerCDDRepository,
         IRepository<PawnTicketPayment> pawnTicketPaymentRepository,
         IRepository<PawnTicketDocument> pawnTicketDocumentRepository,
-        IRepository<UserOutlet> UserOutlet)
+        IRepository<UserOutlet> UserOutlet,
+        IRepository<RedeemRecordTicket> RedeemRecordTicket,
+        IRepository<RedeemRecord> RedeemRecord)
     {
         _repository = repository;
         _PawnItem = pawnItemRepository;
@@ -59,8 +66,10 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
         _GeneralSetupTable = generalSetupTable;
         _CustomerCDD = customerCDDRepository;
         _PawnTicketPayment = pawnTicketPaymentRepository;
+        _RedeemRecordTicket = RedeemRecordTicket;
         _PawnTicketDocument = pawnTicketDocumentRepository;
         _UserOutlet = UserOutlet;
+        _RedeemRecord = RedeemRecord;
     }
 
     public async Task<PagedResultDto<PawnTicketDto>> GetAll(PagedPawnTicketResultRequestDto input)
@@ -189,20 +198,27 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
     {
         if(input.Ticket == null)
         {
-            return "";
+            return "Error: Unknown Ticket Input";
         }
         if(input.Ticket.GeneralSetup == null)
         {
-            return "";
+            return "Error: Missing General Setup";
         }
         bool isHighRisk = await IsHighRiskCustomer(input.Ticket.Customer);
         if (isHighRisk)
         {
-            return "";
+            return "Error: High Risk Profile Customer Without Approval, Kindly Seek Approval Before Proceeding.";
         }
         var generalSetup = await _GeneralSetup.FirstOrDefaultAsync(x=>x.Id == input.Ticket.GeneralSetup);
         var dailyGoldPrices = await _DailyGoldPrice.GetAll().Where(x => x.effectiveDate <= input.Ticket.pledgedDate)
             .OrderByDescending(x => x.effectiveDate).FirstOrDefaultAsync();
+        if (generalSetup != null && dailyGoldPrices != null)
+        {
+            if (input.Ticket.amount / input.Ticket.weight > dailyGoldPrices.inputPrice * generalSetup.maximumAllowedPercentage / 100)
+            {
+                return "Error: The amount per weight exceeds the maximum allowed percentage of the daily gold price.";
+            }
+        }
         if (input.Ticket.Id == null)
         {
             if(string.IsNullOrEmpty(input.Ticket.TicketNo))
@@ -255,13 +271,7 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
             ticket.TenantId = AbpSession.TenantId;
             input.Ticket.Id = await _repository.InsertAndGetIdAsync(ticket);
         }
-        if(generalSetup != null && dailyGoldPrices != null)
-        {
-            if(input.Ticket.amount / input.Ticket.weight > dailyGoldPrices.inputPrice * generalSetup.maximumAllowedPercentage / 100)
-            {
-                return "Error: The amount per weight exceeds the maximum allowed percentage of the daily gold price.";
-            }
-        }
+
         if (editingExistingTicket)
         {
             await _PawnItem.DeleteAsync(item => item.PawnTicket == ticket.Id);
@@ -319,5 +329,39 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
             }
         }
         return input.Ticket;
+    }
+    public async Task<List<PawnTicketWithRedeemStatusDto>> GetAllTicketsForCustomer(int? customerId)
+    {
+        List<PawnTicketWithRedeemStatusDto> result = new List<PawnTicketWithRedeemStatusDto>(); 
+        var tickets = await _repository.GetAll().Where(x => x.Customer == customerId).ToListAsync();
+        var allRedeemRecords = await _RedeemRecord.GetAll().ToListAsync();
+        var allRedeemRecordTickets = await _RedeemRecordTicket.GetAll().ToListAsync();
+        foreach (var ticket in tickets)
+        {
+            var redeemRecordTicket = allRedeemRecordTickets.FirstOrDefault(x => x.PawnTicket == ticket.Id);
+            RedeemRecord redeemRecord = null;
+            if (redeemRecordTicket != null)
+            {
+                redeemRecord = allRedeemRecords.FirstOrDefault(x => x.Id == redeemRecordTicket.RedeemRecord);
+            }
+            var ticketDto = new PawnTicketWithRedeemStatusDto(ticket.Id, ticket.TicketNo, ticket.Customer, ticket.weight, ticket.value,
+                ticket.pledgedDate, ticket.expiryDate, ticket.amount, ticket.monthlyCustody, ticket.serviceCharge,
+                ticket.slotNumber, ticket.GeneralSetup, ticket.amountPerGram, ticket.discount);
+            if (redeemRecord != null)
+            {
+                var redeemRecordDto = new CreateOrEditRedeemRecordDto(redeemRecord.Id, redeemRecord.redeemedBy, redeemRecord.redeemedDate,
+                    redeemRecord.numberOfTickets, redeemRecord.totalAmount, redeemRecord.totalCustody,
+                    redeemRecord.totalService, redeemRecord.grandTotal, redeemRecord.totalDiscount);
+                var redeemRecordTicketDto = new RedeemRecordTicketDto
+                {
+                    PawnTicket = redeemRecordTicket.PawnTicket,
+                    RedeemRecord = redeemRecordTicket.RedeemRecord
+                };
+                ticketDto.CreateOrEditRedeemRecordDto = redeemRecordDto;
+                ticketDto.RedeemRecordTicketDto = redeemRecordTicketDto;
+            }
+            result.Add(ticketDto);
+        }
+        return result;
     }
 }

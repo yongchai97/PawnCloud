@@ -1,4 +1,5 @@
 ﻿using Abp.Application.Services;
+using Abp.Auditing;
 using Abp.Domain.Repositories;
 using PawnCloud.BasicCodes;
 using PawnCloud.Countries;
@@ -13,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace PawnCloud.CustomSeeders
 {
+    [DisableAuditing]
     public class CustomSeederAppService : ApplicationService
     {
         private readonly IRepository<BasicCode, int> _BasicCode;

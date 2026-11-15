@@ -1,0 +1,92 @@
+<form autocomplete="off" #authorizedPersonForm="ngForm" novalidate (ngSubmit)="save()">
+    <abp-modal-header [title]="(person.id ? 'Edit' : 'Add') + ' Authorized Person'" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+
+    <div class="modal-body">
+        <abp-validation-summary [control]="authorizedPersonForm"></abp-validation-summary>
+
+        <div class="row g-3">
+            <div class="col-md-6 form-group">
+                <label for="authorizedFullName">Full name <span class="text-danger">*</span></label>
+                <input pInputText class="w-100" id="authorizedFullName" name="fullName" [(ngModel)]="person.fullName" required />
+            </div>
+            <div class="col-md-3 form-group">
+                <label for="authorizedNric">NRIC</label>
+                <input pInputText class="w-100" id="authorizedNric" name="nric" [(ngModel)]="person.nric" (ngModelChange)="readBirthDateFromNric()" />
+            </div>
+            <div class="col-md-3 form-group">
+                <label for="authorizedOldIc">Old IC</label>
+                <input pInputText class="w-100" id="authorizedOldIc" name="oldIC" [(ngModel)]="person.oldIC" />
+            </div>
+
+            <div class="col-md-4 form-group">
+                <label for="authorizedBirthDate">Birth date <span class="text-danger">*</span></label>
+                <input pInputText type="date" class="w-100" id="authorizedBirthDate" name="birthDate" [(ngModel)]="person.birthDate" (ngModelChange)="updateAge()" required />
+            </div>
+            <div class="col-md-2 form-group">
+                <label for="authorizedAge">Age</label>
+                <input pInputText class="w-100" id="authorizedAge" name="age" [ngModel]="person.age" readonly />
+            </div>
+            <div class="col-md-3 form-group">
+                <label for="authorizedGender">Gender <span class="text-danger">*</span></label>
+                <p-dropdown appendTo="body" inputId="authorizedGender" name="gender" [(ngModel)]="person.gender" [options]="genderOptions" optionLabel="displayName" optionValue="id" [showClear]="true" placeholder="Select" styleClass="w-100" required></p-dropdown>
+            </div>
+            <div class="col-md-3 form-group">
+                <label for="authorizedRace">Race <span class="text-danger">*</span></label>
+                <p-dropdown appendTo="body" inputId="authorizedRace" name="race" [(ngModel)]="person.race" [options]="raceOptions" optionLabel="displayName" optionValue="id" [showClear]="true" placeholder="Select" styleClass="w-100" required></p-dropdown>
+            </div>
+
+            <div class="col-md-4 form-group">
+                <label for="authorizedNationality">Nationality <span class="text-danger">*</span></label>
+                <p-dropdown appendTo="body" inputId="authorizedNationality" name="nationality" [(ngModel)]="person.nationality" [options]="nationalityOptions" optionLabel="label" optionValue="value" [filter]="true" [showClear]="true" placeholder="Select" styleClass="w-100" required></p-dropdown>
+            </div>
+            <div class="col-md-4 form-group">
+                <label for="authorizedCountry">Country <span class="text-danger">*</span></label>
+                <p-dropdown appendTo="body" inputId="authorizedCountry" name="country" [(ngModel)]="person.country" [options]="countryOptions" optionLabel="label" optionValue="value" [filter]="true" [showClear]="true" placeholder="Select" styleClass="w-100" required></p-dropdown>
+            </div>
+            <div class="col-md-4 form-group">
+                <label for="authorizedRelationship">Relationship</label>
+                <input pInputText class="w-100" id="authorizedRelationship" name="relationship" [(ngModel)]="person.relationship" />
+            </div>
+
+            <div class="col-md-6 form-group">
+                <label for="authorizedTelephone">Telephone number</label>
+                <input pInputText class="w-100" id="authorizedTelephone" name="telephoneNumber" [(ngModel)]="person.telephoneNumber" />
+            </div>
+            <div class="col-md-6 form-group">
+                <label for="authorizedTown">Town / City</label>
+                <input pInputText class="w-100" id="authorizedTown" name="town" [(ngModel)]="person.town" />
+            </div>
+            <div class="col-12 form-group">
+                <label for="authorizedAddress">Address</label>
+                <input pInputText class="w-100" id="authorizedAddress" name="address" [(ngModel)]="person.address" />
+            </div>
+            <div class="col-md-4 form-group">
+                <label for="authorizedState">State</label>
+                <input pInputText class="w-100" id="authorizedState" name="state" [(ngModel)]="person.state" />
+            </div>
+            <div class="col-md-4 form-group">
+                <label for="authorizedPostcode">Postcode</label>
+                <input pInputText class="w-100" id="authorizedPostcode" name="postcode" [(ngModel)]="person.postcode" />
+            </div>
+            <div class="col-md-4 form-group">
+                <label for="authorizedRemark">Remark</label>
+                <input pInputText class="w-100" id="authorizedRemark" name="remark" [(ngModel)]="person.remark" />
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="authorizedMember" name="member" [(ngModel)]="person.member" />
+                    <label class="form-check-label" for="authorizedMember">Member</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="authorizedBlacklisted" name="blacklisted" [(ngModel)]="person.blacklisted" />
+                    <label class="form-check-label" for="authorizedBlacklisted">Blacklisted</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <abp-modal-footer [saveDisabled]="saving || authorizedPersonForm.invalid" [cancelDisabled]="saving" (onCancelClick)="bsModalRef.hide()"></abp-modal-footer>
+</form>

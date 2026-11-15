@@ -103,7 +103,7 @@ public class RoleAppService : AsyncCrudAppService<Role, RoleDto, int, PagedRoleR
         var permissions = PermissionManager.GetAllPermissions();
 
         return Task.FromResult(new ListResultDto<PermissionDto>(
-            ObjectMapper.Map<List<PermissionDto>>(permissions).OrderBy(p => p.DisplayName).ToList()
+            ObjectMapper.Map<List<PermissionDto>>(permissions).ToList()
         ));
     }
 
@@ -140,7 +140,7 @@ public class RoleAppService : AsyncCrudAppService<Role, RoleDto, int, PagedRoleR
         return new GetRoleForEditOutput
         {
             Role = roleEditDto,
-            Permissions = ObjectMapper.Map<List<FlatPermissionDto>>(permissions).OrderBy(p => p.DisplayName).ToList(),
+            Permissions = ObjectMapper.Map<List<FlatPermissionDto>>(permissions).ToList(),
             GrantedPermissionNames = grantedPermissions.Select(p => p.Name).ToList()
         };
     }

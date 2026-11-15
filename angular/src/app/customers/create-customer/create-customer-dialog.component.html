@@ -424,6 +424,22 @@
                     </div>
                 </div>
             </tab>
+
+            <tab heading="Authorized People">
+                <div class="text-center text-muted py-5">
+                    <i class="fas fa-user-shield fa-2x mb-3"></i>
+                    <h6>Save the customer before adding authorized people</h6>
+                    <p class="small mb-0">Authorized people are linked to a saved customer record.</p>
+                </div>
+            </tab>
+
+            <tab heading="Pawn Ticket">
+                <div class="text-center text-muted py-5">
+                    <i class="fas fa-ticket-alt fa-2x mb-3"></i>
+                    <h6>Save the customer before viewing pawn tickets</h6>
+                    <p class="small mb-0">Pawn tickets are linked to a saved customer record.</p>
+                </div>
+            </tab>
         </tabset>
     </div>
     <abp-modal-footer [saveDisabled]="saving || checkingCDD || customerForm.invalid || isUnderage()" [saveMessage]="isUnderage() ? 'Minimum Age for The Operation is 18 Years Old' : ''" [cancelDisabled]="saving || checkingCDD" (onCancelClick)="bsModalRef.hide()"></abp-modal-footer>

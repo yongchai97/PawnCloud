@@ -76,6 +76,7 @@
                                         <th>Username</th>
                                         <th>{{ 'Service' | localize }}</th>
                                         <th>{{ 'Method' | localize }}</th>
+                                        <th>Parameters</th>
                                         <th>{{ 'Duration' | localize }}</th>
                                         <th>{{ 'ClientIp' | localize }}</th>
                                         <th>{{ 'Exception' | localize }}</th>
@@ -90,13 +91,19 @@
                                         <td><span class="audit-id">{{ record.userName || 'System' }}</span></td>
                                         <td class="audit-service">{{ record.serviceName || '-' }}</td>
                                         <td class="audit-method">{{ record.methodName || '-' }}</td>
+                                        <td>
+                                            <button *ngIf="record.parameters" type="button" class="btn btn-sm btn-outline-secondary" (click)="showParameters(record)">
+                                                <i class="fas fa-code me-1"></i>View
+                                            </button>
+                                            <span *ngIf="!record.parameters">-</span>
+                                        </td>
                                         <td><span class="audit-duration">{{ record.executionDuration }} ms</span></td>
                                         <td>{{ record.clientIpAddress || '-' }}</td>
                                         <td [class.text-danger]="record.exceptionMessage" class="audit-exception">{{ record.exceptionMessage || 'None' }}</td>
                                     </tr>
                                 </ng-template>
                                 <ng-template pTemplate="emptymessage">
-                                    <tr><td colspan="7" class="text-center audit-empty"><i class="fas fa-inbox"></i><span>{{ 'No audit logs found.' | localize }}</span></td></tr>
+                                    <tr><td colspan="8" class="text-center audit-empty"><i class="fas fa-inbox"></i><span>{{ 'No audit logs found.' | localize }}</span></td></tr>
                                 </ng-template>
                             </p-table>
                         </div>

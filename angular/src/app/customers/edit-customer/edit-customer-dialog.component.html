@@ -474,6 +474,92 @@
                     </div>
                 </div>
             </tab>
+
+            <tab heading="Authorized People">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h6 class="mb-1 text-muted">Authorized People</h6>
+                        <p class="text-muted small mb-0">People authorized to act for this customer.</p>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-primary" (click)="addAuthorizedPerson()">
+                        <i class="fas fa-plus me-1"></i>Add authorized person
+                    </button>
+                </div>
+
+                <div *ngIf="authorizedPeople.length; else noAuthorizedPeople" class="table-responsive">
+                    <table class="table table-sm table-striped align-middle">
+                        <thead>
+                            <tr>
+                                <th>Full name</th>
+                                <th>NRIC</th>
+                                <th>Relationship</th>
+                                <th>Telephone</th>
+                                <th>Blacklisted</th>
+                                <th class="text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let person of authorizedPeople">
+                                <td>{{ person.fullName || '-' }}</td>
+                                <td>{{ person.nric || '-' }}</td>
+                                <td>{{ person.relationship || '-' }}</td>
+                                <td>{{ person.telephoneNumber || '-' }}</td>
+                                <td>{{ person.blacklisted ? 'Yes' : 'No' }}</td>
+                                <td class="text-right text-nowrap">
+                                    <button type="button" class="btn btn-sm btn-outline-primary me-2" (click)="editAuthorizedPerson(person)" aria-label="Edit authorized person">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" (click)="deleteAuthorizedPerson(person)" aria-label="Delete authorized person">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <ng-template #noAuthorizedPeople>
+                    <div class="border rounded text-center text-muted py-5">
+                        <i class="fas fa-user-shield fa-lg mb-2"></i>
+                        <div>No authorized people have been added.</div>
+                    </div>
+                </ng-template>
+            </tab>
+
+            <tab heading="Pawn Ticket" (selectTab)="loadPawnTickets()">
+                <div *ngIf="loadingPawnTickets" class="text-center text-muted py-5">
+                    <i class="fas fa-spinner fa-spin fa-lg mb-2"></i>
+                    <div>Loading pawn tickets...</div>
+                </div>
+
+                <div *ngIf="!loadingPawnTickets && pawnTickets.length" class="table-responsive">
+                    <table class="table table-sm table-striped align-middle">
+                        <thead>
+                            <tr>
+                                <th>Ticket No</th>
+                                <th>Pledged date</th>
+                                <th>Redeemed date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let ticket of pawnTickets">
+                                <td>{{ ticket.ticketNo || '-' }}</td>
+                                <td>{{ formatTicketDate(ticket.pledgedDate) }}</td>
+                                <td>{{ isTicketRedeemed(ticket) ? formatTicketDate(ticket.createOrEditRedeemRecordDto.redeemedDate) : '-' }}</td>
+                                <td>
+                                    <span *ngIf="isTicketRedeemed(ticket); else normalTicketStatus" class="text-success font-weight-bold">REDEEMED</span>
+                                    <ng-template #normalTicketStatus><span>NORMAL</span></ng-template>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div *ngIf="!loadingPawnTickets && !pawnTickets.length" class="border rounded text-center text-muted py-5">
+                    <i class="fas fa-ticket-alt fa-lg mb-2"></i>
+                    <div>No pawn tickets have been created for this customer.</div>
+                </div>
+            </tab>
         </tabset>
 
     </div>

@@ -1,4 +1,5 @@
 using Abp.Application.Services.Dto;
+using PawnCloud.RedeemRecords.Dto;
 using System;
 
 namespace PawnCloud.PawnTickets.Dto;
@@ -18,7 +19,6 @@ public class CreateOrEditPawnTicketDto : EntityDto<int?>
     public virtual int? GeneralSetup { get; set; }
     public decimal amountPerGram { get; set; }
     public decimal discount { get; set; }
-
     public CreateOrEditPawnTicketDto() { }
     public CreateOrEditPawnTicketDto(int? id, string ticketNo, int? customer, decimal weight, decimal value,
         DateTime pledgedDate, DateTime expiryDate, decimal amount, decimal monthlyCustody,

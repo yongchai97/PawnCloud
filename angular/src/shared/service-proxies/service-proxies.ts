@@ -220,6 +220,292 @@ export class AuditLogServiceProxy {
 }
 
 @Injectable()
+export class AuthorizedPeopleServiceProxy {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @return OK
+     */
+    getAll(): Observable<AuthorizedPeople[]> {
+        let url_ = this.baseUrl + "/api/services/app/AuthorizedPeople/GetAll";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetAll(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetAll(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<AuthorizedPeople[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<AuthorizedPeople[]>;
+        }));
+    }
+
+    protected processGetAll(response: HttpResponseBase): Observable<AuthorizedPeople[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200.push(AuthorizedPeople.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param id (optional) 
+     * @return OK
+     */
+    getById(id: number | undefined): Observable<AuthorizedPeople> {
+        let url_ = this.baseUrl + "/api/services/app/AuthorizedPeople/GetById?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetById(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetById(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<AuthorizedPeople>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<AuthorizedPeople>;
+        }));
+    }
+
+    protected processGetById(response: HttpResponseBase): Observable<AuthorizedPeople> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = AuthorizedPeople.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param customerId (optional) 
+     * @return OK
+     */
+    getByCustomerId(customerId: number | undefined): Observable<AuthorizedPeople> {
+        let url_ = this.baseUrl + "/api/services/app/AuthorizedPeople/GetByCustomerId?";
+        if (customerId === null)
+            throw new Error("The parameter 'customerId' cannot be null.");
+        else if (customerId !== undefined)
+            url_ += "customerId=" + encodeURIComponent("" + customerId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetByCustomerId(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetByCustomerId(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<AuthorizedPeople>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<AuthorizedPeople>;
+        }));
+    }
+
+    protected processGetByCustomerId(response: HttpResponseBase): Observable<AuthorizedPeople> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = AuthorizedPeople.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    createOrEdit(body: CreateOrEditAuthorizedPeopleDto | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/AuthorizedPeople/CreateOrEdit";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreateOrEdit(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreateOrEdit(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processCreateOrEdit(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param id (optional) 
+     * @return OK
+     */
+    delete(id: number | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/AuthorizedPeople/Delete?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "Id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+            })
+        };
+
+        return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processDelete(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processDelete(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processDelete(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
+@Injectable()
 export class BasicCodeServiceProxy {
     private http: HttpClient;
     private baseUrl: string;
@@ -4741,6 +5027,69 @@ export class PawnTicketServiceProxy {
         }
         return _observableOf(null as any);
     }
+
+    /**
+     * @param customerId (optional) 
+     * @return OK
+     */
+    getAllTicketsForCustomer(customerId: number | undefined): Observable<PawnTicketWithRedeemStatusDto[]> {
+        let url_ = this.baseUrl + "/api/services/app/PawnTicket/GetAllTicketsForCustomer?";
+        if (customerId === null)
+            throw new Error("The parameter 'customerId' cannot be null.");
+        else if (customerId !== undefined)
+            url_ += "customerId=" + encodeURIComponent("" + customerId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetAllTicketsForCustomer(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetAllTicketsForCustomer(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<PawnTicketWithRedeemStatusDto[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<PawnTicketWithRedeemStatusDto[]>;
+        }));
+    }
+
+    protected processGetAllTicketsForCustomer(response: HttpResponseBase): Observable<PawnTicketWithRedeemStatusDto[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200.push(PawnTicketWithRedeemStatusDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
 }
 
 @Injectable()
@@ -5667,6 +6016,758 @@ export class PrivateBlackListServiceProxy {
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
+@Injectable()
+export class RedeemRecordServiceProxy {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @return OK
+     */
+    getAll(): Observable<RedeemRecord[]> {
+        let url_ = this.baseUrl + "/api/services/app/RedeemRecord/GetAll";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetAll(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetAll(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<RedeemRecord[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<RedeemRecord[]>;
+        }));
+    }
+
+    protected processGetAll(response: HttpResponseBase): Observable<RedeemRecord[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200.push(RedeemRecord.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param id (optional) 
+     * @return OK
+     */
+    getById(id: number | undefined): Observable<RedeemRecord> {
+        let url_ = this.baseUrl + "/api/services/app/RedeemRecord/GetById?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetById(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetById(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<RedeemRecord>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<RedeemRecord>;
+        }));
+    }
+
+    protected processGetById(response: HttpResponseBase): Observable<RedeemRecord> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = RedeemRecord.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    createOrEdit(body: CreateOrEditRedeemRecordDto | undefined): Observable<ReturnStringAndIdDto> {
+        let url_ = this.baseUrl + "/api/services/app/RedeemRecord/CreateOrEdit";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreateOrEdit(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreateOrEdit(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<ReturnStringAndIdDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<ReturnStringAndIdDto>;
+        }));
+    }
+
+    protected processCreateOrEdit(response: HttpResponseBase): Observable<ReturnStringAndIdDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ReturnStringAndIdDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param id (optional) 
+     * @return OK
+     */
+    delete(id: number | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/RedeemRecord/Delete?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "Id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+            })
+        };
+
+        return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processDelete(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processDelete(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processDelete(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    getAllRedeemRecordTicket(): Observable<RedeemRecordTicket[]> {
+        let url_ = this.baseUrl + "/api/services/app/RedeemRecord/GetAllRedeemRecordTicket";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetAllRedeemRecordTicket(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetAllRedeemRecordTicket(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<RedeemRecordTicket[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<RedeemRecordTicket[]>;
+        }));
+    }
+
+    protected processGetAllRedeemRecordTicket(response: HttpResponseBase): Observable<RedeemRecordTicket[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200.push(RedeemRecordTicket.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param id (optional) 
+     * @return OK
+     */
+    getAllRedeemRecordTicketWithId(id: number | undefined): Observable<RedeemRecordTicket[]> {
+        let url_ = this.baseUrl + "/api/services/app/RedeemRecord/GetAllRedeemRecordTicketWithId?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetAllRedeemRecordTicketWithId(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetAllRedeemRecordTicketWithId(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<RedeemRecordTicket[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<RedeemRecordTicket[]>;
+        }));
+    }
+
+    protected processGetAllRedeemRecordTicketWithId(response: HttpResponseBase): Observable<RedeemRecordTicket[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200.push(RedeemRecordTicket.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    createRedeemRecordTicket(body: CreateOrEditRedeemRecordTicketDto | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/RedeemRecord/CreateRedeemRecordTicket";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreateRedeemRecordTicket(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreateRedeemRecordTicket(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processCreateRedeemRecordTicket(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param id (optional) 
+     * @return OK
+     */
+    deleteRedeemRecordTicket(id: number | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/RedeemRecord/DeleteRedeemRecordTicket?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "Id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+            })
+        };
+
+        return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processDeleteRedeemRecordTicket(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processDeleteRedeemRecordTicket(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processDeleteRedeemRecordTicket(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param nRIC (optional) 
+     * @param ticketNumber (optional) 
+     * @return OK
+     */
+    getTheRelatedPawnTicketViaTicketNumber(nRIC: string | undefined, ticketNumber: string | undefined): Observable<CreateOrEditPawnTicketDto> {
+        let url_ = this.baseUrl + "/api/services/app/RedeemRecord/GetTheRelatedPawnTicketViaTicketNumber?";
+        if (nRIC === null)
+            throw new Error("The parameter 'nRIC' cannot be null.");
+        else if (nRIC !== undefined)
+            url_ += "NRIC=" + encodeURIComponent("" + nRIC) + "&";
+        if (ticketNumber === null)
+            throw new Error("The parameter 'ticketNumber' cannot be null.");
+        else if (ticketNumber !== undefined)
+            url_ += "ticketNumber=" + encodeURIComponent("" + ticketNumber) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetTheRelatedPawnTicketViaTicketNumber(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetTheRelatedPawnTicketViaTicketNumber(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<CreateOrEditPawnTicketDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<CreateOrEditPawnTicketDto>;
+        }));
+    }
+
+    protected processGetTheRelatedPawnTicketViaTicketNumber(response: HttpResponseBase): Observable<CreateOrEditPawnTicketDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = CreateOrEditPawnTicketDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    checkIfPawnTicketValidByAuthorizedPeople(body: CheckIfAuthorized | undefined): Observable<boolean> {
+        let url_ = this.baseUrl + "/api/services/app/RedeemRecord/CheckIfPawnTicketValidByAuthorizedPeople";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCheckIfPawnTicketValidByAuthorizedPeople(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCheckIfPawnTicketValidByAuthorizedPeople(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<boolean>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<boolean>;
+        }));
+    }
+
+    protected processCheckIfPawnTicketValidByAuthorizedPeople(response: HttpResponseBase): Observable<boolean> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    checkIfPawnTicketRedeemed(body: CheckIfAuthorized | undefined): Observable<boolean> {
+        let url_ = this.baseUrl + "/api/services/app/RedeemRecord/CheckIfPawnTicketRedeemed";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCheckIfPawnTicketRedeemed(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCheckIfPawnTicketRedeemed(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<boolean>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<boolean>;
+        }));
+    }
+
+    protected processCheckIfPawnTicketRedeemed(response: HttpResponseBase): Observable<boolean> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    dynamicCalculateGrandTotal(body: RedeemRecordConsolidated | undefined): Observable<RedeemRecordConsolidated> {
+        let url_ = this.baseUrl + "/api/services/app/RedeemRecord/DynamicCalculateGrandTotal";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processDynamicCalculateGrandTotal(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processDynamicCalculateGrandTotal(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<RedeemRecordConsolidated>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<RedeemRecordConsolidated>;
+        }));
+    }
+
+    protected processDynamicCalculateGrandTotal(response: HttpResponseBase): Observable<RedeemRecordConsolidated> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = RedeemRecordConsolidated.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param nRIC (optional) 
+     * @param ticketNumber (optional) 
+     * @return OK
+     */
+    getNameOfTheAuthorized(nRIC: string | undefined, ticketNumber: string | undefined): Observable<string> {
+        let url_ = this.baseUrl + "/api/services/app/RedeemRecord/GetNameOfTheAuthorized?";
+        if (nRIC === null)
+            throw new Error("The parameter 'nRIC' cannot be null.");
+        else if (nRIC !== undefined)
+            url_ += "NRIC=" + encodeURIComponent("" + nRIC) + "&";
+        if (ticketNumber === null)
+            throw new Error("The parameter 'ticketNumber' cannot be null.");
+        else if (ticketNumber !== undefined)
+            url_ += "ticketNumber=" + encodeURIComponent("" + ticketNumber) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetNameOfTheAuthorized(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetNameOfTheAuthorized(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<string>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<string>;
+        }));
+    }
+
+    protected processGetNameOfTheAuthorized(response: HttpResponseBase): Observable<string> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -7823,6 +8924,161 @@ export interface IAuthenticateResultModel {
     userId: number;
 }
 
+export class AuthorizedPeople implements IAuthorizedPeople {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    tenantId: number | undefined;
+    customer: number | undefined;
+    customerFk: Customer;
+    nric: string | undefined;
+    fullName: string | undefined;
+    address: string | undefined;
+    town: string | undefined;
+    postcode: string | undefined;
+    state: string | undefined;
+    country: number | undefined;
+    telephoneNumber: string | undefined;
+    remark: string | undefined;
+    relationship: string | undefined;
+    race: number | undefined;
+    gender: number | undefined;
+    member: boolean;
+    nationality: number | undefined;
+    birthDate: moment.Moment;
+    age: number;
+    blacklisted: boolean;
+    oldIC: string | undefined;
+
+    constructor(data?: IAuthorizedPeople) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.creationTime = _data["creationTime"] ? moment(_data["creationTime"].toString()) : <any>undefined;
+            this.creatorUserId = _data["creatorUserId"];
+            this.lastModificationTime = _data["lastModificationTime"] ? moment(_data["lastModificationTime"].toString()) : <any>undefined;
+            this.lastModifierUserId = _data["lastModifierUserId"];
+            this.isDeleted = _data["isDeleted"];
+            this.deleterUserId = _data["deleterUserId"];
+            this.deletionTime = _data["deletionTime"] ? moment(_data["deletionTime"].toString()) : <any>undefined;
+            this.tenantId = _data["tenantId"];
+            this.customer = _data["customer"];
+            this.customerFk = _data["customerFk"] ? Customer.fromJS(_data["customerFk"]) : <any>undefined;
+            this.nric = _data["nric"];
+            this.fullName = _data["fullName"];
+            this.address = _data["address"];
+            this.town = _data["town"];
+            this.postcode = _data["postcode"];
+            this.state = _data["state"];
+            this.country = _data["country"];
+            this.telephoneNumber = _data["telephoneNumber"];
+            this.remark = _data["remark"];
+            this.relationship = _data["relationship"];
+            this.race = _data["race"];
+            this.gender = _data["gender"];
+            this.member = _data["member"];
+            this.nationality = _data["nationality"];
+            this.birthDate = _data["birthDate"] ? moment(_data["birthDate"].toString()) : <any>undefined;
+            this.age = _data["age"];
+            this.blacklisted = _data["blacklisted"];
+            this.oldIC = _data["oldIC"];
+        }
+    }
+
+    static fromJS(data: any): AuthorizedPeople {
+        data = typeof data === 'object' ? data : {};
+        let result = new AuthorizedPeople();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["creationTime"] = this.creationTime ? this.creationTime.toISOString() : <any>undefined;
+        data["creatorUserId"] = this.creatorUserId;
+        data["lastModificationTime"] = this.lastModificationTime ? this.lastModificationTime.toISOString() : <any>undefined;
+        data["lastModifierUserId"] = this.lastModifierUserId;
+        data["isDeleted"] = this.isDeleted;
+        data["deleterUserId"] = this.deleterUserId;
+        data["deletionTime"] = this.deletionTime ? this.deletionTime.toISOString() : <any>undefined;
+        data["tenantId"] = this.tenantId;
+        data["customer"] = this.customer;
+        data["customerFk"] = this.customerFk ? this.customerFk.toJSON() : <any>undefined;
+        data["nric"] = this.nric;
+        data["fullName"] = this.fullName;
+        data["address"] = this.address;
+        data["town"] = this.town;
+        data["postcode"] = this.postcode;
+        data["state"] = this.state;
+        data["country"] = this.country;
+        data["telephoneNumber"] = this.telephoneNumber;
+        data["remark"] = this.remark;
+        data["relationship"] = this.relationship;
+        data["race"] = this.race;
+        data["gender"] = this.gender;
+        data["member"] = this.member;
+        data["nationality"] = this.nationality;
+        data["birthDate"] = this.birthDate ? this.birthDate.toISOString() : <any>undefined;
+        data["age"] = this.age;
+        data["blacklisted"] = this.blacklisted;
+        data["oldIC"] = this.oldIC;
+        return data;
+    }
+
+    clone(): AuthorizedPeople {
+        const json = this.toJSON();
+        let result = new AuthorizedPeople();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IAuthorizedPeople {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    tenantId: number | undefined;
+    customer: number | undefined;
+    customerFk: Customer;
+    nric: string | undefined;
+    fullName: string | undefined;
+    address: string | undefined;
+    town: string | undefined;
+    postcode: string | undefined;
+    state: string | undefined;
+    country: number | undefined;
+    telephoneNumber: string | undefined;
+    remark: string | undefined;
+    relationship: string | undefined;
+    race: number | undefined;
+    gender: number | undefined;
+    member: boolean;
+    nationality: number | undefined;
+    birthDate: moment.Moment;
+    age: number;
+    blacklisted: boolean;
+    oldIC: string | undefined;
+}
+
 export class BasicCodeDto implements IBasicCodeDto {
     id: number;
     tenantId: number | undefined;
@@ -8172,6 +9428,53 @@ export interface IChangeUserLanguageDto {
     languageName: string;
 }
 
+export class CheckIfAuthorized implements ICheckIfAuthorized {
+    nric: string | undefined;
+    ticketNumber: string | undefined;
+
+    constructor(data?: ICheckIfAuthorized) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.nric = _data["nric"];
+            this.ticketNumber = _data["ticketNumber"];
+        }
+    }
+
+    static fromJS(data: any): CheckIfAuthorized {
+        data = typeof data === 'object' ? data : {};
+        let result = new CheckIfAuthorized();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["nric"] = this.nric;
+        data["ticketNumber"] = this.ticketNumber;
+        return data;
+    }
+
+    clone(): CheckIfAuthorized {
+        const json = this.toJSON();
+        let result = new CheckIfAuthorized();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ICheckIfAuthorized {
+    nric: string | undefined;
+    ticketNumber: string | undefined;
+}
+
 export class Country implements ICountry {
     id: number;
     creationTime: moment.Moment;
@@ -8273,6 +9576,125 @@ export interface ICountry {
     riskLevel: string | undefined;
     help: boolean;
     effectiveYear: number;
+}
+
+export class CreateOrEditAuthorizedPeopleDto implements ICreateOrEditAuthorizedPeopleDto {
+    id: number | undefined;
+    customer: number | undefined;
+    nric: string | undefined;
+    fullName: string | undefined;
+    address: string | undefined;
+    town: string | undefined;
+    postcode: string | undefined;
+    state: string | undefined;
+    country: number | undefined;
+    telephoneNumber: string | undefined;
+    remark: string | undefined;
+    relationship: string | undefined;
+    race: number | undefined;
+    gender: number | undefined;
+    member: boolean;
+    nationality: number | undefined;
+    birthDate: moment.Moment;
+    age: number;
+    blacklisted: boolean;
+    oldIC: string | undefined;
+
+    constructor(data?: ICreateOrEditAuthorizedPeopleDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.customer = _data["customer"];
+            this.nric = _data["nric"];
+            this.fullName = _data["fullName"];
+            this.address = _data["address"];
+            this.town = _data["town"];
+            this.postcode = _data["postcode"];
+            this.state = _data["state"];
+            this.country = _data["country"];
+            this.telephoneNumber = _data["telephoneNumber"];
+            this.remark = _data["remark"];
+            this.relationship = _data["relationship"];
+            this.race = _data["race"];
+            this.gender = _data["gender"];
+            this.member = _data["member"];
+            this.nationality = _data["nationality"];
+            this.birthDate = _data["birthDate"] ? moment(_data["birthDate"].toString()) : <any>undefined;
+            this.age = _data["age"];
+            this.blacklisted = _data["blacklisted"];
+            this.oldIC = _data["oldIC"];
+        }
+    }
+
+    static fromJS(data: any): CreateOrEditAuthorizedPeopleDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateOrEditAuthorizedPeopleDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["customer"] = this.customer;
+        data["nric"] = this.nric;
+        data["fullName"] = this.fullName;
+        data["address"] = this.address;
+        data["town"] = this.town;
+        data["postcode"] = this.postcode;
+        data["state"] = this.state;
+        data["country"] = this.country;
+        data["telephoneNumber"] = this.telephoneNumber;
+        data["remark"] = this.remark;
+        data["relationship"] = this.relationship;
+        data["race"] = this.race;
+        data["gender"] = this.gender;
+        data["member"] = this.member;
+        data["nationality"] = this.nationality;
+        data["birthDate"] = this.birthDate ? this.birthDate.toISOString() : <any>undefined;
+        data["age"] = this.age;
+        data["blacklisted"] = this.blacklisted;
+        data["oldIC"] = this.oldIC;
+        return data;
+    }
+
+    clone(): CreateOrEditAuthorizedPeopleDto {
+        const json = this.toJSON();
+        let result = new CreateOrEditAuthorizedPeopleDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ICreateOrEditAuthorizedPeopleDto {
+    id: number | undefined;
+    customer: number | undefined;
+    nric: string | undefined;
+    fullName: string | undefined;
+    address: string | undefined;
+    town: string | undefined;
+    postcode: string | undefined;
+    state: string | undefined;
+    country: number | undefined;
+    telephoneNumber: string | undefined;
+    remark: string | undefined;
+    relationship: string | undefined;
+    race: number | undefined;
+    gender: number | undefined;
+    member: boolean;
+    nationality: number | undefined;
+    birthDate: moment.Moment;
+    age: number;
+    blacklisted: boolean;
+    oldIC: string | undefined;
 }
 
 export class CreateOrEditBasicCodeDto implements ICreateOrEditBasicCodeDto {
@@ -9139,6 +10561,7 @@ export class CreateOrEditPawnTicketDto implements ICreateOrEditPawnTicketDto {
     slotNumber: string | undefined;
     generalSetup: number | undefined;
     amountPerGram: number;
+    discount: number;
 
     constructor(data?: ICreateOrEditPawnTicketDto) {
         if (data) {
@@ -9164,6 +10587,7 @@ export class CreateOrEditPawnTicketDto implements ICreateOrEditPawnTicketDto {
             this.slotNumber = _data["slotNumber"];
             this.generalSetup = _data["generalSetup"];
             this.amountPerGram = _data["amountPerGram"];
+            this.discount = _data["discount"];
         }
     }
 
@@ -9189,6 +10613,7 @@ export class CreateOrEditPawnTicketDto implements ICreateOrEditPawnTicketDto {
         data["slotNumber"] = this.slotNumber;
         data["generalSetup"] = this.generalSetup;
         data["amountPerGram"] = this.amountPerGram;
+        data["discount"] = this.discount;
         return data;
     }
 
@@ -9214,6 +10639,7 @@ export interface ICreateOrEditPawnTicketDto {
     slotNumber: string | undefined;
     generalSetup: number | undefined;
     amountPerGram: number;
+    discount: number;
 }
 
 export class CreateOrEditPrivateBlackListDto implements ICreateOrEditPrivateBlackListDto {
@@ -9265,6 +10691,132 @@ export interface ICreateOrEditPrivateBlackListDto {
     id: number | undefined;
     fullName: string | undefined;
     banReason: string | undefined;
+}
+
+export class CreateOrEditRedeemRecordDto implements ICreateOrEditRedeemRecordDto {
+    id: number | undefined;
+    redeemedBy: string | undefined;
+    redeemedDate: moment.Moment;
+    numberOfTickets: number;
+    totalAmount: number;
+    totalCustody: number;
+    totalService: number;
+    grandTotal: number;
+    totalDiscount: number;
+
+    constructor(data?: ICreateOrEditRedeemRecordDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.redeemedBy = _data["redeemedBy"];
+            this.redeemedDate = _data["redeemedDate"] ? moment(_data["redeemedDate"].toString()) : <any>undefined;
+            this.numberOfTickets = _data["numberOfTickets"];
+            this.totalAmount = _data["totalAmount"];
+            this.totalCustody = _data["totalCustody"];
+            this.totalService = _data["totalService"];
+            this.grandTotal = _data["grandTotal"];
+            this.totalDiscount = _data["totalDiscount"];
+        }
+    }
+
+    static fromJS(data: any): CreateOrEditRedeemRecordDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateOrEditRedeemRecordDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["redeemedBy"] = this.redeemedBy;
+        data["redeemedDate"] = this.redeemedDate ? this.redeemedDate.toISOString() : <any>undefined;
+        data["numberOfTickets"] = this.numberOfTickets;
+        data["totalAmount"] = this.totalAmount;
+        data["totalCustody"] = this.totalCustody;
+        data["totalService"] = this.totalService;
+        data["grandTotal"] = this.grandTotal;
+        data["totalDiscount"] = this.totalDiscount;
+        return data;
+    }
+
+    clone(): CreateOrEditRedeemRecordDto {
+        const json = this.toJSON();
+        let result = new CreateOrEditRedeemRecordDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ICreateOrEditRedeemRecordDto {
+    id: number | undefined;
+    redeemedBy: string | undefined;
+    redeemedDate: moment.Moment;
+    numberOfTickets: number;
+    totalAmount: number;
+    totalCustody: number;
+    totalService: number;
+    grandTotal: number;
+    totalDiscount: number;
+}
+
+export class CreateOrEditRedeemRecordTicketDto implements ICreateOrEditRedeemRecordTicketDto {
+    id: number | undefined;
+    pawnTicket: number | undefined;
+    redeemRecord: number | undefined;
+
+    constructor(data?: ICreateOrEditRedeemRecordTicketDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.pawnTicket = _data["pawnTicket"];
+            this.redeemRecord = _data["redeemRecord"];
+        }
+    }
+
+    static fromJS(data: any): CreateOrEditRedeemRecordTicketDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateOrEditRedeemRecordTicketDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["pawnTicket"] = this.pawnTicket;
+        data["redeemRecord"] = this.redeemRecord;
+        return data;
+    }
+
+    clone(): CreateOrEditRedeemRecordTicketDto {
+        const json = this.toJSON();
+        let result = new CreateOrEditRedeemRecordTicketDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ICreateOrEditRedeemRecordTicketDto {
+    id: number | undefined;
+    pawnTicket: number | undefined;
+    redeemRecord: number | undefined;
 }
 
 export class CreateOrEditUserOutletDto implements ICreateOrEditUserOutletDto {
@@ -12324,6 +13876,7 @@ export class PawnTicket implements IPawnTicket {
     generalSetup: number | undefined;
     generalSetupFk: GeneralSetup;
     amountPerGram: number;
+    discount: number;
 
     constructor(data?: IPawnTicket) {
         if (data) {
@@ -12359,6 +13912,7 @@ export class PawnTicket implements IPawnTicket {
             this.generalSetup = _data["generalSetup"];
             this.generalSetupFk = _data["generalSetupFk"] ? GeneralSetup.fromJS(_data["generalSetupFk"]) : <any>undefined;
             this.amountPerGram = _data["amountPerGram"];
+            this.discount = _data["discount"];
         }
     }
 
@@ -12394,6 +13948,7 @@ export class PawnTicket implements IPawnTicket {
         data["generalSetup"] = this.generalSetup;
         data["generalSetupFk"] = this.generalSetupFk ? this.generalSetupFk.toJSON() : <any>undefined;
         data["amountPerGram"] = this.amountPerGram;
+        data["discount"] = this.discount;
         return data;
     }
 
@@ -12429,6 +13984,7 @@ export interface IPawnTicket {
     generalSetup: number | undefined;
     generalSetupFk: GeneralSetup;
     amountPerGram: number;
+    discount: number;
 }
 
 export class PawnTicketDocument implements IPawnTicketDocument {
@@ -12545,6 +14101,7 @@ export class PawnTicketDto implements IPawnTicketDto {
     slotNumber: string | undefined;
     generalSetup: number | undefined;
     amountPerGram: number;
+    discount: number;
 
     constructor(data?: IPawnTicketDto) {
         if (data) {
@@ -12571,6 +14128,7 @@ export class PawnTicketDto implements IPawnTicketDto {
             this.slotNumber = _data["slotNumber"];
             this.generalSetup = _data["generalSetup"];
             this.amountPerGram = _data["amountPerGram"];
+            this.discount = _data["discount"];
         }
     }
 
@@ -12597,6 +14155,7 @@ export class PawnTicketDto implements IPawnTicketDto {
         data["slotNumber"] = this.slotNumber;
         data["generalSetup"] = this.generalSetup;
         data["amountPerGram"] = this.amountPerGram;
+        data["discount"] = this.discount;
         return data;
     }
 
@@ -12623,6 +14182,7 @@ export interface IPawnTicketDto {
     slotNumber: string | undefined;
     generalSetup: number | undefined;
     amountPerGram: number;
+    discount: number;
 }
 
 export class PawnTicketDtoPagedResultDto implements IPawnTicketDtoPagedResultDto {
@@ -12924,6 +14484,109 @@ export interface IPawnTicketPaymentDto {
     paymentMethod: number | undefined;
 }
 
+export class PawnTicketWithRedeemStatusDto implements IPawnTicketWithRedeemStatusDto {
+    id: number | undefined;
+    ticketNo: string | undefined;
+    customer: number | undefined;
+    weight: number;
+    value: number;
+    pledgedDate: moment.Moment;
+    expiryDate: moment.Moment;
+    amount: number;
+    monthlyCustody: number;
+    serviceCharge: number;
+    slotNumber: string | undefined;
+    generalSetup: number | undefined;
+    amountPerGram: number;
+    discount: number;
+    createOrEditRedeemRecordDto: CreateOrEditRedeemRecordDto;
+    redeemRecordTicketDto: RedeemRecordTicketDto;
+
+    constructor(data?: IPawnTicketWithRedeemStatusDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.ticketNo = _data["ticketNo"];
+            this.customer = _data["customer"];
+            this.weight = _data["weight"];
+            this.value = _data["value"];
+            this.pledgedDate = _data["pledgedDate"] ? moment(_data["pledgedDate"].toString()) : <any>undefined;
+            this.expiryDate = _data["expiryDate"] ? moment(_data["expiryDate"].toString()) : <any>undefined;
+            this.amount = _data["amount"];
+            this.monthlyCustody = _data["monthlyCustody"];
+            this.serviceCharge = _data["serviceCharge"];
+            this.slotNumber = _data["slotNumber"];
+            this.generalSetup = _data["generalSetup"];
+            this.amountPerGram = _data["amountPerGram"];
+            this.discount = _data["discount"];
+            this.createOrEditRedeemRecordDto = _data["createOrEditRedeemRecordDto"] ? CreateOrEditRedeemRecordDto.fromJS(_data["createOrEditRedeemRecordDto"]) : <any>undefined;
+            this.redeemRecordTicketDto = _data["redeemRecordTicketDto"] ? RedeemRecordTicketDto.fromJS(_data["redeemRecordTicketDto"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): PawnTicketWithRedeemStatusDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new PawnTicketWithRedeemStatusDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["ticketNo"] = this.ticketNo;
+        data["customer"] = this.customer;
+        data["weight"] = this.weight;
+        data["value"] = this.value;
+        data["pledgedDate"] = this.pledgedDate ? this.pledgedDate.toISOString() : <any>undefined;
+        data["expiryDate"] = this.expiryDate ? this.expiryDate.toISOString() : <any>undefined;
+        data["amount"] = this.amount;
+        data["monthlyCustody"] = this.monthlyCustody;
+        data["serviceCharge"] = this.serviceCharge;
+        data["slotNumber"] = this.slotNumber;
+        data["generalSetup"] = this.generalSetup;
+        data["amountPerGram"] = this.amountPerGram;
+        data["discount"] = this.discount;
+        data["createOrEditRedeemRecordDto"] = this.createOrEditRedeemRecordDto ? this.createOrEditRedeemRecordDto.toJSON() : <any>undefined;
+        data["redeemRecordTicketDto"] = this.redeemRecordTicketDto ? this.redeemRecordTicketDto.toJSON() : <any>undefined;
+        return data;
+    }
+
+    clone(): PawnTicketWithRedeemStatusDto {
+        const json = this.toJSON();
+        let result = new PawnTicketWithRedeemStatusDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IPawnTicketWithRedeemStatusDto {
+    id: number | undefined;
+    ticketNo: string | undefined;
+    customer: number | undefined;
+    weight: number;
+    value: number;
+    pledgedDate: moment.Moment;
+    expiryDate: moment.Moment;
+    amount: number;
+    monthlyCustody: number;
+    serviceCharge: number;
+    slotNumber: string | undefined;
+    generalSetup: number | undefined;
+    amountPerGram: number;
+    discount: number;
+    createOrEditRedeemRecordDto: CreateOrEditRedeemRecordDto;
+    redeemRecordTicketDto: RedeemRecordTicketDto;
+}
+
 export class PermissionDto implements IPermissionDto {
     id: number;
     name: string | undefined;
@@ -13113,6 +14776,318 @@ export interface IPrivateBlackList {
     banReason: string | undefined;
 }
 
+export class RedeemRecord implements IRedeemRecord {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    tenantId: number | undefined;
+    redeemedBy: string | undefined;
+    redeemedDate: moment.Moment;
+    numberOfTickets: number;
+    totalAmount: number;
+    totalCustody: number;
+    totalService: number;
+    grandTotal: number;
+    totalDiscount: number;
+
+    constructor(data?: IRedeemRecord) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.creationTime = _data["creationTime"] ? moment(_data["creationTime"].toString()) : <any>undefined;
+            this.creatorUserId = _data["creatorUserId"];
+            this.lastModificationTime = _data["lastModificationTime"] ? moment(_data["lastModificationTime"].toString()) : <any>undefined;
+            this.lastModifierUserId = _data["lastModifierUserId"];
+            this.isDeleted = _data["isDeleted"];
+            this.deleterUserId = _data["deleterUserId"];
+            this.deletionTime = _data["deletionTime"] ? moment(_data["deletionTime"].toString()) : <any>undefined;
+            this.tenantId = _data["tenantId"];
+            this.redeemedBy = _data["redeemedBy"];
+            this.redeemedDate = _data["redeemedDate"] ? moment(_data["redeemedDate"].toString()) : <any>undefined;
+            this.numberOfTickets = _data["numberOfTickets"];
+            this.totalAmount = _data["totalAmount"];
+            this.totalCustody = _data["totalCustody"];
+            this.totalService = _data["totalService"];
+            this.grandTotal = _data["grandTotal"];
+            this.totalDiscount = _data["totalDiscount"];
+        }
+    }
+
+    static fromJS(data: any): RedeemRecord {
+        data = typeof data === 'object' ? data : {};
+        let result = new RedeemRecord();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["creationTime"] = this.creationTime ? this.creationTime.toISOString() : <any>undefined;
+        data["creatorUserId"] = this.creatorUserId;
+        data["lastModificationTime"] = this.lastModificationTime ? this.lastModificationTime.toISOString() : <any>undefined;
+        data["lastModifierUserId"] = this.lastModifierUserId;
+        data["isDeleted"] = this.isDeleted;
+        data["deleterUserId"] = this.deleterUserId;
+        data["deletionTime"] = this.deletionTime ? this.deletionTime.toISOString() : <any>undefined;
+        data["tenantId"] = this.tenantId;
+        data["redeemedBy"] = this.redeemedBy;
+        data["redeemedDate"] = this.redeemedDate ? this.redeemedDate.toISOString() : <any>undefined;
+        data["numberOfTickets"] = this.numberOfTickets;
+        data["totalAmount"] = this.totalAmount;
+        data["totalCustody"] = this.totalCustody;
+        data["totalService"] = this.totalService;
+        data["grandTotal"] = this.grandTotal;
+        data["totalDiscount"] = this.totalDiscount;
+        return data;
+    }
+
+    clone(): RedeemRecord {
+        const json = this.toJSON();
+        let result = new RedeemRecord();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IRedeemRecord {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    tenantId: number | undefined;
+    redeemedBy: string | undefined;
+    redeemedDate: moment.Moment;
+    numberOfTickets: number;
+    totalAmount: number;
+    totalCustody: number;
+    totalService: number;
+    grandTotal: number;
+    totalDiscount: number;
+}
+
+export class RedeemRecordConsolidated implements IRedeemRecordConsolidated {
+    createOrEditRedeemRecordDto: CreateOrEditRedeemRecordDto;
+    createOrEditRedeemRecordTicketDtos: CreateOrEditRedeemRecordTicketDto[] | undefined;
+    createOrEditPawnTicketDtos: CreateOrEditPawnTicketDto[] | undefined;
+
+    constructor(data?: IRedeemRecordConsolidated) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.createOrEditRedeemRecordDto = _data["createOrEditRedeemRecordDto"] ? CreateOrEditRedeemRecordDto.fromJS(_data["createOrEditRedeemRecordDto"]) : <any>undefined;
+            if (Array.isArray(_data["createOrEditRedeemRecordTicketDtos"])) {
+                this.createOrEditRedeemRecordTicketDtos = [] as any;
+                for (let item of _data["createOrEditRedeemRecordTicketDtos"])
+                    this.createOrEditRedeemRecordTicketDtos.push(CreateOrEditRedeemRecordTicketDto.fromJS(item));
+            }
+            if (Array.isArray(_data["createOrEditPawnTicketDtos"])) {
+                this.createOrEditPawnTicketDtos = [] as any;
+                for (let item of _data["createOrEditPawnTicketDtos"])
+                    this.createOrEditPawnTicketDtos.push(CreateOrEditPawnTicketDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): RedeemRecordConsolidated {
+        data = typeof data === 'object' ? data : {};
+        let result = new RedeemRecordConsolidated();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["createOrEditRedeemRecordDto"] = this.createOrEditRedeemRecordDto ? this.createOrEditRedeemRecordDto.toJSON() : <any>undefined;
+        if (Array.isArray(this.createOrEditRedeemRecordTicketDtos)) {
+            data["createOrEditRedeemRecordTicketDtos"] = [];
+            for (let item of this.createOrEditRedeemRecordTicketDtos)
+                data["createOrEditRedeemRecordTicketDtos"].push(item.toJSON());
+        }
+        if (Array.isArray(this.createOrEditPawnTicketDtos)) {
+            data["createOrEditPawnTicketDtos"] = [];
+            for (let item of this.createOrEditPawnTicketDtos)
+                data["createOrEditPawnTicketDtos"].push(item.toJSON());
+        }
+        return data;
+    }
+
+    clone(): RedeemRecordConsolidated {
+        const json = this.toJSON();
+        let result = new RedeemRecordConsolidated();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IRedeemRecordConsolidated {
+    createOrEditRedeemRecordDto: CreateOrEditRedeemRecordDto;
+    createOrEditRedeemRecordTicketDtos: CreateOrEditRedeemRecordTicketDto[] | undefined;
+    createOrEditPawnTicketDtos: CreateOrEditPawnTicketDto[] | undefined;
+}
+
+export class RedeemRecordTicket implements IRedeemRecordTicket {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    tenantId: number | undefined;
+    pawnTicket: number | undefined;
+    pawnTicketFk: PawnTicket;
+    redeemRecord: number | undefined;
+    redeemRecordFk: RedeemRecord;
+
+    constructor(data?: IRedeemRecordTicket) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.creationTime = _data["creationTime"] ? moment(_data["creationTime"].toString()) : <any>undefined;
+            this.creatorUserId = _data["creatorUserId"];
+            this.lastModificationTime = _data["lastModificationTime"] ? moment(_data["lastModificationTime"].toString()) : <any>undefined;
+            this.lastModifierUserId = _data["lastModifierUserId"];
+            this.isDeleted = _data["isDeleted"];
+            this.deleterUserId = _data["deleterUserId"];
+            this.deletionTime = _data["deletionTime"] ? moment(_data["deletionTime"].toString()) : <any>undefined;
+            this.tenantId = _data["tenantId"];
+            this.pawnTicket = _data["pawnTicket"];
+            this.pawnTicketFk = _data["pawnTicketFk"] ? PawnTicket.fromJS(_data["pawnTicketFk"]) : <any>undefined;
+            this.redeemRecord = _data["redeemRecord"];
+            this.redeemRecordFk = _data["redeemRecordFk"] ? RedeemRecord.fromJS(_data["redeemRecordFk"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): RedeemRecordTicket {
+        data = typeof data === 'object' ? data : {};
+        let result = new RedeemRecordTicket();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["creationTime"] = this.creationTime ? this.creationTime.toISOString() : <any>undefined;
+        data["creatorUserId"] = this.creatorUserId;
+        data["lastModificationTime"] = this.lastModificationTime ? this.lastModificationTime.toISOString() : <any>undefined;
+        data["lastModifierUserId"] = this.lastModifierUserId;
+        data["isDeleted"] = this.isDeleted;
+        data["deleterUserId"] = this.deleterUserId;
+        data["deletionTime"] = this.deletionTime ? this.deletionTime.toISOString() : <any>undefined;
+        data["tenantId"] = this.tenantId;
+        data["pawnTicket"] = this.pawnTicket;
+        data["pawnTicketFk"] = this.pawnTicketFk ? this.pawnTicketFk.toJSON() : <any>undefined;
+        data["redeemRecord"] = this.redeemRecord;
+        data["redeemRecordFk"] = this.redeemRecordFk ? this.redeemRecordFk.toJSON() : <any>undefined;
+        return data;
+    }
+
+    clone(): RedeemRecordTicket {
+        const json = this.toJSON();
+        let result = new RedeemRecordTicket();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IRedeemRecordTicket {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    tenantId: number | undefined;
+    pawnTicket: number | undefined;
+    pawnTicketFk: PawnTicket;
+    redeemRecord: number | undefined;
+    redeemRecordFk: RedeemRecord;
+}
+
+export class RedeemRecordTicketDto implements IRedeemRecordTicketDto {
+    pawnTicket: number | undefined;
+    redeemRecord: number | undefined;
+
+    constructor(data?: IRedeemRecordTicketDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.pawnTicket = _data["pawnTicket"];
+            this.redeemRecord = _data["redeemRecord"];
+        }
+    }
+
+    static fromJS(data: any): RedeemRecordTicketDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new RedeemRecordTicketDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["pawnTicket"] = this.pawnTicket;
+        data["redeemRecord"] = this.redeemRecord;
+        return data;
+    }
+
+    clone(): RedeemRecordTicketDto {
+        const json = this.toJSON();
+        let result = new RedeemRecordTicketDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IRedeemRecordTicketDto {
+    pawnTicket: number | undefined;
+    redeemRecord: number | undefined;
+}
+
 export class RegisterInput implements IRegisterInput {
     name: string;
     surname: string;
@@ -13268,6 +15243,53 @@ export interface IResetPasswordDto {
     adminPassword: string;
     userId: number;
     newPassword: string;
+}
+
+export class ReturnStringAndIdDto implements IReturnStringAndIdDto {
+    id: number | undefined;
+    message: string | undefined;
+
+    constructor(data?: IReturnStringAndIdDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.message = _data["message"];
+        }
+    }
+
+    static fromJS(data: any): ReturnStringAndIdDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ReturnStringAndIdDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["message"] = this.message;
+        return data;
+    }
+
+    clone(): ReturnStringAndIdDto {
+        const json = this.toJSON();
+        let result = new ReturnStringAndIdDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IReturnStringAndIdDto {
+    id: number | undefined;
+    message: string | undefined;
 }
 
 export class RoleDto implements IRoleDto {

@@ -46,6 +46,7 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
             new MenuItem(this.l('Outlet'), '/app/outlet', 'fas fa-store'),
             new MenuItem(this.l('Customers'), '/app/customers', 'fas fa-user-friends', 'Pages.Customers'),
             new MenuItem(this.l('PawnTickets'), '/app/pawn-tickets', 'fas fa-ticket-alt', 'Pages.PawnTickets'),
+            new MenuItem('Redeem Records', '/app/redeem-records', 'fas fa-receipt', 'Pages.PawnTickets'),
             new MenuItem('Private Blacklist', '/app/private-blacklists', 'fas fa-user-slash', 'Pages.PrivateBlackLists'),
             new MenuItem(this.l('Admin'), '', 'fas fa-cog', null, [
                 new MenuItem(this.l('BasicCodes'), '/app/basic-codes', 'fas fa-list', 'Pages.BasicCodes'),

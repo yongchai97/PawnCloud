@@ -1,0 +1,261 @@
+<div [@routerTransition]>
+    <section class="content-header">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <h1>Redeem Records</h1>
+            <button type="button" class="btn btn-primary" (click)="openCreate()" [disabled]="loading || saving">
+                <i class="fas fa-plus me-1"></i>New redeem record
+            </button>
+        </div>
+    </section>
+
+    <section class="content px-2">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-body table-responsive p-0">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Redeemed by</th>
+                                <th>Redeemed date</th>
+                                <th>Tickets</th>
+                                <th>Total amount</th>
+                                <th>Custody</th>
+                                <th>Service</th>
+                                <th>Discount</th>
+                                <th>Grand total</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let record of redeemRecords">
+                                <td>{{ record.id }}</td>
+                                <td>{{ record.redeemedBy || '-' }}</td>
+                                <td>{{ record.redeemedDate | date:'yyyy-MM-dd HH:mm' }}</td>
+                                <td>{{ record.numberOfTickets }}</td>
+                                <td>{{ record.totalAmount | number:'1.2-2' }}</td>
+                                <td>{{ record.totalCustody | number:'1.2-2' }}</td>
+                                <td>{{ record.totalService | number:'1.2-2' }}</td>
+                                <td>{{ record.totalDiscount | number:'1.2-2' }}</td>
+                                <td class="fw-semibold">{{ record.grandTotal | number:'1.2-2' }}</td>
+                                <td class="text-end">
+                                    <button type="button" class="btn btn-sm btn-outline-primary me-1" (click)="openView(record)" aria-label="View redeem record details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" (click)="deleteRecord(record)" aria-label="Delete redeem record">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr *ngIf="!loading && redeemRecords.length === 0">
+                                <td colspan="10" class="text-center text-muted p-4">No redeem records found.</td>
+                            </tr>
+                            <tr *ngIf="loading">
+                                <td colspan="10" class="text-center text-muted p-4"><i class="fas fa-spinner fa-spin me-2"></i>Loading redeem records...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<ng-template #editor>
+    <form #redeemForm="ngForm" autocomplete="off" novalidate (ngSubmit)="save()">
+        <abp-modal-header title="New Redeem Record" (onCloseClick)="modal.hide()"></abp-modal-header>
+        <div class="modal-body">
+            <abp-validation-summary [control]="redeemForm"></abp-validation-summary>
+
+            <div class="row g-3">
+                <div class="col-md-6 form-group">
+                    <label for="redeemedBy">Redeemed by NRIC <span class="text-danger">*</span></label>
+                    <input pInputText class="w-100" id="redeemedBy" name="redeemedBy" [(ngModel)]="redeemRecord.redeemedBy" (ngModelChange)="onRedeemedByChange($event)" required />
+                    <div *ngIf="nameLoading" class="small text-muted mt-1"><i class="fas fa-spinner fa-spin me-1"></i>Checking NRIC...</div>
+                </div>
+                <div class="col-md-6 form-group" *ngIf="authorizedName">
+                    <label for="authorizedName">Name</label>
+                    <input pInputText class="w-100" id="authorizedName" name="authorizedName" [ngModel]="authorizedName" readonly />
+                </div>
+            </div>
+
+            <div *ngIf="authorizedName" class="mt-4">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-5 form-group">
+                        <label for="ticketNumber">Pawn ticket number</label>
+                        <input pInputText class="w-100" id="ticketNumber" name="ticketNumber" [(ngModel)]="ticketNumber" />
+                    </div>
+                    <div class="col-md-5 form-group">
+                        <label for="compareTicketNumber">Compare</label>
+                        <input pInputText class="w-100" id="compareTicketNumber" name="compareTicketNumber" [(ngModel)]="compareTicketNumber" />
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <button type="button" class="btn btn-outline-primary w-100" (click)="verifyTicket()" [disabled]="ticketLoading || ticketNumber.trim() !== compareTicketNumber.trim() || !ticketNumber.trim()">
+                            <i class="fas fa-search me-1"></i>Verify
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive mt-4">
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>Status</th>
+                                <th></th>
+                                <th>Pawn ticket</th>
+                                <th>Customer name</th>
+                                <th>Customer NRIC</th>
+                                <th>Weight</th>
+                                <th>Value</th>
+                                <th>Pledged date</th>
+                                <th>Amount</th>
+                                <th>Custody</th>
+                                <th>Service charge</th>
+                                <th>Discount</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <ng-container *ngFor="let row of rows">
+                                <tr [class.table-danger]="row.redeemed">
+                                    <td class="fw-semibold">{{ row.redeemed ? 'REDEEMED' : '-' }}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="toggleItems(row)" [attr.aria-label]="row.expanded ? 'Collapse pawn items' : 'Expand pawn items'">
+                                            <i class="fas" [class.fa-plus]="!row.expanded" [class.fa-minus]="row.expanded"></i>
+                                        </button>
+                                    </td>
+                                    <td>{{ row.ticket.ticketNo || '-' }}</td>
+                                    <td>{{ row.customer?.fullName || 'Loading...' }}</td>
+                                    <td>{{ row.customer?.nric || 'Loading...' }}</td>
+                                    <td>{{ row.ticket.weight | number:'1.2-2' }}</td>
+                                    <td>{{ row.ticket.value | number:'1.2-2' }}</td>
+                                    <td>{{ row.ticket.pledgedDate | date:'yyyy-MM-dd' }}</td>
+                                    <td>{{ row.ticket.amount | number:'1.2-2' }}</td>
+                                    <td>{{ row.ticket.monthlyCustody | number:'1.2-2' }}</td>
+                                    <td>
+                                        <input *ngIf="!row.redeemed" pInputText type="number" min="0" step="0.01" class="redeem-ticket-value" [name]="'service_' + row.ticket.id" [(ngModel)]="row.ticket.serviceCharge" (ngModelChange)="onTicketValueChange()" />
+                                        <span *ngIf="row.redeemed">{{ row.ticket.serviceCharge | number:'1.2-2' }}</span>
+                                    </td>
+                                    <td>
+                                        <input *ngIf="!row.redeemed" pInputText type="number" min="0" step="0.01" class="redeem-ticket-value" [name]="'discount_' + row.ticket.id" [(ngModel)]="row.ticket.discount" (ngModelChange)="onTicketValueChange()" />
+                                        <span *ngIf="row.redeemed">{{ row.ticket.discount | number:'1.2-2' }}</span>
+                                    </td>
+                                    <td class="text-nowrap">
+                                        <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeTicket(row)" aria-label="Remove pawn ticket from redeem record">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr *ngIf="row.expanded" [class.table-danger]="row.redeemed">
+                                    <td colspan="13">
+                                        <div *ngIf="row.itemsLoading" class="small text-muted"><i class="fas fa-spinner fa-spin me-1"></i>Loading pawn items...</div>
+                                        <div *ngIf="!row.itemsLoading && row.items.length === 0" class="small text-muted">No pawn items found.</div>
+                                        <table *ngIf="!row.itemsLoading && row.items.length" class="table table-bordered table-sm mb-0 bg-white">
+                                            <thead><tr><th>Item number</th><th>Description</th><th>Quantity</th><th>Weight</th><th>Brand</th></tr></thead>
+                                            <tbody><tr *ngFor="let item of row.items"><td>{{ item.pawnItemNumber || '-' }}</td><td>{{ itemListingName(item) }}</td><td>{{ item.quantity }}</td><td>{{ item.weight | number:'1.2-2' }}</td><td>{{ item.brand || '-' }}</td></tr></tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </ng-container>
+                            <tr *ngIf="rows.length === 0"><td colspan="13" class="text-center text-muted p-4">Verify an eligible pawn ticket to add it here.</td></tr>
+                        </tbody>
+                        <tfoot *ngIf="rows.length">
+                            <tr class="table-light fw-semibold">
+                                <td colspan="8" class="text-end">Eligible totals</td>
+                                <td>{{ redeemRecord.totalAmount | number:'1.2-2' }}</td>
+                                <td>{{ redeemRecord.totalCustody | number:'1.2-2' }}</td>
+                                <td>{{ redeemRecord.totalService | number:'1.2-2' }}</td>
+                                <td>{{ redeemRecord.totalDiscount | number:'1.2-2' }}</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="row g-3 mt-2">
+                    <div class="col-md-3"><label>Number of tickets</label><input pInputText class="w-100" name="numberOfTickets" [ngModel]="redeemRecord.numberOfTickets" readonly /></div>
+                    <div class="col-md-3"><label>Grand total</label><input pInputText class="w-100 fw-semibold" name="grandTotal" [ngModel]="redeemRecord.grandTotal" readonly /></div>
+                </div>
+            </div>
+        </div>
+        <abp-modal-footer [saveDisabled]="saving || calculating || ticketLoading || !authorizedName || !hasEligibleRows() || redeemForm.invalid" [cancelDisabled]="saving" (onCancelClick)="modal.hide()"></abp-modal-footer>
+    </form>
+</ng-template>
+
+<ng-template #details>
+    <abp-modal-header title="Redeem Record Details" (onCloseClick)="modal.hide()"></abp-modal-header>
+    <div class="modal-body" *ngIf="viewRecord as record">
+        <div class="row g-3 mb-4">
+            <div class="col-md-3"><strong>Record ID</strong><div>{{ record.id }}</div></div>
+            <div class="col-md-3"><strong>Redeemed by</strong><div>{{ record.redeemedBy || '-' }}</div></div>
+            <div class="col-md-3"><strong>Redeemed date</strong><div>{{ record.redeemedDate | date:'yyyy-MM-dd HH:mm' }}</div></div>
+            <div class="col-md-3"><strong>Tickets</strong><div>{{ record.numberOfTickets }}</div></div>
+            <div class="col-md-3"><strong>Total amount</strong><div>{{ record.totalAmount | number:'1.2-2' }}</div></div>
+            <div class="col-md-3"><strong>Total custody</strong><div>{{ record.totalCustody | number:'1.2-2' }}</div></div>
+            <div class="col-md-3"><strong>Total service</strong><div>{{ record.totalService | number:'1.2-2' }}</div></div>
+            <div class="col-md-3"><strong>Total discount</strong><div>{{ record.totalDiscount | number:'1.2-2' }}</div></div>
+            <div class="col-md-3"><strong>Grand total</strong><div class="fw-semibold">{{ record.grandTotal | number:'1.2-2' }}</div></div>
+        </div>
+
+        <div *ngIf="viewLoading" class="text-center text-muted p-4">
+            <i class="fas fa-spinner fa-spin me-2"></i>Loading redeemed tickets...
+        </div>
+        <div *ngIf="!viewLoading" class="table-responsive">
+            <table class="table table-sm align-middle">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Pawn ticket</th>
+                        <th>Customer name</th>
+                        <th>Customer NRIC</th>
+                        <th>Weight</th>
+                        <th>Value</th>
+                        <th>Pledged date</th>
+                        <th>Amount</th>
+                        <th>Custody</th>
+                        <th>Service charge</th>
+                        <th>Discount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ng-container *ngFor="let row of viewRows">
+                        <tr>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" (click)="toggleItems(row)" [attr.aria-label]="row.expanded ? 'Collapse pawn items' : 'Expand pawn items'">
+                                    <i class="fas" [class.fa-plus]="!row.expanded" [class.fa-minus]="row.expanded"></i>
+                                </button>
+                            </td>
+                            <td>{{ row.ticket.ticketNo || '-' }}</td>
+                            <td>{{ row.customer?.fullName || (row.ticket.customer ? 'Loading...' : '-') }}</td>
+                            <td>{{ row.customer?.nric || (row.ticket.customer ? 'Loading...' : '-') }}</td>
+                            <td>{{ row.ticket.weight | number:'1.2-2' }}</td>
+                            <td>{{ row.ticket.value | number:'1.2-2' }}</td>
+                            <td>{{ row.ticket.pledgedDate | date:'yyyy-MM-dd' }}</td>
+                            <td>{{ row.ticket.amount | number:'1.2-2' }}</td>
+                            <td>{{ row.ticket.monthlyCustody | number:'1.2-2' }}</td>
+                            <td>{{ row.ticket.serviceCharge | number:'1.2-2' }}</td>
+                            <td>{{ row.ticket.discount | number:'1.2-2' }}</td>
+                        </tr>
+                        <tr *ngIf="row.expanded">
+                            <td colspan="11">
+                                <div *ngIf="row.itemsLoading" class="small text-muted"><i class="fas fa-spinner fa-spin me-1"></i>Loading pawn items...</div>
+                                <div *ngIf="!row.itemsLoading && row.items.length === 0" class="small text-muted">No pawn items found.</div>
+                                <table *ngIf="!row.itemsLoading && row.items.length" class="table table-bordered table-sm mb-0 bg-white">
+                                    <thead><tr><th>Item number</th><th>Description</th><th>Quantity</th><th>Weight</th><th>Brand</th></tr></thead>
+                                    <tbody><tr *ngFor="let item of row.items"><td>{{ item.pawnItemNumber || '-' }}</td><td>{{ itemListingName(item) }}</td><td>{{ item.quantity }}</td><td>{{ item.weight | number:'1.2-2' }}</td><td>{{ item.brand || '-' }}</td></tr></tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    </ng-container>
+                    <tr *ngIf="viewRows.length === 0"><td colspan="11" class="text-center text-muted p-4">No linked pawn tickets found.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="modal-body text-center text-muted" *ngIf="!viewRecord">
+        <i class="fas fa-spinner fa-spin me-2"></i>Loading redeem record...
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" (click)="modal.hide()">Close</button>
+    </div>
+</ng-template>

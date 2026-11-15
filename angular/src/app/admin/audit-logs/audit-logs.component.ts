@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, Injector, ViewChild } from '@angular/core
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs/operators';
+import { BsModalService } from 'ngx-bootstrap/modal';
 import { TableModule } from 'primeng/table';
 import { LazyLoadEvent, PrimeTemplate } from 'primeng/api';
 import { Paginator, PaginatorModule } from 'primeng/paginator';
@@ -10,6 +11,7 @@ import { LocalizePipe } from '@shared/pipes/localize.pipe';
 import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { AuditLogDto, AuditLogServiceProxy } from '@shared/service-proxies/audit-log-service-proxy';
+import { AuditParametersDialogComponent } from './audit-parameters-dialog.component';
 
 @Component({
     templateUrl: './audit-logs.component.html',
@@ -30,6 +32,7 @@ export class AuditLogsComponent extends PagedListingComponentBase<AuditLogDto> {
     constructor(
         injector: Injector,
         private auditLogService: AuditLogServiceProxy,
+        private modalService: BsModalService,
         cd: ChangeDetectorRef
     ) {
         super(injector, cd);
@@ -66,4 +69,12 @@ export class AuditLogsComponent extends PagedListingComponentBase<AuditLogDto> {
     }
 
     protected delete(_record: AuditLogDto): void {}
+
+    showParameters(record: AuditLogDto): void {
+        if (!record.parameters) return;
+        this.modalService.show(AuditParametersDialogComponent, {
+            class: 'modal-lg',
+            initialState: { parameters: record.parameters },
+        });
+    }
 }

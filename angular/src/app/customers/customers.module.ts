@@ -4,6 +4,7 @@ import { CustomersRoutingModule } from './customers-routing.module';
 import { CustomersComponent } from './customers.component';
 import { CreateCustomerDialogComponent } from './create-customer/create-customer-dialog.component';
 import { EditCustomerDialogComponent } from './edit-customer/edit-customer-dialog.component';
+import { AuthorizedPersonDialogComponent } from './authorized-person/authorized-person-dialog.component';
 import { CommonModule } from '@angular/common';
 
 @NgModule({
@@ -14,6 +15,7 @@ import { CommonModule } from '@angular/common';
         CustomersComponent,
         CreateCustomerDialogComponent,
         EditCustomerDialogComponent,
+        AuthorizedPersonDialogComponent,
     ],
 })
 export class CustomersModule {}

@@ -1,5 +1,6 @@
 using Abp.Application.Services;
 using Abp.Application.Services.Dto;
+using Abp.Auditing;
 using Abp.Authorization;
 using Abp.Domain.Repositories;
 using Abp.Linq.Extensions;
@@ -23,6 +24,7 @@ public class BasicCodeAppService : ApplicationService, IBasicCodeAppService
         _repository = repository;
     }
 
+    [DisableAuditing]
     public async Task<PagedResultDto<BasicCodeDto>> GetAll(PagedBasicCodeResultRequestDto input)
     {
 
@@ -39,6 +41,7 @@ public class BasicCodeAppService : ApplicationService, IBasicCodeAppService
         return new PagedResultDto<BasicCodeDto>(totalCount, dtos);
     }
 
+    [DisableAuditing]
     public async Task<GetBasicCodeForEditOutput> GetViaIdForEdit(EntityDto<int> input)
     {
         await PermissionChecker.AuthorizeAsync(PermissionNames.Pages_BasicCodes);
@@ -86,6 +89,7 @@ public class BasicCodeAppService : ApplicationService, IBasicCodeAppService
         await _repository.DeleteAsync(input.Id);
     }
 
+    [DisableAuditing]
     public async Task<ListResultDto<BasicCodeLookupDto>> GetBasicCodesForLookup()
     {
         var basicCodes = await _repository.GetAllListAsync();
@@ -100,6 +104,7 @@ public class BasicCodeAppService : ApplicationService, IBasicCodeAppService
         return new ListResultDto<BasicCodeLookupDto>(lookup);
     }
 
+    [DisableAuditing]
     public async Task<ListResultDto<BasicCodeLookupDto>> GetBasicCodesByCategory(int? categoryId)
     {
         var basicCodes = await _repository.GetAllListAsync();

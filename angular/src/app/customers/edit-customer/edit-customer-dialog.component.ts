@@ -8,7 +8,7 @@ import { AbpModalHeaderComponent } from '../../../shared/components/modal/abp-mo
 import { AbpValidationSummaryComponent } from '../../../shared/components/validation/abp-validation.summary.component';
 import { AbpModalFooterComponent } from '../../../shared/components/modal/abp-modal-footer.component';
 import { LocalizePipe } from '@shared/pipes/localize.pipe';
-import { CustomerServiceProxy, CustomerCDDServiceProxy, CreateOrEditCustomerDto, CreateOrEditCustomerCDDDto, SearchCDDDto, CustomerCDD, GetCustomerForEditOutput, BasicCodeServiceProxy, BasicCodeLookupDto, Country, CountryServiceProxy, MiscMasterConfigServiceProxy, MiscMasterConfigLookupDto, CustomerPicture, CustomerOutletDto, CreateOrEditCustomerOutletDto, GeneralSetup, PawnTicketServiceProxy } from '@shared/service-proxies/service-proxies';
+import { CustomerServiceProxy, CustomerCDDServiceProxy, AuthorizedPeopleServiceProxy, CreateOrEditCustomerDto, CreateOrEditCustomerCDDDto, SearchCDDDto, CustomerCDD, GetCustomerForEditOutput, BasicCodeServiceProxy, BasicCodeLookupDto, Country, CountryServiceProxy, MiscMasterConfigServiceProxy, MiscMasterConfigLookupDto, CustomerPicture, CustomerOutletDto, CreateOrEditCustomerOutletDto, GeneralSetup, PawnTicketServiceProxy, PawnTicketWithRedeemStatusDto, AuthorizedPeople } from '@shared/service-proxies/service-proxies';
 import { LookupServiceProxy } from '@shared/service-proxies/lookup-service-proxy';
 import { CustomerPictureServiceProxy } from '@shared/service-proxies/customer-picture-service-proxy';
 import { OutletServiceProxy } from '@shared/service-proxies/outlet-service-proxy';
@@ -20,6 +20,7 @@ import { NgIf, NgFor } from '@angular/common';
 import { DropdownModule } from 'primeng/dropdown';
 import moment from 'moment';
 import { HighRiskCustomerWarningDialogComponent } from '../high-risk-customer-warning-dialog.component';
+import { AuthorizedPersonDialogComponent } from '../authorized-person/authorized-person-dialog.component';
 
 @Component({
     templateUrl: './edit-customer-dialog.component.html',
@@ -48,6 +49,9 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
     outletOptions: { label: string; value: number }[] = [];
     customerOutlets: CustomerOutletDto[] = [];
     selectedOutlet?: number;
+    authorizedPeople: AuthorizedPeople[] = [];
+    pawnTickets: PawnTicketWithRedeemStatusDto[] = [];
+    loadingPawnTickets = false;
 
     onSave = output<EventEmitter<any>>();
 
@@ -55,6 +59,7 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
         injector: Injector,
         private _customerService: CustomerServiceProxy,
         private _customerCDDService: CustomerCDDServiceProxy,
+        private _authorizedPeopleService: AuthorizedPeopleServiceProxy,
         private _pawnTicketService: PawnTicketServiceProxy,
         private _modalService: BsModalService,
         private _lookupService: LookupServiceProxy,
@@ -88,6 +93,7 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
                 this.updateAge();
                 this.loadCustomerCDD();
                 this.loadCustomerOutlets();
+                this.loadAuthorizedPeople();
                 this.loadCustomerPictures();
                 this.cd.detectChanges();
             }, (error) => {
@@ -113,6 +119,78 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
         this._customerService.getCustomerOutletViaCustomerId(this.id).subscribe((result) => {
             this.customerOutlets = result || [];
             this.cd.detectChanges();
+        });
+    }
+
+    private loadAuthorizedPeople(): void {
+        if (!this.id) return;
+        this._authorizedPeopleService.getByCustomerId(this.id).subscribe(
+            (result) => {
+                this.authorizedPeople = result ? [result] : [];
+                this.cd.detectChanges();
+            },
+            (error) => this.notify.error(error?.error?.error?.message || error?.error?.message || 'Unable to load authorized people.')
+        );
+    }
+
+    loadPawnTickets(): void {
+        if (!this.id) return;
+
+        this.loadingPawnTickets = true;
+        this._pawnTicketService.getAllTicketsForCustomer(this.id).subscribe(
+            (result) => {
+                this.pawnTickets = result || [];
+                this.loadingPawnTickets = false;
+                this.cd.detectChanges();
+            },
+            (error) => {
+                this.loadingPawnTickets = false;
+                this.notify.error(error?.error?.error?.message || error?.error?.message || 'Unable to load pawn tickets.');
+                this.cd.detectChanges();
+            }
+        );
+    }
+
+    isTicketRedeemed(ticket: PawnTicketWithRedeemStatusDto): boolean {
+        return !!ticket.createOrEditRedeemRecordDto?.redeemedDate;
+    }
+
+    formatTicketDate(value: moment.Moment | undefined): string {
+        return value ? moment(value).format('DD/MM/YYYY') : '-';
+    }
+
+    addAuthorizedPerson(): void {
+        this.openAuthorizedPersonDialog();
+    }
+
+    editAuthorizedPerson(person: AuthorizedPeople): void {
+        this.openAuthorizedPersonDialog(person);
+    }
+
+    private openAuthorizedPersonDialog(person?: AuthorizedPeople): void {
+        if (!this.id) return;
+
+        const dialog = this._modalService.show(AuthorizedPersonDialogComponent, {
+            class: 'modal-xl',
+            initialState: {
+                customerId: this.id,
+                source: person,
+            },
+        });
+        dialog.content.onSave.subscribe(() => this.loadAuthorizedPeople());
+    }
+
+    deleteAuthorizedPerson(person: AuthorizedPeople): void {
+        if (!person.id) return;
+        abp.message.confirm(`Delete authorized person ${person.fullName || ''}?`, undefined, (confirmed: boolean) => {
+            if (!confirmed) return;
+            this._authorizedPeopleService.delete(person.id).subscribe(
+                () => {
+                    this.notify.info(this.l('SuccessfullyDeleted'));
+                    this.loadAuthorizedPeople();
+                },
+                (error) => this.notify.error(error?.error?.error?.message || error?.error?.message || 'Unable to delete authorized person.')
+            );
         });
     }
 

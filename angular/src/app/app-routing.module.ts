@@ -71,6 +71,12 @@ import { GeneralSetupComponent } from './admin/general-setup/general-setup.compo
                         canActivate: [AppRouteGuard],
                     },
                     {
+                        path: 'redeem-records',
+                        loadChildren: () => import('./redeem-records/redeem-records.module').then((m) => m.RedeemRecordsModule),
+                        data: { permission: 'Pages.PawnTickets' },
+                        canActivate: [AppRouteGuard],
+                    },
+                    {
                         path: 'basic-codes',
                         loadChildren: () => import('./basic-codes/basic-codes.module').then((m) => m.BasicCodesModule),
                         data: { permission: 'Pages.BasicCodes' },

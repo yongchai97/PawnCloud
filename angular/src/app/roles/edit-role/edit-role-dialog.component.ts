@@ -1,6 +1,7 @@
 import { Component, Injector, OnInit, EventEmitter, Output, ChangeDetectorRef } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
 import { forEach as _forEach, includes as _includes, map as _map } from 'lodash-es';
+import { NgTemplateOutlet } from '@angular/common';
 import { AppComponentBase } from '@shared/app-component-base';
 import {
     RoleServiceProxy,
@@ -17,14 +18,48 @@ import { AbpValidationSummaryComponent } from '../../../shared/components/valida
 import { AbpModalFooterComponent } from '../../../shared/components/modal/abp-modal-footer.component';
 import { LocalizePipe } from '@shared/pipes/localize.pipe';
 
+interface PermissionTreeNode<T extends { name: string | undefined }> {
+    permission: T;
+    children: PermissionTreeNode<T>[];
+    depth: number;
+}
+
 @Component({
     templateUrl: 'edit-role-dialog.component.html',
     standalone: true,
+    styles: [`
+        .permission-tree {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .permission-tree .permission-tree {
+            border-left: 1px solid #dee2e6;
+            margin-left: 0.75rem;
+            padding-left: 1.25rem;
+        }
+
+        .permission-tree li {
+            position: relative;
+            padding: 0.35rem 0;
+        }
+
+        .permission-tree .permission-tree > li::before {
+            border-top: 1px solid #dee2e6;
+            content: '';
+            left: -1.25rem;
+            position: absolute;
+            top: 1rem;
+            width: 1rem;
+        }
+    `],
     imports: [
         FormsModule,
         AbpModalHeaderComponent,
         TabsetComponent,
         TabDirective,
+        NgTemplateOutlet,
         AbpValidationSummaryComponent,
         AbpModalFooterComponent,
         LocalizePipe,
@@ -37,6 +72,7 @@ export class EditRoleDialogComponent extends AppComponentBase implements OnInit 
     id: number;
     role = new RoleEditDto();
     permissions: FlatPermissionDto[];
+    permissionTree: PermissionTreeNode<FlatPermissionDto>[] = [];
     grantedPermissionNames: string[];
     checkedPermissionsMap: { [key: string]: boolean } = {};
 
@@ -52,7 +88,8 @@ export class EditRoleDialogComponent extends AppComponentBase implements OnInit 
     ngOnInit(): void {
         this._roleService.getRoleForEdit(this.id).subscribe((result: GetRoleForEditOutput) => {
             this.role = result.role;
-            this.permissions = result.permissions;
+            this.permissions = result.permissions || [];
+            this.permissionTree = this.buildPermissionTree(this.permissions);
             this.grantedPermissionNames = result.grantedPermissionNames;
             this.setInitialPermissionsStatus();
             this.cd.detectChanges();
@@ -66,11 +103,51 @@ export class EditRoleDialogComponent extends AppComponentBase implements OnInit 
     }
 
     isPermissionChecked(permissionName: string): boolean {
-        return _includes(this.grantedPermissionNames, permissionName);
+        const checked = this.checkedPermissionsMap[permissionName];
+        return checked === undefined ? _includes(this.grantedPermissionNames, permissionName) : checked;
+    }
+
+    private buildPermissionTree<T extends { name: string | undefined }>(permissions: T[]): PermissionTreeNode<T>[] {
+        const nodes = new Map<string, PermissionTreeNode<T>>();
+        const roots: PermissionTreeNode<T>[] = [];
+
+        permissions.forEach((permission) => {
+            if (permission.name) {
+                nodes.set(permission.name, { permission, children: [], depth: 0 });
+            }
+        });
+
+        permissions.forEach((permission) => {
+            if (!permission.name) return;
+
+            const node = nodes.get(permission.name);
+            if (!node) return;
+
+            const separatorIndex = permission.name.lastIndexOf('.');
+            const parentName = separatorIndex > 0 ? permission.name.substring(0, separatorIndex) : undefined;
+            const parent = parentName ? nodes.get(parentName) : undefined;
+
+            if (parent) {
+                node.depth = parent.depth + 1;
+                parent.children.push(node);
+            } else {
+                roots.push(node);
+            }
+        });
+
+        return roots;
     }
 
     onPermissionChange(permission: FlatPermissionDto, $event) {
-        this.checkedPermissionsMap[permission.name] = $event.target.checked;
+        if (!permission.name) return;
+
+        const checked = $event.target.checked;
+        const descendantPrefix = `${permission.name}.`;
+        this.permissions.forEach((item) => {
+            if (item.name === permission.name || item.name?.startsWith(descendantPrefix)) {
+                this.checkedPermissionsMap[item.name] = checked;
+            }
+        });
     }
 
     getCheckedPermissions(): string[] {
