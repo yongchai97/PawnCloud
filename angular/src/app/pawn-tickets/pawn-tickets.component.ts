@@ -46,6 +46,7 @@ export class PawnTicketsComponent extends AppComponentBase {
     newPaymentAmount = 0;
     newPaymentMethod?: number;
     customers: CustomerLookupDto[] = [];
+    customerLookup = new Map<number, CustomerLookupDto>();
     selectedCustomer?: CreateOrEditCustomerDto;
     customerCDD = new CreateOrEditCustomerCDDDto();
     loadingCustomerCDD = false;
@@ -179,7 +180,18 @@ export class PawnTicketsComponent extends AppComponentBase {
     }
 
     loadCustomers(): void {
-        this.lookup.getCustomersForLookup(this.customerFilter).pipe(finalize(() => this.completeInitialLoad())).subscribe((result) => (this.customers = result.items || []));
+        this.lookup.getCustomersForLookup(this.customerFilter).pipe(finalize(() => this.completeInitialLoad())).subscribe((result) => {
+            this.customers = result.items || [];
+            this.customers.forEach((customer) => this.customerLookup.set(customer.id, customer));
+        });
+    }
+
+    customerName(customerId: number | undefined): string {
+        return customerId ? this.customerLookup.get(customerId)?.fullName || '-' : '-';
+    }
+
+    customerNric(customerId: number | undefined): string {
+        return customerId ? this.customerLookup.get(customerId)?.nric || '-' : '-';
     }
 
     selectCustomer(onAllowed?: () => void): void {

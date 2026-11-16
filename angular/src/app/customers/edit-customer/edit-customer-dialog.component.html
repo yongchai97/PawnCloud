@@ -18,7 +18,7 @@
                 <input pInputText class="w-100" id="FullName" name="fullName" [(ngModel)]="customer.fullName" (blur)="checkCustomerCDD()" required />
             </div>
 
-            <div class="col-md-4 form-group"><label for="Nric">{{ 'NRIC' | localize }}</label><input pInputText class="w-100" id="Nric" name="nric" [(ngModel)]="customer.nric" (ngModelChange)="readBirthDateFromNric()" /></div>
+            <div class="col-md-4 form-group"><label for="Nric">{{ 'NRIC' | localize }}</label><input pInputText class="w-100" id="Nric" name="nric" [(ngModel)]="customer.nric" (ngModelChange)="readBirthDateFromNric()" [readonly]="customerOnly" /></div>
             <div class="col-md-4 form-group"><label for="PassportNo">{{ 'PassportNo' | localize }}</label><input pInputText class="w-100" id="PassportNo" name="passportNo" [(ngModel)]="customer.passportNo" /></div>
             <div class="col-md-4 form-group"><label for="OldIC">Old IC</label><input pInputText class="w-100" id="OldIC" name="oldIC" [(ngModel)]="customer.oldIC" /></div>
 
@@ -295,7 +295,7 @@
 
             </tab>
 
-            <tab heading="Customer Risk Profiling (CDD)">
+            <tab *ngIf="!customerOnly" heading="Customer Risk Profiling (CDD)">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h6 class="mb-0 text-muted">Customer Risk Profiling</h6>
                     <div class="d-flex align-items-center gap-2">
@@ -475,7 +475,7 @@
                 </div>
             </tab>
 
-            <tab heading="Authorized People">
+            <tab *ngIf="!customerOnly" heading="Authorized People">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
                         <h6 class="mb-1 text-muted">Authorized People</h6>
@@ -525,7 +525,7 @@
                 </ng-template>
             </tab>
 
-            <tab heading="Pawn Ticket" (selectTab)="loadPawnTickets()">
+            <tab *ngIf="!customerOnly" heading="Pawn Ticket" (selectTab)="loadPawnTickets()">
                 <div *ngIf="loadingPawnTickets" class="text-center text-muted py-5">
                     <i class="fas fa-spinner fa-spin fa-lg mb-2"></i>
                     <div>Loading pawn tickets...</div>

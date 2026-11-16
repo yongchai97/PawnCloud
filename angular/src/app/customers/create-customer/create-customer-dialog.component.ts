@@ -72,6 +72,10 @@ export class CreateCustomerDialogComponent extends AppComponentBase implements O
                 value: country.id,
             }));
             this.nationalityOptions = this.countryOptions;
+            const malaysia = countries?.find((country) => country.countryCodeThreeAlphabet?.toUpperCase() === 'MYS' || country.countryName?.toLowerCase().includes('malaysia'));
+            if (malaysia && !this.customer.nationality) {
+                this.customer.nationality = malaysia.id;
+            }
             this.cd.detectChanges();
         });
     }

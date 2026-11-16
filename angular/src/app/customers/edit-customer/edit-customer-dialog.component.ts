@@ -34,6 +34,7 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
     checkingCDD = false;
     private lastCheckedCustomerName = '';
     id?: number;
+    customerOnly = false;
 
     // BasicCode dropdowns
     countryOptions: { label: string; value: number }[] = [];
@@ -82,26 +83,28 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
         this.loadOutlets();
         this.customerCDD.approvedBy = this.appSession.userId;
         this.customerCDD.pepStatus = false;
-        if (this.id) {
-            this._customerService.getViaIdForEdit(this.id).subscribe((result: GetCustomerForEditOutput) => {
-                this.customer = result.customer;
-                this.customer.monthlyIncome = this.customer.monthlyIncome ?? 0;
-                if (this.customer.birthDate) {
-                    this.customer.birthDate = moment(this.customer.birthDate).format('YYYY-MM-DD') as any;
-                }
-                this.readBirthDateFromNric();
-                this.updateAge();
+        if (!this.id) return;
+
+        this._customerService.getViaIdForEdit(this.id).subscribe((result: GetCustomerForEditOutput) => {
+            this.customer = result.customer;
+            this.customer.monthlyIncome = this.customer.monthlyIncome ?? 0;
+            if (this.customer.birthDate) {
+                this.customer.birthDate = moment(this.customer.birthDate).format('YYYY-MM-DD') as any;
+            }
+            this.readBirthDateFromNric();
+            this.updateAge();
+            if (!this.customerOnly) {
                 this.loadCustomerCDD();
                 this.loadCustomerOutlets();
                 this.loadAuthorizedPeople();
                 this.loadCustomerPictures();
-                this.cd.detectChanges();
-            }, (error) => {
-                const message = error?.error?.error?.message || error?.error?.message || error?.message || 'Unable to load customer for editing.';
-                this.notify.error(message);
-                this.bsModalRef.hide();
-            });
-        }
+            }
+            this.cd.detectChanges();
+        }, (error) => {
+            const message = error?.error?.error?.message || error?.error?.message || error?.message || 'Unable to load customer for editing.';
+            this.notify.error(message);
+            this.bsModalRef.hide();
+        });
     }
 
     private loadOutlets(): void {
@@ -228,6 +231,10 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
                 value: country.id,
             }));
             this.nationalityOptions = this.countryOptions;
+            const malaysia = countries?.find((country) => country.countryCodeThreeAlphabet?.toUpperCase() === 'MYS' || country.countryName?.toLowerCase().includes('malaysia'));
+            if (malaysia && !this.customer.nationality) {
+                this.customer.nationality = malaysia.id;
+            }
             this.cd.detectChanges();
         });
     }
@@ -334,6 +341,11 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
 
     checkCustomerCDD(onCompleted?: () => void): void {
         const customerName = (this.customer.fullName || '').trim();
+        if (this.customerOnly) {
+            this.lastCheckedCustomerName = customerName;
+            onCompleted?.();
+            return;
+        }
         if (!customerName || this.checkingCDD || customerName === this.lastCheckedCustomerName) {
             return;
         }
@@ -452,6 +464,22 @@ export class EditCustomerDialogComponent extends AppComponentBase implements OnI
         const birthDate = this.customer.birthDate as any;
         this.customer.birthDate = birthDate ? (moment.isMoment(birthDate) ? birthDate : moment(birthDate)) : (undefined as any);
         this.customer.id = this.id;
+        if (this.customerOnly) {
+            this._customerService.createOrEdit(this.customer).subscribe(
+                () => {
+                    this.notify.info(this.l('SavedSuccessfully'));
+                    this.bsModalRef.hide();
+                    this.onSave.emit(null);
+                },
+                (error) => {
+                    this.saving = false;
+                    const message = error?.error?.error?.message || error?.error?.message || error?.message || 'Unable to save customer.';
+                    this.notify.error(message);
+                    this.cd.detectChanges();
+                }
+            );
+            return;
+        }
         this._customerService.createOrEdit(this.customer).subscribe(
             (customerId) => {
                 this.customerCDD.customer = customerId;

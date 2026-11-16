@@ -7,6 +7,7 @@ using Abp.Zero.Configuration;
 using PawnCloud.Authentication.JwtBearer;
 using PawnCloud.AuditLogs;
 using PawnCloud.Configuration;
+using PawnCloud.CustomerCDDs;
 using PawnCloud.EntityFrameworkCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
@@ -67,12 +68,15 @@ namespace PawnCloud
         {
             IocManager.RegisterAssemblyByConvention(typeof(PawnCloudWebCoreModule).GetAssembly());
             IocManager.Register<AuditLogCleanupWorker>();
+            IocManager.Register<CustomerCDDRefreshWorker>();
         }
 
         public override void PostInitialize()
         {
             IocManager.Resolve<Abp.Threading.BackgroundWorkers.IBackgroundWorkerManager>()
                 .Add(IocManager.Resolve<AuditLogCleanupWorker>());
+            IocManager.Resolve<Abp.Threading.BackgroundWorkers.IBackgroundWorkerManager>()
+                .Add(IocManager.Resolve<CustomerCDDRefreshWorker>());
 
             IocManager.Resolve<ApplicationPartManager>()
                 .AddApplicationPartsIfNotAddedBefore(typeof(PawnCloudWebCoreModule).Assembly);

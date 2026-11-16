@@ -15,13 +15,13 @@
             <div class="card position-relative" *ngIf="!pageLoading">
                 <div class="card-body table-responsive p-0">
                     <table class="table table-hover text-nowrap">
-                        <thead><tr><th>{{ 'TicketNo' | localize }}</th><th>{{ 'Customer' | localize }}</th><th>{{ 'Weight' | localize }}</th><th>{{ 'Value' | localize }}</th><th>{{ 'ExpiryDate' | localize }}</th><th>{{ 'Actions' | localize }}</th></tr></thead>
+                        <thead><tr><th>{{ 'TicketNo' | localize }}</th><th>Customer name</th><th>Customer NRIC</th><th>{{ 'Weight' | localize }}</th><th>{{ 'Value' | localize }}</th><th>{{ 'ExpiryDate' | localize }}</th><th>{{ 'Actions' | localize }}</th></tr></thead>
                         <tbody>
                             <tr *ngFor="let row of tickets">
-                                <td>{{ row.ticketNo }}</td><td>{{ row.customer }}</td><td>{{ row.weight }}</td><td>{{ row.value }}</td><td>{{ row.expiryDate | date }}</td>
+                                <td>{{ row.ticketNo }}</td><td>{{ customerName(row.customer) }}</td><td>{{ customerNric(row.customer) }}</td><td>{{ row.weight }}</td><td>{{ row.value }}</td><td>{{ row.expiryDate | date }}</td>
                                 <td><button type="button" class="btn btn-sm btn-outline-primary me-2" (click)="openEdit(row)" [disabled]="ticketsLoading" aria-label="Edit"><i class="fas fa-edit"></i></button><button type="button" class="btn btn-sm btn-outline-danger" (click)="deleteTicket(row)" [disabled]="ticketsLoading" aria-label="Delete"><i class="fas fa-trash"></i></button></td>
                             </tr>
-                            <tr *ngIf="tickets.length === 0"><td colspan="6" class="text-center p-4">{{ 'NoData' | localize }}</td></tr>
+                            <tr *ngIf="tickets.length === 0"><td colspan="7" class="text-center p-4">{{ 'NoData' | localize }}</td></tr>
                         </tbody>
                     </table>
                 </div>

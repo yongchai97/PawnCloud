@@ -5,7 +5,9 @@ import { BsModalService } from 'ngx-bootstrap/modal';
 import moment from 'moment';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { AppComponentBase } from '@shared/app-component-base';
+import { LookupServiceProxy } from '@shared/service-proxies/lookup-service-proxy';
 import {
+    AuthorizedPeopleServiceProxy,
     CheckIfAuthorized,
     CreateOrEditCustomerDto,
     CreateOrEditPawnTicketDto,
@@ -24,6 +26,7 @@ import { AbpModalFooterComponent } from '@shared/components/modal/abp-modal-foot
 import { AbpModalHeaderComponent } from '@shared/components/modal/abp-modal-header.component';
 import { AbpValidationSummaryComponent } from '@shared/components/validation/abp-validation.summary.component';
 import { InputTextModule } from 'primeng/inputtext';
+import { EditCustomerDialogComponent } from '@app/customers/edit-customer/edit-customer-dialog.component';
 
 interface RedeemTicketRow {
     ticket: CreateOrEditPawnTicketDto;
@@ -52,6 +55,7 @@ export class RedeemRecordsComponent extends AppComponentBase {
     rows: RedeemTicketRow[] = [];
     redeemRecord = new CreateOrEditRedeemRecordDto();
     authorizedName = '';
+    identifiedCustomerId?: number;
     nameLoading = false;
     ticketNumber = '';
     compareTicketNumber = '';
@@ -71,6 +75,8 @@ export class RedeemRecordsComponent extends AppComponentBase {
         injector: Injector,
         private redeemRecordService: RedeemRecordServiceProxy,
         private customerService: CustomerServiceProxy,
+        private lookupService: LookupServiceProxy,
+        private authorizedPeopleService: AuthorizedPeopleServiceProxy,
         private pawnItemService: PawnItemServiceProxy,
         private pawnTicketService: PawnTicketServiceProxy,
         private modal: BsModalService,
@@ -175,6 +181,7 @@ export class RedeemRecordsComponent extends AppComponentBase {
     private resetCreateForm(): void {
         this.rows = [];
         this.authorizedName = '';
+        this.identifiedCustomerId = undefined;
         this.nameLoading = false;
         this.ticketNumber = '';
         this.compareTicketNumber = '';
@@ -194,6 +201,7 @@ export class RedeemRecordsComponent extends AppComponentBase {
         const redeemedBy = (value || '').trim();
         this.redeemRecord.redeemedBy = value;
         this.authorizedName = '';
+        this.identifiedCustomerId = undefined;
         this.rows = [];
         this.ticketNumber = '';
         this.compareTicketNumber = '';
@@ -214,6 +222,7 @@ export class RedeemRecordsComponent extends AppComponentBase {
                 this.authorizedName = (name || '').trim();
                 this.nameLoading = false;
                 this.resetTotals();
+                this.resolveIdentifiedCustomer(redeemedBy, requestId);
                 this.cd.detectChanges();
             },
             (error) => {
@@ -223,6 +232,46 @@ export class RedeemRecordsComponent extends AppComponentBase {
                 this.cd.detectChanges();
             }
         );
+    }
+    private resolveIdentifiedCustomer(nric: string, requestId: number): void {
+        this.lookupService.getCustomersForLookup(nric).subscribe(
+            (result) => {
+                if (requestId !== this.nameRequestId || this.redeemRecord.redeemedBy?.trim() !== nric) return;
+                const directCustomer = (result.items || []).find((customer) => customer.nric?.trim().toLowerCase() === nric.toLowerCase());
+                if (directCustomer?.id) {
+                    this.identifiedCustomerId = directCustomer.id;
+                    this.cd.detectChanges();
+                    return;
+                }
+
+                this.authorizedPeopleService.getAll().subscribe((people) => {
+                    if (requestId !== this.nameRequestId || this.redeemRecord.redeemedBy?.trim() !== nric) return;
+                    const authorizedPerson = (people || []).find((person) => person.nric?.trim().toLowerCase() === nric.toLowerCase());
+                    this.identifiedCustomerId = authorizedPerson?.customer;
+                    this.cd.detectChanges();
+                });
+            },
+            () => undefined
+        );
+    }
+
+    openCustomerEditor(): void {
+        if (!this.identifiedCustomerId) return;
+        const dialog = this.modal.show(EditCustomerDialogComponent, {
+            class: 'modal-xl',
+            initialState: {
+                id: this.identifiedCustomerId,
+                customerOnly: true,
+            },
+        });
+        dialog.content.onSave.subscribe(() => {
+            const redeemedBy = (this.redeemRecord.redeemedBy || '').trim();
+            if (!redeemedBy) return;
+            this.redeemRecordService.getNameOfTheAuthorized(redeemedBy, undefined).subscribe((name) => {
+                this.authorizedName = (name || '').trim();
+                this.cd.detectChanges();
+            });
+        });
     }
 
     verifyTicket(): void {
