@@ -48,6 +48,7 @@ public static class PermissionNames
     public const string Pages_PrivateBlackLists_Edit = "Pages.PrivateBlackLists.Edit";
     public const string Pages_PrivateBlackLists_Delete = "Pages.PrivateBlackLists.Delete";
 
+    public const string Pages_PawnRequestPermissions = "Pages.PawnRequestPermissions";
 
     public const string Pages_MiscFunctions = "Pages.MiscFunctions";
 

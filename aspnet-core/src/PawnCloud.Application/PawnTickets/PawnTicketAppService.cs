@@ -12,6 +12,8 @@ using PawnCloud.DailyGoldPrices;
 using PawnCloud.GeneralSetups;
 using PawnCloud.GoldTypes;
 using PawnCloud.PawnItems;
+using PawnCloud.PawnRequestPermissions;
+using PawnCloud.PawnRequestPermissions.Dto;
 using PawnCloud.PawnTicketPayments;
 using PawnCloud.PawnTickets.Dto;
 using PawnCloud.RedeemRecords;
@@ -41,6 +43,7 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
     private readonly IRepository<UserOutlet> _UserOutlet;
     private readonly IRepository<RedeemRecordTicket> _RedeemRecordTicket;
     private readonly IRepository<RedeemRecord> _RedeemRecord;
+    private readonly IRepository<PawnRequestPermission> _PawnRequestPermission;
 
     public PawnTicketAppService(
         IRepository<PawnTicket, int> repository,
@@ -55,7 +58,8 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
         IRepository<PawnTicketDocument> pawnTicketDocumentRepository,
         IRepository<UserOutlet> UserOutlet,
         IRepository<RedeemRecordTicket> RedeemRecordTicket,
-        IRepository<RedeemRecord> RedeemRecord)
+        IRepository<RedeemRecord> RedeemRecord,
+        IRepository<PawnRequestPermission> pawnRequestPermissionRepository)
     {
         _repository = repository;
         _PawnItem = pawnItemRepository;
@@ -66,6 +70,7 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
         _GeneralSetupTable = generalSetupTable;
         _CustomerCDD = customerCDDRepository;
         _PawnTicketPayment = pawnTicketPaymentRepository;
+        _PawnRequestPermission = pawnRequestPermissionRepository;
         _RedeemRecordTicket = RedeemRecordTicket;
         _PawnTicketDocument = pawnTicketDocumentRepository;
         _UserOutlet = UserOutlet;
@@ -138,7 +143,7 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
             var entity = await _repository.GetAsync(input.Id.Value);
             if(entity != null)
             {
-                entity.TicketNo = input.TicketNo;
+                //entity.TicketNo = input.TicketNo;
                 entity.Customer = input.Customer;
                 entity.weight = input.weight;
                 entity.value = input.value;
@@ -167,14 +172,84 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
             return entity.Id;
         }
     }
-
-    public async Task Delete(EntityDto<int> input)
+    public async Task<string> BackdoorEditTicketNumber(CreateOrEditPawnTicketDto input, string newTicketNumber)
     {
-        //await PermissionChecker.AuthorizeAsync(PermissionNames.Pages_PawnTickets_Delete);
-        await _PawnTicketDocument.DeleteAsync(x => x.PawnTicket == input.Id);
-        await _PawnTicketPayment.DeleteAsync(x => x.PawnTicket == input.Id);
-        await _PawnItem.DeleteAsync(x=>x.PawnTicket == input.Id);
-        await _repository.DeleteAsync(input.Id);
+        var entity = await _repository.GetAsync(input.Id.Value);
+        if(entity == null)
+        {
+            return "Error: Pawn Ticket Not Found";
+        }
+        var correspondingRequestPermission = await _PawnRequestPermission.GetAll().Where(x=>x.TicketNo == entity.TicketNo && x.request == "EDIT").ToListAsync();
+        if (correspondingRequestPermission == null)
+        {
+            var newRequestPermission = new CreateOrEditPawnRequestPermissionDto
+            {
+                TicketNo = entity.TicketNo,
+                Customer = entity.Customer,
+                request = "EDIT",
+                approvalStatus = "PENDING",
+                requestedBy = (int)AbpSession.UserId,
+                approvedBy = null,
+                newTicketNo = newTicketNumber
+            };
+            await GeneratePawnRequestPermission(newRequestPermission);
+            return "This Operation requires approval,a request has been generated out for you. Kindly check the approval requests or consult managers with the necessary permissions.";
+        }
+        else
+        {
+            if (correspondingRequestPermission.FirstOrDefault(x => x.approvalStatus == "APPROVED") != null)
+            {
+                entity.TicketNo = newTicketNumber;
+                await _repository.UpdateAsync(entity);
+                return "Pawn Ticket Number Updated Successfully";
+            }
+            else
+            {
+                return "This Operation requires approval. Kindly check the approval requests or consult managers with the necessary permissions.";
+            }
+        }
+    }
+    public async Task<string> Delete(EntityDto<int> input)
+    {
+        var pawnticket = await _repository.FirstOrDefaultAsync(input.Id);
+        if(pawnticket == null)
+        {
+            return "Error: Pawn Ticket Not Found";
+
+        }
+        var correspondingRequestPermission = await _PawnRequestPermission.FirstOrDefaultAsync(x => x.TicketNo == pawnticket.TicketNo && x.request == "DELETE");
+        if(correspondingRequestPermission == null)
+        {
+            var newRequestPermission = new CreateOrEditPawnRequestPermissionDto
+            {
+                TicketNo = pawnticket.TicketNo,
+                Customer = pawnticket.Customer,
+                request = "DELETE",
+                approvalStatus = "PENDING",
+                requestedBy = (int)AbpSession.UserId,
+                approvedBy = null,
+                newTicketNo = null
+            };
+            await GeneratePawnRequestPermission(newRequestPermission);
+            return "This operation required approval, a request has been generated out for you. Kindly check the approval requests.or consult managers with the necessary permissions.";
+        }
+        else
+        {
+            switch(correspondingRequestPermission.approvalStatus)
+            {
+                case "APPROVED":
+                    await _PawnTicketDocument.DeleteAsync(x => x.PawnTicket == input.Id);
+                    await _PawnTicketPayment.DeleteAsync(x => x.PawnTicket == input.Id);
+                    await _PawnItem.DeleteAsync(x => x.PawnTicket == input.Id);
+                    await _repository.DeleteAsync(input.Id);
+                    return "Pawn Ticket Deleted Successfully";
+                    break;
+                default:
+                    return "Error: This operation required approval, Kindly check the approval requests.or consult managers with the necessary permissions.";
+                    break;
+            }
+
+        }
     }
 
     public async Task<ListResultDto<PawnTicketLookupDto>> GetPawnTicketsForLookup()
@@ -212,11 +287,38 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
         var generalSetup = await _GeneralSetup.FirstOrDefaultAsync(x=>x.Id == input.Ticket.GeneralSetup);
         var dailyGoldPrices = await _DailyGoldPrice.GetAll().Where(x => x.effectiveDate <= input.Ticket.pledgedDate)
             .OrderByDescending(x => x.effectiveDate).FirstOrDefaultAsync();
+        var correspondingRequestPermission = await _PawnRequestPermission.GetAll().Where(x => x.TicketNo == input.Ticket.TicketNo).ToListAsync();
         if (generalSetup != null && dailyGoldPrices != null)
         {
             if (input.Ticket.amount / input.Ticket.weight > dailyGoldPrices.inputPrice * generalSetup.maximumAllowedPercentage / 100)
             {
-                return "Error: The amount per weight exceeds the maximum allowed percentage of the daily gold price.";
+                var existingRequest = correspondingRequestPermission.FirstOrDefault(x => x.request == "EXCEEDLIMIT");
+                if(existingRequest != null)
+                {
+                    switch(existingRequest.approvalStatus)
+                    {
+                        case "PENDING":
+                            return "Error: The amount per weight exceeds the maximum allowed percentage of the daily gold price. Approval request is still pending.";
+                        case "REJECTED":
+                            return "Error: The amount per weight exceeds the maximum allowed percentage of the daily gold price. Approval request has been rejected.";
+                        case "APPROVED":
+                            break;
+                    }
+                }
+                else
+                {
+                    CreateOrEditPawnRequestPermissionDto requestPermissionDto = new CreateOrEditPawnRequestPermissionDto
+                    {
+                        TicketNo = input.Ticket.TicketNo,
+                        Customer = input.Ticket.Customer,
+                        request = "EXCEEDLIMIT",
+                        approvalStatus = "PENDING",
+                        requestedBy = (int)AbpSession.UserId,
+                        approvedBy = null,
+                        newTicketNo = null
+                    };
+                    await GeneratePawnRequestPermission(requestPermissionDto);
+                }
             }
         }
         if (input.Ticket.Id == null)
@@ -363,5 +465,11 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
             result.Add(ticketDto);
         }
         return result;
+    }
+    private async Task GeneratePawnRequestPermission(CreateOrEditPawnRequestPermissionDto input)
+    {
+        var pawnRequestPermission = new PawnRequestPermission(input.TicketNo, input.Customer, input.request, "PENDING",
+            input.requestedBy, null, input.newTicketNo);
+        await _PawnRequestPermission.InsertAsync(pawnRequestPermission);
     }
 }

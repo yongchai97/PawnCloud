@@ -55,6 +55,7 @@ public class PawnCloudAuthorizationProvider : AuthorizationProvider
         privateBlackLists.CreateChildPermission(PermissionNames.Pages_PrivateBlackLists_Edit, L("EditPrivateBlackLists"));
         privateBlackLists.CreateChildPermission(PermissionNames.Pages_PrivateBlackLists_Delete, L("DeletePrivateBlackLists"));
 
+        var pawnRequestPermissions = context.CreatePermission(PermissionNames.Pages_PawnRequestPermissions, L("PawnRequestPermissions"));
     }
 
     private static ILocalizableString L(string name)

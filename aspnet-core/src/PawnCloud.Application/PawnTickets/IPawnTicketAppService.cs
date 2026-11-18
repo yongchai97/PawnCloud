@@ -13,7 +13,7 @@ public interface IPawnTicketAppService : IApplicationService
 
     Task<int> CreateOrEdit(CreateOrEditPawnTicketDto input);
 
-    Task Delete(EntityDto<int> input);
+    Task<string> Delete(EntityDto<int> input);
 
     Task<ListResultDto<PawnTicketLookupDto>> GetPawnTicketsForLookup();
 

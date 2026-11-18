@@ -17,6 +17,7 @@ using PawnCloud.ItemStatuses;
 using PawnCloud.MiscMasterConfigs;
 using PawnCloud.MultiTenancy;
 using PawnCloud.PawnItems;
+using PawnCloud.PawnRequestPermissions;
 using PawnCloud.PawnTicketPayments;
 using PawnCloud.PawnTickets;
 using PawnCloud.PrivateBlackLists;
@@ -54,6 +55,7 @@ public class PawnCloudDbContext : AbpZeroDbContext<Tenant, Role, User, PawnCloud
     public virtual DbSet<AuthorizedPeople> AuthorizedPeoples { get; set; }
     public virtual DbSet<RedeemRecord> RedeemRecords { get; set; }
     public virtual DbSet<RedeemRecordTicket> RedeemRecordTickets { get; set; }
+    public virtual DbSet<PawnRequestPermission> PawnRequestPermissions { get; set; }
 
     public PawnCloudDbContext(DbContextOptions<PawnCloudDbContext> options)
         : base(options)

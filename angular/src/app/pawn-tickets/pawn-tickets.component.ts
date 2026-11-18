@@ -14,7 +14,8 @@ import {
     CustomerServiceProxy,
     CreatePawnTicketWithItemsDto,
     GoldType, GoldTypeServiceProxy, ItemListing, ItemListingServiceProxy, ItemStatus,
-    ItemStatusServiceProxy, PawnItemServiceProxy, PawnTicketDto, PawnTicketPaymentServiceProxy, PawnTicketServiceProxy, CustomerCDDServiceProxy,
+    ItemStatusServiceProxy, PawnItemServiceProxy, PawnRequestPermission, PawnRequestPermissionServiceProxy, CreateOrEditPawnRequestPermissionDto,
+    PawnTicketDto, PawnTicketPaymentServiceProxy, PawnTicketServiceProxy, CustomerCDDServiceProxy, UserDto, UserServiceProxy,
 } from '@shared/service-proxies/service-proxies';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -31,6 +32,14 @@ import { TabsModule } from 'ngx-bootstrap/tabs';
 })
 export class PawnTicketsComponent extends AppComponentBase {
     tickets: PawnTicketDto[] = [];
+    permissionRequests: PawnRequestPermission[] = [];
+    permissionRequestsLoading = false;
+    permissionFilter = '';
+    permissionStatusFilter = '';
+    permissionSortField: 'ticketNo' | 'approvalStatus' = 'ticketNo';
+    permissionSortDirection: 'asc' | 'desc' = 'asc';
+    permissionActionId?: number;
+    private userNames = new Map<number, string>();
 
     outlets: GeneralSetup[] = [];
 
@@ -73,6 +82,7 @@ export class PawnTicketsComponent extends AppComponentBase {
     private customerRiskRequestId = 0;
     private readonly highRiskCustomerMessage = 'High risk profile customer without approval or customer with missing CDD detected, operation cancelled';
     private readonly ticketSaveSuccessMessage = 'Pawn Ticket and Items created successfully';
+    private readonly ticketDeleteSuccessMessage = 'Pawn Ticket Deleted Successfully';
     @ViewChild('editor') editor!: TemplateRef<any>;
 
     constructor(
@@ -82,6 +92,8 @@ export class PawnTicketsComponent extends AppComponentBase {
         private customerCDDService: CustomerCDDServiceProxy,
         private countryService: CountryServiceProxy,
         private ticketService: PawnTicketServiceProxy,
+        private permissionService: PawnRequestPermissionServiceProxy,
+        private userService: UserServiceProxy,
         private listingService: ItemListingServiceProxy,
         private statusService: ItemStatusServiceProxy,
         private goldService: GoldTypeServiceProxy,
@@ -177,6 +189,133 @@ export class PawnTicketsComponent extends AppComponentBase {
             this.completeInitialLoad();
             completeTicketRefresh();
         })).subscribe((result) => (this.tickets = result.items || []));
+    }
+
+    loadPermissionRequests(): void {
+        if (this.permissionRequestsLoading) return;
+        this.permissionRequestsLoading = true;
+        this.permissionService.getAllPawnRequestPermissions().pipe(finalize(() => {
+            this.permissionRequestsLoading = false;
+            this.cd.detectChanges();
+        })).subscribe({
+            next: (requests) => {
+                this.permissionRequests = requests || [];
+                this.loadPermissionUsers();
+            },
+            error: (error) => this.notify.error(this.errorMessage(error, 'Unable to load pawn request permissions.')),
+        });
+    }
+
+    private loadPermissionUsers(): void {
+        this.userService.getAll(undefined, undefined, 'UserName ASC', 0, 1000).subscribe({
+            next: (result) => {
+                this.userNames.clear();
+                (result.items || []).forEach((user: UserDto) => this.userNames.set(user.id, user.userName));
+                this.cd.detectChanges();
+            },
+            error: () => undefined,
+        });
+    }
+
+    private errorMessage(error: any, fallback: string): string {
+        return error?.error?.error?.message || error?.error?.message || error?.message || fallback;
+    }
+
+    get filteredPermissionRequests(): PawnRequestPermission[] {
+        const filter = this.permissionFilter.trim().toLowerCase();
+        const status = this.permissionStatusFilter.trim().toUpperCase();
+        return this.permissionRequests
+            .filter((request) => {
+                const matchesFilter = !filter || [request.ticketNo, request.request, request.newTicketNo]
+                    .some((value) => (value || '').toLowerCase().includes(filter));
+                const matchesStatus = !status || this.permissionStatus(request) === status;
+                return matchesFilter && matchesStatus;
+            })
+            .sort((left, right) => {
+                const leftValue = this.permissionSortField === 'ticketNo' ? left.ticketNo || '' : this.permissionStatus(left);
+                const rightValue = this.permissionSortField === 'ticketNo' ? right.ticketNo || '' : this.permissionStatus(right);
+                const comparison = this.permissionSortField === 'ticketNo'
+                    ? leftValue.localeCompare(rightValue, undefined, { numeric: true, sensitivity: 'base' })
+                    : leftValue.localeCompare(rightValue, undefined, { sensitivity: 'base' });
+                return this.permissionSortDirection === 'asc' ? comparison : -comparison;
+            });
+    }
+
+    sortPermissionRequests(field: 'ticketNo' | 'approvalStatus'): void {
+        if (this.permissionSortField === field) {
+            this.permissionSortDirection = this.permissionSortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            this.permissionSortField = field;
+            this.permissionSortDirection = 'asc';
+        }
+    }
+
+    permissionStatus(request: PawnRequestPermission): string {
+        return (request.approvalStatus || '').toUpperCase();
+    }
+
+    approvedByName(userId: number | undefined): string {
+        return userId ? this.userNames.get(userId) || `User #${userId}` : '-';
+    }
+
+    isPermissionPending(request: PawnRequestPermission): boolean {
+        return this.permissionStatus(request) === 'PENDING';
+    }
+
+    canDeletePermission(request: PawnRequestPermission): boolean {
+        return !['APPROVED', 'REJECTED'].includes(this.permissionStatus(request));
+    }
+
+    approvePermission(request: PawnRequestPermission): void {
+        this.updatePermissionStatus(request, 'APPROVED');
+    }
+
+    rejectPermission(request: PawnRequestPermission): void {
+        this.updatePermissionStatus(request, 'REJECTED');
+    }
+
+    private updatePermissionStatus(request: PawnRequestPermission, approvalStatus: 'APPROVED' | 'REJECTED'): void {
+        if (!request.id || !this.isPermissionPending(request) || this.permissionActionId) return;
+        const action = approvalStatus === 'APPROVED' ? 'approve' : 'reject';
+        if (!confirm(`Are you sure you want to ${action} this pawn request?`)) return;
+
+        this.permissionActionId = request.id;
+        const input = new CreateOrEditPawnRequestPermissionDto({
+            id: request.id,
+            ticketNo: request.ticketNo,
+            customer: request.customer,
+            request: request.request,
+            approvalStatus,
+            requestedBy: request.requestedBy,
+            approvedBy: request.approvedBy,
+            newTicketNo: request.newTicketNo,
+        });
+        this.permissionService.approveOrRejectRequest(input).pipe(finalize(() => {
+            this.permissionActionId = undefined;
+            this.cd.detectChanges();
+        })).subscribe({
+            next: () => {
+                this.notify.info(`Pawn request ${approvalStatus.toLowerCase()}d successfully.`);
+                this.loadPermissionRequests();
+            },
+            error: (error) => this.notify.error(this.errorMessage(error, `Unable to ${action} pawn request.`)),
+        });
+    }
+
+    deletePermission(request: PawnRequestPermission): void {
+        if (!request.id || !this.canDeletePermission(request) || this.permissionActionId || !confirm('Delete this pawn request?')) return;
+
+        this.permissionActionId = request.id;
+        this.permissionService.deletePawnRequestPermission(request.id).pipe(finalize(() => {
+            this.permissionActionId = undefined;
+            this.cd.detectChanges();
+        })).subscribe({
+            next: () => {
+                this.notify.info('Pawn request deleted.');
+                this.loadPermissionRequests();
+            },
+            error: (error) => this.notify.error(this.errorMessage(error, 'Unable to delete pawn request.')),
+        });
     }
 
     loadCustomers(): void {
@@ -346,11 +485,18 @@ export class PawnTicketsComponent extends AppComponentBase {
         if (this.pageLoading || this.ticketsLoading || !ticket.id || !confirm(`Delete pawn ticket ${ticket.ticketNo || ticket.id}?`)) return;
 
         this.ticketService.delete(ticket.id).subscribe(
-            () => {
-                this.notify.info('Pawn ticket deleted.');
-                this.loadTickets();
+            (result) => {
+                const message = (result || '').trim();
+                if (message === this.ticketDeleteSuccessMessage) {
+                    this.notify.info(message);
+                    this.loadTickets();
+                } else if (message.toLowerCase().startsWith('error:')) {
+                    this.notify.error(message);
+                } else {
+                    this.notify.info(message || 'Unable to delete pawn ticket.');
+                }
             },
-            () => this.notify.error('Unable to delete pawn ticket.')
+            (error) => this.notify.error(this.errorMessage(error, 'Unable to delete pawn ticket.'))
         );
     }
 

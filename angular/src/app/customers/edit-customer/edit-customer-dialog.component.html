@@ -525,40 +525,74 @@
                 </ng-template>
             </tab>
 
-            <tab *ngIf="!customerOnly" heading="Pawn Ticket" (selectTab)="loadPawnTickets()">
-                <div *ngIf="loadingPawnTickets" class="text-center text-muted py-5">
-                    <i class="fas fa-spinner fa-spin fa-lg mb-2"></i>
-                    <div>Loading pawn tickets...</div>
-                </div>
+            <tab *ngIf="!customerOnly" heading="Record" (selectTab)="loadPawnTickets()">
+                <tabset class="mt-3">
+                    <tab heading="Summary">
+                        <div class="table-responsive mt-3">
+                            <table class="table table-sm table-striped align-middle">
+                                <tbody>
+                                    <tr><td class="text-center text-muted">No summary records available.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </tab>
 
-                <div *ngIf="!loadingPawnTickets && pawnTickets.length" class="table-responsive">
-                    <table class="table table-sm table-striped align-middle">
-                        <thead>
-                            <tr>
-                                <th>Ticket No</th>
-                                <th>Pledged date</th>
-                                <th>Redeemed date</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let ticket of pawnTickets">
-                                <td>{{ ticket.ticketNo || '-' }}</td>
-                                <td>{{ formatTicketDate(ticket.pledgedDate) }}</td>
-                                <td>{{ isTicketRedeemed(ticket) ? formatTicketDate(ticket.createOrEditRedeemRecordDto.redeemedDate) : '-' }}</td>
-                                <td>
-                                    <span *ngIf="isTicketRedeemed(ticket); else normalTicketStatus" class="text-success font-weight-bold">REDEEMED</span>
-                                    <ng-template #normalTicketStatus><span>NORMAL</span></ng-template>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                    <tab heading="Pawn">
+                        <div *ngIf="loadingPawnTickets" class="text-center text-muted py-5">
+                            <i class="fas fa-spinner fa-spin fa-lg mb-2"></i>
+                            <div>Loading pawn tickets...</div>
+                        </div>
 
-                <div *ngIf="!loadingPawnTickets && !pawnTickets.length" class="border rounded text-center text-muted py-5">
-                    <i class="fas fa-ticket-alt fa-lg mb-2"></i>
-                    <div>No pawn tickets have been created for this customer.</div>
-                </div>
+                        <div *ngIf="!loadingPawnTickets && pawnTickets.length" class="table-responsive mt-3">
+                            <table class="table table-sm table-striped align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Ticket No</th>
+                                        <th>Pledged date</th>
+                                        <th>Redeemed date</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let ticket of pawnTickets">
+                                        <td>{{ ticket.ticketNo || '-' }}</td>
+                                        <td>{{ formatTicketDate(ticket.pledgedDate) }}</td>
+                                        <td>{{ isTicketRedeemed(ticket) ? formatTicketDate(ticket.createOrEditRedeemRecordDto.redeemedDate) : '-' }}</td>
+                                        <td>
+                                            <span *ngIf="isTicketRedeemed(ticket); else normalTicketStatus" class="text-success font-weight-bold">REDEEMED</span>
+                                            <ng-template #normalTicketStatus><span>NORMAL</span></ng-template>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div *ngIf="!loadingPawnTickets && !pawnTickets.length" class="border rounded text-center text-muted py-5">
+                            <i class="fas fa-ticket-alt fa-lg mb-2"></i>
+                            <div>No pawn tickets have been created for this customer.</div>
+                        </div>
+                    </tab>
+
+                    <tab heading="Redeem">
+                        <div class="table-responsive mt-3">
+                            <table class="table table-sm table-striped align-middle">
+                                <tbody>
+                                    <tr><td class="text-center text-muted">No redeem records available.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </tab>
+
+                    <tab heading="Sold">
+                        <div class="table-responsive mt-3">
+                            <table class="table table-sm table-striped align-middle">
+                                <tbody>
+                                    <tr><td class="text-center text-muted">No sold records available.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </tab>
+                </tabset>
             </tab>
         </tabset>
 

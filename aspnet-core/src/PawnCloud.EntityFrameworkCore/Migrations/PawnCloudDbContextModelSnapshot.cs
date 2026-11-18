@@ -2903,6 +2903,66 @@ namespace PawnCloud.Migrations
                     b.ToTable("PawnItems");
                 });
 
+            modelBuilder.Entity("PawnCloud.PawnRequestPermissions.PawnRequestPermission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("CreatorUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int?>("Customer")
+                        .HasColumnType("int");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("LastModifierUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int?>("TenantId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TicketNo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("approvalStatus")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("approvedBy")
+                        .HasColumnType("int");
+
+                    b.Property<string>("newTicketNo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("request")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("requestedBy")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Customer");
+
+                    b.ToTable("PawnRequestPermissions");
+                });
+
             modelBuilder.Entity("PawnCloud.PawnTicketPayments.PawnTicketPayment", b =>
                 {
                     b.Property<int>("Id")
@@ -3639,6 +3699,15 @@ namespace PawnCloud.Migrations
                     b.Navigation("ItemStatusFk");
 
                     b.Navigation("PawnTicketFk");
+                });
+
+            modelBuilder.Entity("PawnCloud.PawnRequestPermissions.PawnRequestPermission", b =>
+                {
+                    b.HasOne("PawnCloud.Customers.Customer", "CustomerFk")
+                        .WithMany()
+                        .HasForeignKey("Customer");
+
+                    b.Navigation("CustomerFk");
                 });
 
             modelBuilder.Entity("PawnCloud.PawnTicketPayments.PawnTicketPayment", b =>
