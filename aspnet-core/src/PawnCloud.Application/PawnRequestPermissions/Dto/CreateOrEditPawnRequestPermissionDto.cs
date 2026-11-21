@@ -16,10 +16,11 @@ namespace PawnCloud.PawnRequestPermissions.Dto
         public virtual int? requestedBy { get; set; }
         public virtual int? approvedBy { get; set; }
         public string newTicketNo { get; set; } //only used when request is "CHANGENUMBER"
+        public string reason { get; set; } //reason for the request
 
         public CreateOrEditPawnRequestPermissionDto() { }
         public CreateOrEditPawnRequestPermissionDto(int? id, string ticketNo, int? customer, string request, string approvalStatus,
-            int? requestedBy, int? approvedBy, string newTicketNo)
+            int? requestedBy, int? approvedBy, string newTicketNo, string reason)
         {
             Id = id;
             TicketNo = ticketNo;
@@ -29,6 +30,7 @@ namespace PawnCloud.PawnRequestPermissions.Dto
             this.requestedBy = requestedBy;
             this.approvedBy = approvedBy;
             this.newTicketNo = newTicketNo;
+            this.reason = reason;
         }
     }
 }

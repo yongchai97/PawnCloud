@@ -25,6 +25,26 @@ import { AuthorizedPersonDialogComponent } from '../authorized-person/authorized
 @Component({
     templateUrl: './edit-customer-dialog.component.html',
     standalone: true,
+    styles: [`
+        .form-check {
+            min-height: 1.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-check-input {
+            width: 1.25rem;
+            height: 1.25rem;
+            margin-top: 0;
+            cursor: pointer;
+        }
+
+        .form-check-input:disabled {
+            cursor: not-allowed;
+            opacity: 0.65;
+        }
+    `],
     imports: [FormsModule, AbpModalHeaderComponent, AbpValidationSummaryComponent, AbpModalFooterComponent, LocalizePipe, InputTextModule, InputNumberModule, ButtonModule, TableModule, NgIf, NgFor, DropdownModule, TabsModule],
 })
 export class EditCustomerDialogComponent extends AppComponentBase implements OnInit {

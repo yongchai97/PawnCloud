@@ -5044,15 +5044,20 @@ export class PawnTicketServiceProxy {
 
     /**
      * @param newTicketNumber (optional) 
+     * @param reason (optional) 
      * @param body (optional) 
      * @return OK
      */
-    backdoorEditTicketNumber(newTicketNumber: string | undefined, body: CreateOrEditPawnTicketDto | undefined): Observable<string> {
+    backdoorEditTicketNumber(newTicketNumber: string | undefined, reason: string | undefined, body: CreateOrEditPawnTicketDto | undefined): Observable<string> {
         let url_ = this.baseUrl + "/api/services/app/PawnTicket/BackdoorEditTicketNumber?";
         if (newTicketNumber === null)
             throw new Error("The parameter 'newTicketNumber' cannot be null.");
         else if (newTicketNumber !== undefined)
             url_ += "newTicketNumber=" + encodeURIComponent("" + newTicketNumber) + "&";
+        if (reason === null)
+            throw new Error("The parameter 'reason' cannot be null.");
+        else if (reason !== undefined)
+            url_ += "reason=" + encodeURIComponent("" + reason) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(body);
@@ -5106,14 +5111,19 @@ export class PawnTicketServiceProxy {
 
     /**
      * @param id (optional) 
+     * @param reason (optional) 
      * @return OK
      */
-    delete(id: number | undefined): Observable<string> {
+    delete(id: number | undefined, reason: string | undefined): Observable<string> {
         let url_ = this.baseUrl + "/api/services/app/PawnTicket/Delete?";
         if (id === null)
             throw new Error("The parameter 'id' cannot be null.");
         else if (id !== undefined)
             url_ += "Id=" + encodeURIComponent("" + id) + "&";
+        if (reason === null)
+            throw new Error("The parameter 'reason' cannot be null.");
+        else if (reason !== undefined)
+            url_ += "reason=" + encodeURIComponent("" + reason) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -10853,6 +10863,7 @@ export class CreateOrEditPawnRequestPermissionDto implements ICreateOrEditPawnRe
     requestedBy: number | undefined;
     approvedBy: number | undefined;
     newTicketNo: string | undefined;
+    reason: string | undefined;
 
     constructor(data?: ICreateOrEditPawnRequestPermissionDto) {
         if (data) {
@@ -10873,6 +10884,7 @@ export class CreateOrEditPawnRequestPermissionDto implements ICreateOrEditPawnRe
             this.requestedBy = _data["requestedBy"];
             this.approvedBy = _data["approvedBy"];
             this.newTicketNo = _data["newTicketNo"];
+            this.reason = _data["reason"];
         }
     }
 
@@ -10893,6 +10905,7 @@ export class CreateOrEditPawnRequestPermissionDto implements ICreateOrEditPawnRe
         data["requestedBy"] = this.requestedBy;
         data["approvedBy"] = this.approvedBy;
         data["newTicketNo"] = this.newTicketNo;
+        data["reason"] = this.reason;
         return data;
     }
 
@@ -10913,6 +10926,7 @@ export interface ICreateOrEditPawnRequestPermissionDto {
     requestedBy: number | undefined;
     approvedBy: number | undefined;
     newTicketNo: string | undefined;
+    reason: string | undefined;
 }
 
 export class CreateOrEditPawnTicketDto implements ICreateOrEditPawnTicketDto {
@@ -14238,6 +14252,7 @@ export class PawnRequestPermission implements IPawnRequestPermission {
     requestedBy: number | undefined;
     approvedBy: number | undefined;
     newTicketNo: string | undefined;
+    reason: string | undefined;
 
     constructor(data?: IPawnRequestPermission) {
         if (data) {
@@ -14267,6 +14282,7 @@ export class PawnRequestPermission implements IPawnRequestPermission {
             this.requestedBy = _data["requestedBy"];
             this.approvedBy = _data["approvedBy"];
             this.newTicketNo = _data["newTicketNo"];
+            this.reason = _data["reason"];
         }
     }
 
@@ -14296,6 +14312,7 @@ export class PawnRequestPermission implements IPawnRequestPermission {
         data["requestedBy"] = this.requestedBy;
         data["approvedBy"] = this.approvedBy;
         data["newTicketNo"] = this.newTicketNo;
+        data["reason"] = this.reason;
         return data;
     }
 
@@ -14325,6 +14342,7 @@ export interface IPawnRequestPermission {
     requestedBy: number | undefined;
     approvedBy: number | undefined;
     newTicketNo: string | undefined;
+    reason: string | undefined;
 }
 
 export class PawnTicket implements IPawnTicket {

@@ -10,7 +10,8 @@ namespace PawnCloud.SharedFunctions
 {
     public class SharedFunction
     {
-        public string GenerateTicketNumber(int currentTicketCount, GeneralSetup generalSetup, DateTime pledgedDate, string ticketNumberFromUserInput)
+        public string GenerateTicketNumber(int currentTicketCount, GeneralSetup generalSetup, DateTime pledgedDate, 
+            string ticketNumberFromUserInput, int currentTicketCountThisMonth)
         {
             try
             {
@@ -30,10 +31,10 @@ namespace PawnCloud.SharedFunctions
                 switch(generalSetup.ticketIdMethod)
                 {
                     case 1:
-                        ticketNumber += (currentTicketCount + 1).ToString("D4"); // D4 formats the number to 4 digits with leading zeros
+                        ticketNumber += ((generalSetup.AppendYearMonth ? currentTicketCountThisMonth : currentTicketCount) + 1).ToString("D4"); // D4 formats the number to 4 digits with leading zeros
                         break;
                     case 2:
-                        for(int i = 0; i<=currentTicketCount; i++)
+                        for(int i = 0; i<=(generalSetup.AppendYearMonth ? currentTicketCountThisMonth : currentTicketCount); i++)
                         {
                             startingAlphabets = IncrementCode(startingAlphabets);
                         }
@@ -52,7 +53,7 @@ namespace PawnCloud.SharedFunctions
                         ticketNumber = ticketNumberFromUserInput;
                         break;
                     case 5:
-                        ticketNumber = GenerateCode(currentTicketCount, 10);
+                        ticketNumber = GenerateCode((generalSetup.AppendYearMonth ? currentTicketCountThisMonth : currentTicketCount), 10);
                         break;
                     default:
                         ticketNumber = ticketNumberFromUserInput;

@@ -239,7 +239,7 @@
             </div>
 
             <div class="col-md-6 form-group">
-                <label for="MonthlyIncome">{{ 'MonthlyIncome' | localize }}</label>
+                <label for="MonthlyIncome">{{ 'MonthlyIncome' | localize }} <i class="fas fa-info-circle text-info ms-1" title="This input is not mandatory but missing it will result in the customer being classified as High Risk Customer" aria-label="This input is not mandatory but missing it will result in the customer being classified as High Risk Customer"></i></label>
                 <p-inputNumber inputId="MonthlyIncome" name="monthlyIncome" styleClass="w-100" [(ngModel)]="customer.monthlyIncome" [min]="0"></p-inputNumber>
             </div>
         </div>
@@ -355,7 +355,7 @@
                     </div>
 
                     <div class="col-md-6 form-group">
-                        <label for="TransactionPurpose">Transaction purpose</label>
+                        <label for="TransactionPurpose">Transaction purpose <i class="fas fa-info-circle text-info ms-1" title="This input is not mandatory but missing it will result in the customer being classified as High Risk Customer" aria-label="This input is not mandatory but missing it will result in the customer being classified as High Risk Customer"></i></label>
                         <input pInputText class="w-100" id="TransactionPurpose" name="transactionPurpose" [(ngModel)]="customerCDD.transactionPurpose" (ngModelChange)="updateMissingTransactionPurpose()" />
                     </div>
                     <div class="col-md-6 form-group">

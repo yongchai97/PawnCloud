@@ -172,14 +172,15 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
             return entity.Id;
         }
     }
-    public async Task<string> BackdoorEditTicketNumber(CreateOrEditPawnTicketDto input, string newTicketNumber)
+    public async Task<string> BackdoorEditTicketNumber(CreateOrEditPawnTicketDto input, string newTicketNumber, string reason)
     {
         var entity = await _repository.GetAsync(input.Id.Value);
         if(entity == null)
         {
             return "Error: Pawn Ticket Not Found";
         }
-        var correspondingRequestPermission = await _PawnRequestPermission.GetAll().Where(x=>x.TicketNo == entity.TicketNo && x.request == "EDIT").ToListAsync();
+        var correspondingRequestPermission = await _PawnRequestPermission.FirstOrDefaultAsync(x => x.TicketNo == 
+        entity.TicketNo && x.request == "EDIT" && x.newTicketNo == newTicketNumber && x.approvalStatus != "REJECTED");
         if (correspondingRequestPermission == null)
         {
             var newRequestPermission = new CreateOrEditPawnRequestPermissionDto
@@ -190,14 +191,15 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
                 approvalStatus = "PENDING",
                 requestedBy = (int)AbpSession.UserId,
                 approvedBy = null,
-                newTicketNo = newTicketNumber
+                newTicketNo = newTicketNumber,
+                reason = reason
             };
             await GeneratePawnRequestPermission(newRequestPermission);
             return "This Operation requires approval,a request has been generated out for you. Kindly check the approval requests or consult managers with the necessary permissions.";
         }
         else
         {
-            if (correspondingRequestPermission.FirstOrDefault(x => x.approvalStatus == "APPROVED") != null)
+            if (correspondingRequestPermission.approvalStatus == "APPROVED")
             {
                 entity.TicketNo = newTicketNumber;
                 await _repository.UpdateAsync(entity);
@@ -209,7 +211,7 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
             }
         }
     }
-    public async Task<string> Delete(EntityDto<int> input)
+    public async Task<string> Delete(EntityDto<int> input, string reason)
     {
         var pawnticket = await _repository.FirstOrDefaultAsync(input.Id);
         if(pawnticket == null)
@@ -228,7 +230,8 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
                 approvalStatus = "PENDING",
                 requestedBy = (int)AbpSession.UserId,
                 approvedBy = null,
-                newTicketNo = null
+                newTicketNo = null,
+                reason = reason
             };
             await GeneratePawnRequestPermission(newRequestPermission);
             return "This operation required approval, a request has been generated out for you. Kindly check the approval requests.or consult managers with the necessary permissions.";
@@ -315,7 +318,8 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
                         approvalStatus = "PENDING",
                         requestedBy = (int)AbpSession.UserId,
                         approvedBy = null,
-                        newTicketNo = null
+                        newTicketNo = null,
+                        reason = "The amount per weight exceeds the maximum allowed percentage of the daily gold price."
                     };
                     await GeneratePawnRequestPermission(requestPermissionDto);
                 }
@@ -326,11 +330,12 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
             if(string.IsNullOrEmpty(input.Ticket.TicketNo))
             {
                 var allTickets = await _repository.GetAll().ToListAsync();
+                var allTicketsThisMonth = allTickets.Where(x => x.pledgedDate.Month == input.Ticket.pledgedDate.Month && x.pledgedDate.Year == input.Ticket.pledgedDate.Year).ToList();
                 bool repeatedTicketNumber = true;
                 while (repeatedTicketNumber)
                 {
-                    string ticketNumber = sharedFunction.GenerateTicketNumber(allTickets.Count, generalSetup, input.Ticket.pledgedDate, input.Ticket.TicketNo);
-                    var ticketNumberChecker = await _repository.GetAll().Where(x => x.TicketNo == ticketNumber).FirstOrDefaultAsync();
+                    string ticketNumber = sharedFunction.GenerateTicketNumber(allTickets.Count, generalSetup, input.Ticket.pledgedDate, input.Ticket.TicketNo, allTicketsThisMonth.Count);
+                    var ticketNumberChecker = allTickets.Where(x => x.TicketNo == ticketNumber).FirstOrDefault();
                     if (ticketNumberChecker == null)
                     {
                         repeatedTicketNumber = false;
@@ -469,7 +474,8 @@ public class PawnTicketAppService : ApplicationService, IPawnTicketAppService
     private async Task GeneratePawnRequestPermission(CreateOrEditPawnRequestPermissionDto input)
     {
         var pawnRequestPermission = new PawnRequestPermission(input.TicketNo, input.Customer, input.request, "PENDING",
-            input.requestedBy, null, input.newTicketNo);
+            input.requestedBy, null, input.newTicketNo, input.reason);
+        pawnRequestPermission.TenantId = AbpSession.TenantId;
         await _PawnRequestPermission.InsertAsync(pawnRequestPermission);
     }
 }

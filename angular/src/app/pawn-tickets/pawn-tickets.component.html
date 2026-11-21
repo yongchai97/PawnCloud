@@ -68,6 +68,7 @@
                                         <th><button type="button" class="btn btn-link p-0 text-reset text-decoration-none" (click)="sortPermissionRequests('approvalStatus')">Approval Status <i *ngIf="permissionSortField === 'approvalStatus'" class="fas" [class.fa-sort-up]="permissionSortDirection === 'asc'" [class.fa-sort-down]="permissionSortDirection === 'desc'"></i></button></th>
                                         <th>Requested By</th>
                                         <th>Approved By</th>
+                                        <th>Reason</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -79,6 +80,7 @@
                                         <td><span class="badge" [class.bg-warning]="permissionStatus(request) === 'PENDING'" [class.bg-success]="permissionStatus(request) === 'APPROVED'" [class.bg-danger]="permissionStatus(request) === 'REJECTED'">{{ permissionStatus(request) || '-' }}</span></td>
                                         <td>{{ approvedByName(request.requestedBy) }}</td>
                                         <td>{{ approvedByName(request.approvedBy) }}</td>
+                                        <td>{{ request.reason || '-' }}</td>
                                         <td class="text-nowrap">
                                             <ng-container *ngIf="isPermissionPending(request)">
                                                 <button type="button" class="btn btn-sm btn-outline-success me-1" (click)="approvePermission(request)" [disabled]="permissionActionId !== undefined" title="Approve"><i class="fas fa-check"></i></button>
@@ -88,7 +90,7 @@
                                             <span *ngIf="!isPermissionPending(request) && !canDeletePermission(request)" class="text-muted">-</span>
                                         </td>
                                     </tr>
-                                    <tr *ngIf="filteredPermissionRequests.length === 0"><td colspan="7" class="text-center p-4">No permission requests found.</td></tr>
+                                    <tr *ngIf="filteredPermissionRequests.length === 0"><td colspan="8" class="text-center p-4">No permission requests found.</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -111,7 +113,10 @@
             <div class="row g-3">
                 <div class="col-md-6" *ngIf="ticket.id">
                     <label>{{ 'TicketNo' | localize }}</label>
-                    <input class="form-control" name="ticketNo" [ngModel]="ticket.ticketNo" readonly />
+                    <div class="input-group">
+                        <input class="form-control" name="ticketNo" [ngModel]="ticket.ticketNo" readonly />
+                        <button type="button" class="btn btn-outline-warning" (click)="requestTicketNumberChange()" [disabled]="ticketNumberActionLoading || saving" title="Request ticket number change"><i class="fas fa-pen"></i></button>
+                    </div>
                 </div>
                 <div class="col-md-6">
                     <label>{{ 'Customer' | localize }}</label>
@@ -324,6 +329,6 @@
                 </tab>
             </tabset>
         </div>
-        <div class="modal-footer"><p-button type="button" label="{{ 'Cancel' | localize }}" severity="secondary" (onClick)="modal.hide()" [disabled]="saving || checkingCustomerRisk"></p-button><p-button type="submit" label="{{ 'Save' | localize }}" icon="pi pi-save" [loading]="saving" [disabled]="saving || checkingCustomerRisk || loadingCustomerCDD"></p-button></div>
+        <div class="modal-footer"><p-button type="button" label="{{ 'Cancel' | localize }}" severity="secondary" (onClick)="modal.hide()" [disabled]="saving || checkingCustomerRisk || ticketNumberActionLoading"></p-button><p-button type="submit" label="{{ 'Save' | localize }}" icon="pi pi-save" [loading]="saving" [disabled]="saving || checkingCustomerRisk || loadingCustomerCDD || ticketNumberActionLoading"></p-button></div>
     </form>
 </ng-template>

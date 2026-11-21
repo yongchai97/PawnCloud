@@ -21,6 +21,26 @@ import { HighRiskCustomerWarningDialogComponent } from '../high-risk-customer-wa
 @Component({
     templateUrl: './create-customer-dialog.component.html',
     standalone: true,
+    styles: [`
+        .form-check {
+            min-height: 1.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-check-input {
+            width: 1.25rem;
+            height: 1.25rem;
+            margin-top: 0;
+            cursor: pointer;
+        }
+
+        .form-check-input:disabled {
+            cursor: not-allowed;
+            opacity: 0.65;
+        }
+    `],
     imports: [FormsModule, AbpModalHeaderComponent, AbpValidationSummaryComponent, AbpModalFooterComponent, LocalizePipe, InputTextModule, InputNumberModule, ButtonModule, DropdownModule, NgFor, TabsModule],
 })
 export class CreateCustomerDialogComponent extends AppComponentBase implements OnInit {

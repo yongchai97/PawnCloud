@@ -21,6 +21,7 @@ import { AuditLogServiceProxy } from './audit-log-service-proxy';
         ApiServiceProxies.CustomerCDDServiceProxy,
         ApiServiceProxies.AuthorizedPeopleServiceProxy,
         ApiServiceProxies.RedeemRecordServiceProxy,
+        ApiServiceProxies.PawnRequestPermissionServiceProxy,
         ApiServiceProxies.PawnTicketServiceProxy,
         ApiServiceProxies.PawnItemServiceProxy,
         ApiServiceProxies.ItemListingServiceProxy,

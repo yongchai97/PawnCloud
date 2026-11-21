@@ -39,6 +39,7 @@ export class PawnTicketsComponent extends AppComponentBase {
     permissionSortField: 'ticketNo' | 'approvalStatus' = 'ticketNo';
     permissionSortDirection: 'asc' | 'desc' = 'asc';
     permissionActionId?: number;
+    ticketNumberActionLoading = false;
     private userNames = new Map<number, string>();
 
     outlets: GeneralSetup[] = [];
@@ -191,6 +192,11 @@ export class PawnTicketsComponent extends AppComponentBase {
         })).subscribe((result) => (this.tickets = result.items || []));
     }
 
+    private refreshPawnTicketPage(): void {
+        this.loadTickets();
+        this.loadPermissionRequests();
+    }
+
     loadPermissionRequests(): void {
         if (this.permissionRequestsLoading) return;
         this.permissionRequestsLoading = true;
@@ -289,6 +295,7 @@ export class PawnTicketsComponent extends AppComponentBase {
             requestedBy: request.requestedBy,
             approvedBy: request.approvedBy,
             newTicketNo: request.newTicketNo,
+            reason: request.reason,
         });
         this.permissionService.approveOrRejectRequest(input).pipe(finalize(() => {
             this.permissionActionId = undefined;
@@ -296,9 +303,12 @@ export class PawnTicketsComponent extends AppComponentBase {
         })).subscribe({
             next: () => {
                 this.notify.info(`Pawn request ${approvalStatus.toLowerCase()}d successfully.`);
-                this.loadPermissionRequests();
+                this.refreshPawnTicketPage();
             },
-            error: (error) => this.notify.error(this.errorMessage(error, `Unable to ${action} pawn request.`)),
+            error: (error) => {
+                this.notify.error(this.errorMessage(error, `Unable to ${action} pawn request.`));
+                this.refreshPawnTicketPage();
+            },
         });
     }
 
@@ -312,9 +322,12 @@ export class PawnTicketsComponent extends AppComponentBase {
         })).subscribe({
             next: () => {
                 this.notify.info('Pawn request deleted.');
-                this.loadPermissionRequests();
+                this.refreshPawnTicketPage();
             },
-            error: (error) => this.notify.error(this.errorMessage(error, 'Unable to delete pawn request.')),
+            error: (error) => {
+                this.notify.error(this.errorMessage(error, 'Unable to delete pawn request.'));
+                this.refreshPawnTicketPage();
+            },
         });
     }
 
@@ -428,9 +441,12 @@ export class PawnTicketsComponent extends AppComponentBase {
                 }
                 this.notify.info(this.l('SavedSuccessfully'));
                 this.modal.hide();
-                this.loadTickets();
+                this.refreshPawnTicketPage();
             },
-            (error) => this.notify.error(error?.error?.error?.message || error?.error?.message || error?.message || 'Unable to save pawn ticket and items.')
+            (error) => {
+                this.notify.error(error?.error?.error?.message || error?.error?.message || error?.message || 'Unable to save pawn ticket and items.');
+                this.refreshPawnTicketPage();
+            }
         );
     }
 
@@ -481,22 +497,67 @@ export class PawnTicketsComponent extends AppComponentBase {
         });
     }
 
+    requestTicketNumberChange(): void {
+        if (!this.ticket.id || this.ticketNumberActionLoading) return;
+
+        const newTicketNumber = window.prompt('Enter the new ticket number:', this.ticket.ticketNo || '')?.trim();
+        if (!newTicketNumber || newTicketNumber === this.ticket.ticketNo) return;
+
+        const reason = window.prompt('Please provide the reason for changing the ticket number:')?.trim();
+        if (!reason) {
+            this.notify.warn('A reason is required for changing the ticket number.');
+            return;
+        }
+
+        this.ticketNumberActionLoading = true;
+        this.ticketService.backdoorEditTicketNumber(newTicketNumber, reason, this.ticket).pipe(finalize(() => {
+            this.ticketNumberActionLoading = false;
+            this.cd.detectChanges();
+        })).subscribe(
+            (result) => {
+                const message = (result || '').trim();
+                if (message === 'Pawn Ticket Number Updated Successfully') {
+                    this.ticket.ticketNo = newTicketNumber;
+                    this.notify.info(message);
+                } else if (message.toLowerCase().startsWith('error:')) {
+                    this.notify.error(message);
+                } else {
+                    this.notify.info(message || 'Unable to change pawn ticket number.');
+                }
+                this.refreshPawnTicketPage();
+            },
+            (error) => {
+                this.notify.error(this.errorMessage(error, 'Unable to change pawn ticket number.'));
+                this.refreshPawnTicketPage();
+            }
+        );
+    }
+
     deleteTicket(ticket: PawnTicketDto): void {
         if (this.pageLoading || this.ticketsLoading || !ticket.id || !confirm(`Delete pawn ticket ${ticket.ticketNo || ticket.id}?`)) return;
 
-        this.ticketService.delete(ticket.id).subscribe(
+        const reason = window.prompt('Please provide the reason for deleting this pawn ticket:')?.trim();
+        if (!reason) {
+            this.notify.warn('A reason is required for deleting the pawn ticket.');
+            return;
+        }
+
+        this.ticketService.delete(ticket.id, reason).subscribe(
             (result) => {
                 const message = (result || '').trim();
                 if (message === this.ticketDeleteSuccessMessage) {
                     this.notify.info(message);
-                    this.loadTickets();
                 } else if (message.toLowerCase().startsWith('error:')) {
                     this.notify.error(message);
                 } else {
                     this.notify.info(message || 'Unable to delete pawn ticket.');
                 }
+                this.refreshPawnTicketPage();
             },
-            (error) => this.notify.error(this.errorMessage(error, 'Unable to delete pawn ticket.'))
+            (error) => {
+                this.notify.error(this.errorMessage(error, 'Unable to delete pawn ticket.'));
+                this.refreshPawnTicketPage();
+            }
         );
     }
 

@@ -77,8 +77,9 @@ namespace PawnCloud.PawnRequestPermissions
                         await _PawnItem.DeleteAsync(x => x.PawnTicket == designatedPawnTicket.Id);
                         await _PawnTicket.DeleteAsync(x => x.Id == designatedPawnTicket.Id);
                         break;
+                    case "EDIT":
                     case "CHANGENUMBER":
-                        designatedPawnTicket.TicketNo = input.newTicketNo;
+                        designatedPawnTicket.TicketNo = pawnRequestPermission.newTicketNo;
                         await _PawnTicket.UpdateAsync(designatedPawnTicket);
                         break;
                     default:

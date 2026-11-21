@@ -24,9 +24,10 @@ namespace PawnCloud.PawnRequestPermissions
         public virtual int? requestedBy { get; set; }
         public virtual int? approvedBy { get; set; }
         public string newTicketNo { get; set; } //only used when request is "CHANGENUMBER"
+        public string reason { get; set; } //reason for the request
         public PawnRequestPermission() { }
         public PawnRequestPermission(string ticketNo, int? customer, string request, string approvalStatus,
-            int? requestedBy, int? approvedBy, string newTicketNo)
+            int? requestedBy, int? approvedBy, string newTicketNo, string reason)
         {
             TicketNo = ticketNo;
             Customer = customer;
@@ -35,6 +36,7 @@ namespace PawnCloud.PawnRequestPermissions
             this.requestedBy = requestedBy;
             this.approvedBy = approvedBy;
             this.newTicketNo = newTicketNo;
+            this.reason = reason;
         }
     }
 }

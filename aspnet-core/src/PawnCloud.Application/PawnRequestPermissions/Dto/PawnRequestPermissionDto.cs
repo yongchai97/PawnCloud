@@ -15,6 +15,7 @@ namespace PawnCloud.PawnRequestPermissions.Dto
         public virtual int? requestedBy { get; set; }
         public virtual int? approvedBy { get; set; }
         public string newTicketNo { get; set; } //only used when request is "CHANGENUMBER"
+        public string reason { get; set; } //reason for the request
 
     }
 }

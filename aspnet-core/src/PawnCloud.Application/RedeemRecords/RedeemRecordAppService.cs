@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using PawnCloud.AuthorizedPeoples;
 using PawnCloud.AuthorizedPeoples.Dto;
 using PawnCloud.Customers;
+using PawnCloud.PawnRequestPermissions;
 using PawnCloud.PawnTickets;
 using PawnCloud.PawnTickets.Dto;
 using PawnCloud.RedeemRecords.Dto;
@@ -25,15 +26,18 @@ namespace PawnCloud.RedeemRecords
         private readonly IRepository<PawnTicket> _PawnTicket;
         private readonly IRepository<Customer> _Customer;
         private readonly IRepository<AuthorizedPeople> _AuthorizedPeople;
+        private readonly IRepository<PawnRequestPermission> _PawnRequestPermission;
 
         public RedeemRecordAppService(IRepository<RedeemRecord> RedeemRecord,
-            IRepository<RedeemRecordTicket> RedeemRecordTicket, IRepository<PawnTicket> PawnTicket, IRepository<Customer> Customer, IRepository<AuthorizedPeople> AuthorizedPeople )
+            IRepository<RedeemRecordTicket> RedeemRecordTicket, IRepository<PawnTicket> PawnTicket, IRepository<Customer> Customer, 
+            IRepository<AuthorizedPeople> AuthorizedPeople, IRepository<PawnRequestPermission> PawnRequestPermission)
         {
             _RedeemRecord = RedeemRecord;
             _RedeemRecordTicket = RedeemRecordTicket;
             _PawnTicket = PawnTicket;
             _Customer = Customer;
             _AuthorizedPeople = AuthorizedPeople;
+            _PawnRequestPermission = PawnRequestPermission;
         }
         public async Task<List<RedeemRecord>> GetAll()
         {
@@ -78,6 +82,16 @@ namespace PawnCloud.RedeemRecords
             if(redeemRecordTicketChecker != null)
             {
                 throw new UserFriendlyException("This Ticket has been redeemed, operation cancelled");
+            }
+            var pawnTicketChecker = await _PawnTicket.FirstOrDefaultAsync(x => x.Id == input.PawnTicket);
+            if (pawnTicketChecker == null)
+            {
+                throw new UserFriendlyException("Unknown Ticket");
+            }
+            var requestOnTheTicketChecker = await _PawnRequestPermission.FirstOrDefaultAsync(x => x.TicketNo == pawnTicketChecker.TicketNo && x.approvalStatus == "PENDING");
+            if(requestOnTheTicketChecker != null)
+            {
+                throw new UserFriendlyException("This Ticket has a pending request, operation cancelled. Kindly take actions on the ticket first before proceeding with Redeem");
             }
             var redeemRecordTicket = new RedeemRecordTicket(input.PawnTicket,input.RedeemRecord);
             redeemRecordTicket.TenantId = AbpSession.TenantId;

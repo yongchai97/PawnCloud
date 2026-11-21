@@ -11,9 +11,9 @@ public interface IPawnTicketAppService : IApplicationService
 
     Task<GetPawnTicketForEditOutput> GetViaIdForEdit(EntityDto<int> input);
 
-    Task<int> CreateOrEdit(CreateOrEditPawnTicketDto input);
+    //Task<int> CreateOrEdit(CreateOrEditPawnTicketDto input, string reason);
 
-    Task<string> Delete(EntityDto<int> input);
+    Task<string> Delete(EntityDto<int> input, string reason);
 
     Task<ListResultDto<PawnTicketLookupDto>> GetPawnTicketsForLookup();
 

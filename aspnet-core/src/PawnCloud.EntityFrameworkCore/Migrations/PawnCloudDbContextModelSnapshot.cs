@@ -2950,6 +2950,9 @@ namespace PawnCloud.Migrations
                     b.Property<string>("newTicketNo")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("reason")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("request")
                         .HasColumnType("nvarchar(max)");
 
